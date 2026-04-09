@@ -14,6 +14,22 @@
 
 ---
 
+## ⚡ *HOSTING RECOMENDADO*
+
+<div align="center">
+  
+# 🚀 SWALLOX - HOSTING DE CALIDAD
+
+### *La mejor página para alojar tus bots y proyectos 24/7*
+
+| 🔗 DASHBOARD | 💬 GRUPO DE WHATSAPP |
+|:------------:|:--------------------:|
+| [https://dash.swallox.com](https://dash.swallox.com) | [⚡ Swallox - Host ⚡](https://chat.whatsapp.com/Bzo7jcdivDGJc3thZrSyEC) |
+
+</div>
+
+---
+
 ## 🜸 *DESCRIPCIÓN*
 
 **BALDWIND IV** es un bot de WhatsApp con temática **medieval/cyberpunk** diseñado para ofrecer una experiencia única. Con un sistema RPG completo, descargas multimedia, juegos y mucho más.
