@@ -76,7 +76,7 @@ function msToTime(duration) {
 // ========== FUNCIONES PARA CAMBIAR DATOS DEL SUB-BOT ==========
 const SUB_BOT_NAME = '🜸 BALDWIND SUB-BOT 🛸'
 const SUB_BOT_BIO = '—͟͟͞͞ 🜸 BALDWIND IV • SUB-BOT 🛸 ⌬'
-const SUB_BOT_PIC = 'https://files.catbox.moe/o1q5sq.jpeg'
+const SUB_BOT_PIC = 'https://files.catbox.moe/xdpxey.jpg'
 
 const changeSubBotName = async (sock) => {
   try {
