@@ -14,29 +14,28 @@ const tags = {
 
 // Función para detectar si es Sub-Bot
 const isSubBot = (conn) => {
-  // Verificar si existe en la lista de sub-bots globales
   if (global.conns && Array.isArray(global.conns)) {
     return global.conns.some(bot => bot.user?.jid === conn.user?.jid)
   }
   return false
 }
 
-// Función para obtener el tipo de bot
-const getBotType = (conn) => {
+// Función para obtener el tipo de bot con texto visible
+const getBotTypeText = (conn) => {
   const subBot = isSubBot(conn)
   if (subBot) {
     return {
       icon: '🜸',
       name: 'ꜱᴜʙ-ʙᴏᴛ',
-      color: '🟣',
-      description: 'ᴇɴʟᴀᴄᴇ ꜱᴇᴄᴜɴᴅᴀʀɪᴏ'
+      status: '🟣 ᴇꜱᴛᴀᴅᴏ: ᴀᴄᴛɪᴠᴏ ᴄᴏᴍᴏ ꜱᴜʙ-ʙᴏᴛ',
+      description: '📌 ᴇꜱᴛᴀꜱ ᴜꜱᴀɴᴅᴏ ᴜɴ ᴇɴʟᴀᴄᴇ ꜱᴇᴄᴜɴᴅᴀʀɪᴏ'
     }
   } else {
     return {
       icon: '👑',
       name: 'ʙᴏᴛ ᴘʀɪɴᴄɪᴘᴀʟ',
-      color: '🔴',
-      description: 'ɴᴜ́ᴄʟᴇᴏ ᴘʀɪɴᴄɪᴘᴀʟ'
+      status: '🔴 ᴇꜱᴛᴀᴅᴏ: ɴᴜ́ᴄʟᴇᴏ ᴘʀɪɴᴄɪᴘᴀʟ',
+      description: '📌 ᴇꜱᴛᴀꜱ ᴜꜱᴀɴᴅᴏ ᴇʟ ʙᴏᴛ ᴘʀɪɴᴄɪᴘᴀʟ'
     }
   }
 }
@@ -50,6 +49,8 @@ const defaultMenu = {
 > 🌐 ᴍᴏᴅᴏ      » %mode
 > ⏳ ᴀᴄᴛɪᴠᴏ   » %muptime
 > 👥 ᴜꜱᴜᴀʀɪᴏꜱ » %totalreg
+> 🤖 *TIPO DE BOT:* %botTypeIcon %botTypeName
+> 📌 %botTypeStatus
 
 ✦  𝗕𝗔𝗟𝗗𝗪𝗜𝗡𝗗 𝗜𝗩  •  𝗘𝗟𝗜𝗧𝗘 𝗠𝗘𝗡𝗨  ✦
 👑  ᴄʀᴇᴀᴅᴏʀ:  ★  ᴅᴇᴠʟʏᴏɴɴ  ★
@@ -87,9 +88,8 @@ let handler = async (m, { conn, usedPrefix }) => {
   const menu = global.subBotMenus?.[botJid] || defaultMenu
   
   // Detectar tipo de bot
-  const botType = getBotType(conn)
+  const botType = getBotTypeText(conn)
   
-  // Agregar información del tipo de bot a las variables de reemplazo
   const user = global.db.data.users[m.sender] || { level: 0, exp: 0 }
   const { min, xp } = xpRange(user.level, global.multiplier)
 
@@ -104,7 +104,7 @@ let handler = async (m, { conn, usedPrefix }) => {
     readmore: String.fromCharCode(8206).repeat(4001),
     botTypeIcon: botType.icon,
     botTypeName: botType.name,
-    botTypeColor: botType.color,
+    botTypeStatus: botType.status,
     botTypeDesc: botType.description
   }
 
@@ -120,7 +120,7 @@ let handler = async (m, { conn, usedPrefix }) => {
     for (const t of tg)
       if (t && !tags[t]) tags[t] = textCyberpunk(t)
 
-  let text = [
+  const text = [
     menu.before,
     ...Object.keys(tags).map(tag => {
       const cmds = help
@@ -132,20 +132,11 @@ let handler = async (m, { conn, usedPrefix }) => {
     }),
     menu.after
   ].join('\n').replace(/%(\w+)/g, (_, k) => replace[k] ?? '')
-  
-  // Agregar información del tipo de bot al inicio del menú
-  let tipoBotInfo = `\n✦ 𝗧𝗜𝗣𝗢 𝗗𝗘 𝗕𝗢𝗧 ✦\n`
-  tipoBotInfo += `> ${botType.icon} *${botType.name}*\n`
-  tipoBotInfo += `> 📌 ${botType.description}\n`
-  
-  // Insertar la información después de los datos del usuario
-  text = text.replace(/(%readmore)/, `${tipoBotInfo}\n%readmore`)
 
   const video = menuMedia.video && fs.existsSync(menuMedia.video)
     ? fs.readFileSync(menuMedia.video)
     : defaultVideo
 
-  // SIN MINIATURA (thumbnail = null)
   await conn.sendMessage(m.chat, {
     video,
     gifPlayback: false,
