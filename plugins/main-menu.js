@@ -24,30 +24,22 @@ const getBotType = (conn) => {
 
 const defaultMenu = {
   before: `
-◈────═══✧༺༻✧═══────◈
-     🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸
-        ᴄʏʙᴇʀ ᴄᴏʀᴇ
-◈────═══✧༺༻✧═══────◈
-
-✦ 𝗜𝗡𝗙𝗢𝗥𝗠𝗔𝗖𝗜𝗢́𝗡 ✦
+—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »
 > 🪐 ɴᴏᴍʙʀᴇ   » %name
 > 🌐 ᴍᴏᴅᴏ      » %mode
 > ⏳ ᴀᴄᴛɪᴠᴏ   » %muptime
 > 👥 ᴜꜱᴜᴀʀɪᴏꜱ » %totalreg
 > 🤖 %botIcon *%botName*
-> 📊 ᴄᴏᴍᴀɴᴅᴏꜱ » %totalCmds
+> 📊 ᴄᴏᴍᴀɴᴅᴏꜱ: %totalCmds
 
-◈────═══✧༺༻✧═══────◈
-
-     ✦ 𝗠𝗘𝗡𝗨 𝗣𝗥𝗜𝗡𝗖𝗜𝗣𝗔𝗟 ✦
-     👑 ᴄʀᴇᴀᴅᴏʀ:  ★ ᴅᴇᴠʟʏᴏɴɴ ★
-
+✦  𝗕𝗔𝗟𝗗𝗪𝗜𝗡𝗗 𝗜𝗩  •  𝗘𝗟𝗜𝗧𝗘 𝗠𝗘𝗡𝗨  ✦
+👑  ᴄʀᴇᴀᴅᴏʀ:  ★  ᴅᴇᴠʟʏᴏɴɴ  ★
 %readmore
 `.trimStart(),
-  header: '\n◈────═══✧༺༻✧═══────◈\n     🛸 %category (%count)\n◈────═══✧༺༻✧═══────◈',
-  body: '     🔖 %cmd',
-  footer: '',
-  after: '\n◈────═══✧༺༻✧═══────◈\n     ⌬ ʙᴀʟᴅᴡɪɴᴅ ɪᴠ ᴄʏʙᴇʀ ᴍᴇɴᴜ 🧬\n◈────═══✧༺༻✧═══────◈'
+  header: '\n⧼⋆꙳•〔 🛸 %category (%count) 〕⋆꙳•⧽',
+  body: '> 🔖 %cmd',
+  footer: '╰⋆꙳•❅‧*₊⋆꙳︎‧*❆₊⋆╯',
+  after: '\n⌬ ʙᴀʟᴅᴡɪɴᴅ ɪᴠ ᴄʏʙᴇʀ ᴍᴇɴᴜ 🧬 - ᴄᴏɴᴇᴄᴛᴀᴅᴏ ᴘᴏʀ: ᴅᴇᴠʟʏᴏɴɴ'
 }
 
 const menuDir = './media/menu'
@@ -68,16 +60,25 @@ const fetchBuffer = async (url) => {
     const res = await fetch(url)
     return Buffer.from(await res.arrayBuffer())
   } catch (e) {
+    console.log('Error cargando imagen:', e.message)
     return null
   }
 }
 
-// Imagen del menú
+// ========== IMAGEN DE CATBOX ==========
 const FOTO_URL = 'https://files.catbox.moe/4x1v0l.jpeg'
 let fotoBuffer = null
+
 try {
   fotoBuffer = await fetchBuffer(FOTO_URL)
-} catch (e) {}
+  if (fotoBuffer) {
+    console.log('✅ Imagen del menú cargada correctamente')
+  } else {
+    console.log('⚠️ No se pudo cargar la imagen')
+  }
+} catch (e) {
+  console.log('Error:', e.message)
+}
 
 let handler = async (m, { conn, usedPrefix }) => {
   try {
@@ -151,7 +152,7 @@ let handler = async (m, { conn, usedPrefix }) => {
         .join('\n')
       if (cmds) {
         const cmdCount = comandosPorTag.get(tag) || 0
-        menuText += `\n${menu.header.replace('%category', tagsMap[tag]).replace('%count', cmdCount)}\n${cmds}`
+        menuText += `\n${menu.header.replace('%category', tagsMap[tag]).replace('%count', cmdCount)}\n${cmds}\n${menu.footer}`
       }
     }
 
@@ -161,6 +162,7 @@ let handler = async (m, { conn, usedPrefix }) => {
       menuText = menuText.replace(new RegExp(`%${key}`, 'g'), value)
     }
 
+    // Opciones del mensaje CON imagen
     const messageOptions = {
       text: menuText,
       footer: '🧠 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ • ᴄʏʙᴇʀ ꜱʏꜱᴛᴇᴍ ☘️',
@@ -183,8 +185,9 @@ let handler = async (m, { conn, usedPrefix }) => {
 
   } catch (error) {
     console.error('Error en menu:', error)
+    // Mensaje de respaldo sin imagen
     await conn.sendMessage(m.chat, { 
-      text: `◈────═══✧༺༻✧═══────◈\n     ⚠️ *Error al cargar el menú*\n     📌 Usa *${usedPrefix}help* para ver comandos\n     👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*\n◈────═══✧༺༻✧═══────◈` 
+      text: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> ⚠️ *Error al cargar el menú*\n> 📌 Usa *${usedPrefix}help* para ver comandos\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*` 
     }, { quoted: m })
   }
 }
