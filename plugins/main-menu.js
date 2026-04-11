@@ -167,7 +167,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 handler.help = ['menu', 'menú']
 handler.tags = ['main']
 handler.command = ['menu', 'menú', 'help', 'ayuda']
-handler.register = false
+handler.register = true
 export default handler
 
 const clockString = ms =>
