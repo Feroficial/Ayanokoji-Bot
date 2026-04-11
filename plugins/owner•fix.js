@@ -17,9 +17,14 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   try {
     await conn.reply(m.chat, '—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> ⏳ *Actualizando el bot...*', m)
 
-    // Guardar cambios locales antes de actualizar
+    // Forzar reset del archivo config.js para evitar conflictos
     try {
-      execSync('git stash', { stdio: 'pipe' })
+      execSync('git checkout -- núcleo•clover/config.js', { stdio: 'pipe' })
+    } catch (e) {}
+    
+    // Guardar otros cambios locales (excepto config.js)
+    try {
+      execSync('git stash -- src/database/database.json baldwindSession/', { stdio: 'pipe' })
     } catch (e) {}
 
     const output = execSync('git pull' + (args.length ? ' ' + args.join(' ') : '')).toString()
@@ -38,11 +43,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     await conn.reply(m.chat, updateMsg, m)
 
   } catch (error) {
-    // Si hay error, restaurar cambios
-    try {
-      execSync('git stash pop', { stdio: 'pipe' })
-    } catch (e) {}
-
     await conn.reply(m.chat, `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> ❌ *Error al actualizar:*\n> ${error.message}\n\n👑 *🜸 𝘋𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`, m)
   }
 }
