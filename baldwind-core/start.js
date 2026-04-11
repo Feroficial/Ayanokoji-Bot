@@ -303,7 +303,7 @@ global.reloadHandler = async function(restatConn) {
 };
 
 
-global.rutaJadiBot = join(__dirname, '../núcleo•clover/baldwindJadiBot')
+global.rutaJadiBot = join(__dirname, '../baldwind-core/baldwindJadiBot')
 
 if (global.blackJadibts) {
     if (!existsSync(global.rutaJadiBot)) {
@@ -481,86 +481,43 @@ if (!opts['test']) {
 }
 
 setInterval(async () => {
-    if (stopped === 'close' || !conn || !conn.user) return
+    if (global.stopped === 'close' || !global.conn || !global.conn.user) return
     await clearTmp()
     console.log(chalk.bold.cyanBright(`\n╭» ❍ MULTIMEDIA ❍\n│→ ARCHIVOS DE LA CARPETA TMP ELIMINADOS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))
 }, 1000 * 60 * 4)
 
 setInterval(async () => {
-    if (stopped === 'close' || !conn || !conn.user) return
+    if (global.stopped === 'close' || !global.conn || !global.conn.user) return
     await purgeSession()
     console.log(chalk.bold.cyanBright(`\n╭» ❍ ${global.sessions} ❍\n│→ SESIONES NO ESENCIALES ELIMINADAS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))
 }, 1000 * 60 * 10)
 
 setInterval(async () => {
-    if (stopped === 'close' || !conn || !conn.user) return
+    if (global.stopped === 'close' || !global.conn || !global.conn.user) return
     await purgeSessionSB()
 }, 1000 * 60 * 10)
 
 setInterval(async () => {
-    if (stopped === 'close' || !conn || !conn.user) return
+    if (global.stopped === 'close' || !global.conn || !global.conn.user) return
     await purgeOldFiles()
 }, 1000 * 60 * 10)
 
-_quickTest().then(() => conn.logger.info(chalk.bold(`✞ H E C H O\n`.trim()))).catch(console.error)
+_quickTest().then(() => global.conn.logger.info(chalk.bold(`✞ H E C H O\n`.trim()))).catch(console.error)
 
-
-let stopped
 
 setInterval(async () => {
-    if (stopped === 'close' || !conn || !conn?.user) return
+    if (global.stopped === 'close' || !global.conn || !global.conn?.user) return
     const _uptime = process.uptime() * 1000
     const uptime = clockString(_uptime)
     const bio = `🜸 BALDWIND IV |「🕒」Aᥴ𝗍і᥎o: ${uptime}`
-    await conn?.updateProfileStatus(bio).catch(_ => _)
+    await global.conn?.updateProfileStatus(bio).catch(_ => _)
     if (global.rutaJadiBot) {
         const bots = readdirSync(global.rutaJadiBot)
         for (const bot of bots) {
             const credsPath = join(global.rutaJadiBot, bot, 'creds.json')
             if (existsSync(credsPath)) {
                 try {
-                    await conn?.updateProfileStatus(bio).catch(_ => _)
-                } catch {}
-            }
-        }
-    }
-}, 60000)
-
-function clockString(ms) {
-    const d = isNaN(ms) ? '--' : Math.floor(ms / 86400000)
-    const h = isNaN(ms) ? '--' : Math.floor(ms / 3600000) % 24
-    const m = isNaN(ms) ? '--' : Math.floor(ms / 60000) % 60
-    const s = isNaN(ms) ? '--' : Math.floor(ms / 1000) % 60
-    return [d, 'd ', h, 'h ', m, 'm ', s, 's '].map((v) => v.toString().padStart(2, 0)).join('')
-}
-
-async function isValidPhoneNumber(number) {
-    try {
-        number = number.replace(/\s+/g, '')
-        if (number.startsWith('+521')) number = number.replace('+521', '+52')
-        else if (number.startsWith('+52') && number[4] === '1') number = number.replace('+52 1', '+52')
-        const parsedNumber = phoneUtil.parseAndKeepRawInput(number)
-        return phoneUtil.isValidNumber(parsedNumber)
-    } catch {
-        return false
-    }
-}
-
-let stopped
-
-setInterval(async () => {
-    if (stopped === 'close' || !conn || !conn?.user) return
-    const _uptime = process.uptime() * 1000
-    const uptime = clockString(_uptime)
-    const bio = `🜸 BALDWIND IV |「🕒」Aᥴ𝗍і᥎o: ${uptime}`
-    await conn?.updateProfileStatus(bio).catch(_ => _)
-    if (global.rutaJadiBot) {
-        const bots = readdirSync(global.rutaJadiBot)
-        for (const bot of bots) {
-            const credsPath = join(global.rutaJadiBot, bot, 'creds.json')
-            if (existsSync(credsPath)) {
-                try {
-                    await conn?.updateProfileStatus(bio).catch(_ => _)
+                    await global.conn?.updateProfileStatus(bio).catch(_ => _)
                 } catch {}
             }
         }
