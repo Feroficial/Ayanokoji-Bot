@@ -6,6 +6,7 @@ import fetch from 'node-fetch'
 const charset = { a:'ᴀ',b:'ʙ',c:'ᴄ',d:'ᴅ',e:'ᴇ',f:'ꜰ',g:'ɢ',h:'ʜ',i:'ɪ',j:'ᴊ',k:'ᴋ',l:'ʟ',m:'ᴍ',n:'ɴ',o:'ᴏ',p:'ᴘ',q:'ǫ',r:'ʀ',s:'ꜱ',t:'ᴛ',u:'ᴜ',v:'ᴠ',w:'ᴡ',x:'x',y:'ʏ',z:'ᴢ' }
 const textCyberpunk = t => t.toLowerCase().replace(/[a-z]/g, c => charset[c])
 
+// ========== DETECCIÓN DE SUB-BOT ==========
 const isSubBot = (conn) => {
   if (global.conns && Array.isArray(global.conns)) {
     return global.conns.some(bot => bot.user?.jid === conn.user?.jid)
@@ -13,12 +14,12 @@ const isSubBot = (conn) => {
   return false
 }
 
-const getBotType = (conn) => {
+const getBotTypeText = (conn) => {
   const subBot = isSubBot(conn)
   if (subBot) {
-    return { icon: '🜸', name: 'ꜱᴜʙ-ʙᴏᴛ', color: '🟣' }
+    return { icon: '🜸', name: 'ꜱᴜʙ-ʙᴏᴛ', status: '🟣 ᴇꜱᴛᴀᴅᴏ: ᴀᴄᴛɪᴠᴏ ᴄᴏᴍᴏ ꜱᴜʙ-ʙᴏᴛ' }
   } else {
-    return { icon: '👑', name: 'ʙᴏᴛ ᴘʀɪɴᴄɪᴘᴀʟ', color: '🔴' }
+    return { icon: '👑', name: 'ʙᴏᴛ ᴘʀɪɴᴄɪᴘᴀʟ', status: '🔴 ᴇꜱᴛᴀᴅᴏ: ɴᴜ́ᴄʟᴇᴏ ᴘʀɪɴᴄɪᴘᴀʟ' }
   }
 }
 
@@ -30,162 +31,139 @@ const defaultMenu = {
 > ⏳ ᴀᴄᴛɪᴠᴏ   » %muptime
 > 👥 ᴜꜱᴜᴀʀɪᴏꜱ » %totalreg
 > 🤖 %botIcon *%botName*
-> 📊 ᴄᴏᴍᴀɴᴅᴏꜱ: %totalCmds
+> 📌 %botStatus
+> 📊 ᴄᴏᴍᴀɴᴅᴏꜱ ᴛᴏᴛᴀʟᴇꜱ: %totalCmds
 
-✦ 𝗕𝗔𝗟𝗗𝗪𝗜𝗡𝗗 𝗜𝗩 • 𝗘𝗟𝗜𝗧𝗘 𝗠𝗘𝗡𝗨 ✦
-👑 ᴄʀᴇᴀᴅᴏʀ: ★ ᴅᴇᴠʟʏᴏɴɴ ★
+✦  𝗕𝗔𝗟𝗗𝗪𝗜𝗡𝗗 𝗜𝗩  •  𝗘𝗟𝗜𝗧𝗘 𝗠𝗘𝗡𝗨  ✦
+👑  ᴄʀᴇᴀᴅᴏʀ:  ★  ᴅᴇᴠʟʏᴏɴɴ  ★
 %readmore
 `.trimStart(),
-  header: '\n⧼⋆꙳•〔 🛸 %category (%count) 〕⋆꙳•⧽',
+  header: '\n⧼⋆꙳•〔 🛸 %category 〕⋆꙳•⧽',
   body: '> 🔖 %cmd',
   footer: '╰⋆꙳•❅‧*₊⋆꙳︎‧*❆₊⋆╯',
   after: '\n⌬ ʙᴀʟᴅᴡɪɴᴅ ɪᴠ ᴄʏʙᴇʀ ᴍᴇɴᴜ 🧬 - ᴄᴏɴᴇᴄᴛᴀᴅᴏ ᴘᴏʀ: ᴅᴇᴠʟʏᴏɴɴ'
 }
 
 const menuDir = './media/menu'
-if (!fs.existsSync(menuDir)) fs.mkdirSync(menuDir, { recursive: true })
+fs.mkdirSync(menuDir, { recursive: true })
 
-const getMenuMediaFile = jid => path.join(menuDir, `menuMedia_${jid.replace(/[:@.]/g, '_')}.json`)
+const getMenuMediaFile = jid =>
+  path.join(menuDir, `menuMedia_${jid.replace(/[:@.]/g, '_')}.json`)
 
 const loadMenuMedia = jid => {
-  try {
-    const file = getMenuMediaFile(jid)
-    if (!fs.existsSync(file)) return {}
-    return JSON.parse(fs.readFileSync(file))
-  } catch { return {} }
+  const file = getMenuMediaFile(jid)
+  if (!fs.existsSync(file)) return {}
+  try { return JSON.parse(fs.readFileSync(file)) } catch { return {} }
 }
 
-// 🔥 URL DE IMAGEN
-const FOTO_URL = 'https://files.catbox.moe/4x1v0l.jpeg'
+const fetchBuffer = async url =>
+  Buffer.from(await (await fetch(url)).arrayBuffer())
+
+const defaultVideo = await fetchBuffer('https://files.catbox.moe/jbiz6v.mp4')
 
 let handler = async (m, { conn, usedPrefix }) => {
-  try {
-    await conn.sendMessage(m.chat, { react: { text: '⚔️', key: m.key } })
+  await conn.sendMessage(m.chat, { react: { text: '⚔️', key: m.key } })
 
-    // ✅ CARGAR IMAGEN DENTRO DEL HANDLER (FIX REAL)
-    let fotoBuffer = null
-    try {
-      const res = await fetch(FOTO_URL)
-      fotoBuffer = Buffer.from(await res.arrayBuffer())
-    } catch (e) {
-      console.log('Error cargando imagen:', e)
-    }
+  const botJid = conn.user.jid
+  const menuMedia = loadMenuMedia(botJid)
+  const menu = global.subBotMenus?.[botJid] || defaultMenu
+  const botType = getBotTypeText(conn)
 
-    const botJid = conn.user.jid
-    const menuMedia = loadMenuMedia(botJid)
-    const menu = global.subBotMenus?.[botJid] || defaultMenu
-    const botType = getBotType(conn)
-    
-    const user = global.db?.data?.users?.[m.sender] || { level: 0, exp: 0 }
-    const { min, xp } = xpRange(user.level || 0, global.multiplier || 1)
+  const user = global.db.data.users[m.sender] || { level: 0, exp: 0 }
 
-    let totalComandos = 0
-    let comandosPorTag = new Map()
-    
-    const help = Object.values(global.plugins || {})
-      .filter(p => p && !p.disabled)
-      .map(p => ({
-        help: [].concat(p.help || []),
-        tags: [].concat(p.tags || []),
-        prefix: 'customPrefix' in p
-      }))
+  // ========== CONTADOR DE COMANDOS ==========
+  let totalComandos = 0
+  let comandosPorTag = new Map()
+  
+  const help = Object.values(global.plugins || {})
+    .filter(p => !p.disabled)
+    .map(p => ({
+      help: [].concat(p.help || []),
+      tags: [].concat(p.tags || []),
+      prefix: 'customPrefix' in p
+    }))
 
-    for (const plugin of help) {
-      const cmdCount = plugin.help.length
-      totalComandos += cmdCount
-      for (const tag of plugin.tags) {
-        if (tag) {
-          if (!comandosPorTag.has(tag)) comandosPorTag.set(tag, 0)
-          comandosPorTag.set(tag, comandosPorTag.get(tag) + cmdCount)
-        }
+  for (const plugin of help) {
+    const cmdCount = plugin.help.length
+    totalComandos += cmdCount
+    for (const tag of plugin.tags) {
+      if (tag) {
+        if (!comandosPorTag.has(tag)) comandosPorTag.set(tag, 0)
+        comandosPorTag.set(tag, comandosPorTag.get(tag) + cmdCount)
       }
     }
-
-    const tagsMap = { main: 'ꜱɪꜱᴛᴇᴍᴀ', group: 'ɢʀᴜᴘᴏꜱ', serbot: 'ꜱᴜʙ ʙᴏᴛꜱ' }
-    for (const { tags: tg } of help) {
-      for (const t of tg) {
-        if (t && !tagsMap[t]) tagsMap[t] = textCyberpunk(t)
-      }
-    }
-
-    let userName = 'Anónimo'
-    try {
-      const name = await conn.getName(m.sender)
-      if (name) userName = name
-    } catch {
-      userName = m.pushName || 'Anónimo'
-    }
-
-    const replace = {
-      name: userName,
-      level: user.level || 0,
-      exp: (user.exp || 0) - (min || 0),
-      maxexp: xp || 1,
-      totalreg: Object.keys(global.db?.data?.users || {}).length || 0,
-      mode: global.opts?.self ? 'Privado' : 'Público',
-      muptime: clockString(process.uptime() * 1000),
-      readmore: String.fromCharCode(8206).repeat(4001),
-      botIcon: botType.icon,
-      botName: botType.name,
-      totalCmds: totalComandos
-    }
-
-    let menuText = menu.before
-
-    for (const tag of Object.keys(tagsMap)) {
-      const cmds = help
-        .filter(p => p.tags && p.tags.includes(tag))
-        .flatMap(p => p.help.map(c => menu.body.replace('%cmd', p.prefix ? c : usedPrefix + c)))
-        .join('\n')
-      if (cmds) {
-        const cmdCount = comandosPorTag.get(tag) || 0
-        menuText += `\n${menu.header.replace('%category', tagsMap[tag]).replace('%count', cmdCount)}\n${cmds}\n${menu.footer}`
-      }
-    }
-
-    menuText += `\n${menu.after}`
-    
-    for (const [key, value] of Object.entries(replace)) {
-      menuText = menuText.replace(new RegExp(`%${key}`, 'g'), value)
-    }
-
-    // ✅ ENVÍO FINAL FIXED
-    await conn.sendMessage(m.chat, {
-      text: menuText,
-      footer: '🧠 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ • ᴄʏʙᴇʀ ꜱʏꜱᴛᴇᴍ ☘️',
-      buttons: [
-        { buttonId: `${usedPrefix}code`, buttonText: { displayText: '🕹 PEDIR CODE' }, type: 1 }
-      ],
-      contextInfo: {
-        externalAdReply: {
-          title: 'ʙᴀʟᴅᴡɪɴᴅ ɪᴠ | ᴄʏʙᴇʀ ᴠᴇʀꜱɪᴏɴ',
-          body: '┊࣪ ˖ ᴄʀᴇᴀᴅᴏ ʙʏ • ᴅᴇᴠʟʏᴏɴɴ ♱',
-          jpegThumbnail: fotoBuffer, // 🔥 FIX AQUÍ
-          sourceUrl: 'https://github.com/Feroficial/Baldwind-IV-Bot.git',
-          mediaType: 1,
-          renderLargerThumbnail: true
-        }
-      }
-    }, { quoted: m })
-
-  } catch (error) {
-    console.error('Error en menu:', error)
-    await conn.sendMessage(m.chat, { 
-      text: `⚠️ Error al cargar el menú\nUsa ${usedPrefix}help` 
-    }, { quoted: m })
   }
+
+  const tagsMap = { main: 'ꜱɪꜱᴛᴇᴍᴀ', group: 'ɢʀᴜᴘᴏꜱ', serbot: 'ꜱᴜʙ ʙᴏᴛꜱ' }
+  for (const { tags: tg } of help) {
+    for (const t of tg) {
+      if (t && !tagsMap[t]) tagsMap[t] = textCyberpunk(t)
+    }
+  }
+
+  const replace = {
+    name: await conn.getName(m.sender),
+    level: user.level,
+    totalreg: Object.keys(global.db.data.users).length,
+    mode: global.opts.self ? 'Privado' : 'Público',
+    muptime: clockString(process.uptime() * 1000),
+    readmore: String.fromCharCode(8206).repeat(4001),
+    botIcon: botType.icon,
+    botName: botType.name,
+    botStatus: botType.status,
+    totalCmds: totalComandos
+  }
+
+  // Construir menú con contadores por categoría
+  let text = menu.before
+
+  for (const tag of Object.keys(tagsMap)) {
+    const cmds = help
+      .filter(p => p.tags && p.tags.includes(tag))
+      .flatMap(p => p.help.map(c => menu.body.replace('%cmd', p.prefix ? c : usedPrefix + c)))
+      .join('\n')
+    if (cmds) {
+      const cmdCount = comandosPorTag.get(tag) || 0
+      text += `\n${menu.header.replace('%category', `${tagsMap[tag]} (${cmdCount} comandos)`)}\n${cmds}\n${menu.footer}`
+    }
+  }
+
+  text += `\n${menu.after}`
+  
+  for (const [key, value] of Object.entries(replace)) {
+    text = text.replace(new RegExp(`%${key}`, 'g'), value)
+  }
+
+  const video = menuMedia.video && fs.existsSync(menuMedia.video)
+    ? fs.readFileSync(menuMedia.video)
+    : defaultVideo
+
+  // SIN BOTONES, SOLO VIDEO Y TEXTO
+  await conn.sendMessage(m.chat, {
+    video,
+    gifPlayback: false,
+    caption: text,
+    footer: '🧠 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ • ᴄʏʙᴇʀ ꜱʏꜱᴛᴇᴍ ☘️',
+    contextInfo: {
+      externalAdReply: {
+        title: 'ʙᴀʟᴅᴡɪɴᴅ ɪᴠ | ᴄʏʙᴇʀ ᴠᴇʀꜱɪᴏɴ',
+        body: '┊࣪ ˖ ᴄʀᴇᴀᴅᴏ ʙʏ • ᴅᴇᴠʟʏᴏɴɴ ♱',
+        thumbnail: null,
+        sourceUrl: 'https://github.com/Feroficial/Baldwind-IV-Bot.git',
+        mediaType: 1,
+        renderLargerThumbnail: true
+      }
+    }
+  }, { quoted: m })
 }
 
 handler.help = ['menu', 'menú']
 handler.tags = ['main']
 handler.command = ['menu', 'menú', 'help', 'ayuda']
 handler.register = false
-
 export default handler
 
-const clockString = ms => {
-  if (!ms || isNaN(ms)) return '00:00:00'
-  return [3600000, 60000, 1000].map((v, i) =>
+const clockString = ms =>
+  [3600000, 60000, 1000].map((v, i) =>
     String(Math.floor(ms / v) % (i ? 60 : 99)).padStart(2, '0')
   ).join(':')
-}
