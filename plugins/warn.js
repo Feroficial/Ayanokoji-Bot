@@ -63,9 +63,9 @@ let handler = async (m, { conn, usedPrefix, command, text, isAdmin, isBotAdmin }
   await global.db.write()
 }
 
-handler.help = ['balwind @usuario <razón>']
+handler.help = ['sentencia @usuario <razón>']
 handler.tags = ['grupo']
-handler.command = ['advertencia', 'balwind', 'advertir']
+handler.command = ['advertencia', 'sentencia', 'advertir']
 handler.group = true
 handler.admin = true
 handler.botAdmin = true
