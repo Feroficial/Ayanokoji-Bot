@@ -6,7 +6,6 @@ let handler = async (m, { conn, usedPrefix, text, isAdmin }) => {
   
   if (!isAdmin) return m.reply(`❌ *Solo los administradores pueden usar este comando*`)
   
-  // Inicializar chat si no existe
   if (!global.db.data.chats[m.chat]) {
     global.db.data.chats[m.chat] = {}
   }
