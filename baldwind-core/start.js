@@ -101,34 +101,29 @@ const MethodMobile = process.argv.includes("mobile");
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 const question = (texto) => new Promise((resolver) => rl.question(texto, resolver));
 
-let opcion = '1';
+let opcion;
 const credsExist = fs.existsSync(`./${global.sessions}/creds.json`);
 
-// ========== SOLO PREGUNTAR SI NO HAY SESIÓN ==========
-if (!methodCodeQR && !methodCode && !credsExist) {
-    do {
-        opcion = await question(
-            chalk.bgYellow.black('⌬ BALDWIND IV - SELECCIONA MODO:\n') +
-            chalk.bold.yellow('1. Código QR\n') +
-            chalk.bold.cyan('2. Código de 8 dígitos\n🜸➤ ')
-        );
-        if (!/^[1-2]$/.test(opcion)) {
-            console.log(chalk.bold.redBright(`✞ Opción inválida. Elige 1 o 2.`));
-        }
-    } while (opcion !== '1' && opcion !== '2');
-    console.log(chalk.bold.green(`✅ Modo: ${opcion === '1' ? 'QR' : 'Código de 8 dígitos'}\n`));
-} else {
-    // SI HAY SESIÓN, USAR QR AUTOMÁTICO (SIN PREGUNTAR)
-    opcion = '1';
-    console.log(chalk.bold.green(`✅ Sesión existente. Usando QR automático.\n`));
-}
+// ========== SIEMPRE PREGUNTAR 1 o 2 (NUNCA QR AUTOMÁTICO) ==========
+do {
+    opcion = await question(
+        chalk.bgYellow.black('⌬ BALDWIND IV - SELECCIONA MODO:\n') +
+        chalk.bold.yellow('1. Código QR\n') +
+        chalk.bold.cyan('2. Código de 8 dígitos\n🜸➤ ')
+    );
+    if (!/^[1-2]$/.test(opcion)) {
+        console.log(chalk.bold.redBright(`✞ Opción inválida. Elige 1 o 2.`));
+    }
+} while (opcion !== '1' && opcion !== '2');
+
+console.log(chalk.bold.green(`✅ Modo: ${opcion === '1' ? 'QR' : 'Código de 8 dígitos'}\n`));
 
 console.info = () => {};
 console.debug = () => {};
 
 const connectionOptions = {
     logger: pino({ level: 'silent' }),
-    printQRInTerminal: true,  // SIEMPRE QR, PERO EL USUARIO PUEDE USAR CÓDIGO SI SELECCIONÓ 2
+    printQRInTerminal: opcion === '1',  // QR solo si eligió 1
     mobile: MethodMobile, 
     browser: opcion === '1' ? [`${global.nameqr}`, 'Edge', '20.0.04'] : ['Ubuntu', 'Edge', '110.0.1587.56'],
     auth: {
@@ -150,25 +145,27 @@ const connectionOptions = {
 
 global.conn = makeWASocket(connectionOptions)
 
-// ========== CÓDIGO DE 8 DÍGITOS (SOLO SI SE SELECCIONÓ OPCIÓN 2 Y NO HAY SESIÓN) ==========
-if (opcion === '2' && !credsExist) {
-    if (!conn.authState.creds.registered) {
-        let addNumber = phoneNumber;
-        if (!addNumber) {
-            addNumber = await question(chalk.bgBlack(chalk.bold.greenBright(`✞ Ingresa tu número (ej: 59177474230):\n🜸➤ `)));
-            addNumber = addNumber.replace(/\D/g, '');
-            rl.close();
-        }
-        setTimeout(async () => {
-            try {
-                let codeBot = await conn.requestPairingCode(addNumber);
-                codeBot = codeBot?.match(/.{1,4}/g)?.join("-") || codeBot;
-                console.log(chalk.bold.white(chalk.bgMagenta(`🜸 CÓDIGO: ${codeBot} 🜸`)));
-                console.log(chalk.cyan('📌 Ingresa en WhatsApp > Dispositivos vinculados'));
-            } catch (e) {
-                console.log(chalk.red('❌ Error:', e.message));
+// ========== CÓDIGO DE 8 DÍGITOS ==========
+if (opcion === '2') {
+    if (!fs.existsSync(`./${global.sessions}/creds.json`)) {
+        if (!conn.authState.creds.registered) {
+            let addNumber = phoneNumber;
+            if (!addNumber) {
+                addNumber = await question(chalk.bgBlack(chalk.bold.greenBright(`✞ Ingresa tu número SIN + (ej: 59177474230):\n🜸➤ `)));
+                addNumber = addNumber.replace(/\D/g, '');
+                rl.close();
             }
-        }, 3000);
+            setTimeout(async () => {
+                try {
+                    let codeBot = await conn.requestPairingCode(addNumber);
+                    codeBot = codeBot?.match(/.{1,4}/g)?.join("-") || codeBot;
+                    console.log(chalk.bold.white(chalk.bgMagenta(`🜸 CÓDIGO: ${codeBot} 🜸`)));
+                    console.log(chalk.cyan('📌 Ingresa este código en: WhatsApp > Dispositivos vinculados > Vincular con número de teléfono'));
+                } catch (e) {
+                    console.log(chalk.red('❌ Error:', e.message));
+                }
+            }, 3000);
+        }
     }
 }
 
@@ -192,7 +189,9 @@ async function connectionUpdate(update) {
     if (!global.db.data) loadDatabase();
 
     if ((qr && qr !== '0')) {
-        console.log(chalk.bold.yellow(`\n❐ ESCANEA EL CÓDIGO QR - EXPIRA EN 45 SEGUNDOS`));
+        if (opcion === '1') {
+            console.log(chalk.bold.yellow(`\n❐ ESCANEA EL CÓDIGO QR - EXPIRA EN 45 SEGUNDOS`));
+        }
     }
 
     if (connection === 'open') {
@@ -530,4 +529,4 @@ async function isValidPhoneNumber(number) {
     } catch {
         return false
     }
-}
+        }
