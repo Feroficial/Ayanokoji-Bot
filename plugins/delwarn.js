@@ -28,9 +28,9 @@ let handler = async (m, { conn, usedPrefix, command, isAdmin }) => {
   await global.db.write()
 }
 
-handler.help = ['delwarn @usuario']
+handler.help = ['resetsentencia @usuario']
 handler.tags = ['grupo']
-handler.command = ['delwarn', 'resetwarn', 'quitarwarn']
+handler.command = ['resetsentencia', 'resetwarn', 'quitarwarn']
 handler.group = true
 handler.admin = true
 
