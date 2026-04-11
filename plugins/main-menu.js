@@ -32,8 +32,8 @@ const defaultMenu = {
 > 🤖 %botIcon *%botName*
 > 📊 ᴄᴏᴍᴀɴᴅᴏꜱ: %totalCmds
 
-✦  𝗕𝗔𝗟𝗗𝗪𝗜𝗡𝗗 𝗜𝗩  •  𝗘𝗟𝗜𝗧𝗘 𝗠𝗘𝗡𝗨  ✦
-👑  ᴄʀᴇᴀᴅᴏʀ:  ★  ᴅᴇᴠʟʏᴏɴɴ  ★
+✦ 𝗕𝗔𝗟𝗗𝗪𝗜𝗡𝗗 𝗜𝗩 • 𝗘𝗟𝗜𝗧𝗘 𝗠𝗘𝗡𝗨 ✦
+👑 ᴄʀᴇᴀᴅᴏʀ: ★ ᴅᴇᴠʟʏᴏɴɴ ★
 %readmore
 `.trimStart(),
   header: '\n⧼⋆꙳•〔 🛸 %category (%count) 〕⋆꙳•⧽',
@@ -55,18 +55,21 @@ const loadMenuMedia = jid => {
   } catch { return {} }
 }
 
-const fetchBuffer = async (url) => {
-  const res = await fetch(url)
-  return Buffer.from(await res.arrayBuffer())
-}
-
-// ========== IMAGEN DE CATBOX (DIRECTA) ==========
+// 🔥 URL DE IMAGEN
 const FOTO_URL = 'https://files.catbox.moe/4x1v0l.jpeg'
-let fotoBuffer = await fetchBuffer(FOTO_URL)
 
 let handler = async (m, { conn, usedPrefix }) => {
   try {
     await conn.sendMessage(m.chat, { react: { text: '⚔️', key: m.key } })
+
+    // ✅ CARGAR IMAGEN DENTRO DEL HANDLER (FIX REAL)
+    let fotoBuffer = null
+    try {
+      const res = await fetch(FOTO_URL)
+      fotoBuffer = Buffer.from(await res.arrayBuffer())
+    } catch (e) {
+      console.log('Error cargando imagen:', e)
+    }
 
     const botJid = conn.user.jid
     const menuMedia = loadMenuMedia(botJid)
@@ -146,7 +149,7 @@ let handler = async (m, { conn, usedPrefix }) => {
       menuText = menuText.replace(new RegExp(`%${key}`, 'g'), value)
     }
 
-    // ========== ENVIAR CON IMAGEN (thumbnail NO es null) ==========
+    // ✅ ENVÍO FINAL FIXED
     await conn.sendMessage(m.chat, {
       text: menuText,
       footer: '🧠 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ • ᴄʏʙᴇʀ ꜱʏꜱᴛᴇᴍ ☘️',
@@ -157,7 +160,7 @@ let handler = async (m, { conn, usedPrefix }) => {
         externalAdReply: {
           title: 'ʙᴀʟᴅᴡɪɴᴅ ɪᴠ | ᴄʏʙᴇʀ ᴠᴇʀꜱɪᴏɴ',
           body: '┊࣪ ˖ ᴄʀᴇᴀᴅᴏ ʙʏ • ᴅᴇᴠʟʏᴏɴɴ ♱',
-          thumbnail: fotoBuffer,
+          jpegThumbnail: fotoBuffer, // 🔥 FIX AQUÍ
           sourceUrl: 'https://github.com/Feroficial/Baldwind-IV-Bot.git',
           mediaType: 1,
           renderLargerThumbnail: true
@@ -168,7 +171,7 @@ let handler = async (m, { conn, usedPrefix }) => {
   } catch (error) {
     console.error('Error en menu:', error)
     await conn.sendMessage(m.chat, { 
-      text: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> ⚠️ *Error al cargar el menú*\n> 📌 Usa *${usedPrefix}help* para ver comandos\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*` 
+      text: `⚠️ Error al cargar el menú\nUsa ${usedPrefix}help` 
     }, { quoted: m })
   }
 }
