@@ -65,7 +65,7 @@ const fetchBuffer = async (url) => {
 }
 
 // Imagen del menú
-const FOTO_URL = 'https://ibb.co/5hHzjhv7'
+const FOTO_URL = 'https://files.catbox.moe/orff5e.jpeg'
 let fotoBuffer = null
 try {
   fotoBuffer = await fetchBuffer(FOTO_URL)
