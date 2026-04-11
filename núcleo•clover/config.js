@@ -9,30 +9,23 @@ import moment from 'moment-timezone';
 
 //*─✞─ CONFIGURACIÓN GLOBAL ─✞─*
 
-// Número del bot (déjalo vacío o pon el tuyo)
-global.botNumber = '';
+// Número del bot
+global.botNumber = '59177474230';
 
 //*─ׄ─ׅ─ׄ─✞─ׄ─ׅ─ׄ─✞─ׄ─ׅ─ׄ─✞─ׄ─ׅ─ׄ─✞─ׄ─ׅ─ׄ─✞─ׄ─ׅ─ׄ─*
 // ========== DETECCIÓN MÚLTIPLE DEL CREADOR ==========
-// Múltiples formatos para asegurar que te detecte
-
 global.owner = [
   ['59177474230', '🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸', true],
   ['59177474230', 'DEVLYONN', true],
   ['59177474230', 'DevLyonn', true],
-  ['59177474230'],  // Solo el número
-  ['59177474230@s.whatsapp.net', 'DEVLYONN', true],  // Con @s.whatsapp.net
-  ['59177474230@c.us', 'DEVLYONN', true]  // Con @c.us
+  ['59177474230'],
+  ['59177474230@s.whatsapp.net', 'DEVLYONN', true],
+  ['59177474230@c.us', 'DEVLYONN', true]
 ];
 
-// Moderadores (también tu número)
 global.mods = ['59177474230', '59177474230@s.whatsapp.net'];
-
-// Premium (también tu número)
-global.prems = ['59177474230', '59177474230@s.whatsapp.net'];
-
-// Dueños de sub-bots
 global.suittag = ['59177474230'];
+global.prems = ['59177474230', '59177474230@s.whatsapp.net'];
 
 //*─ׄ─ׅ─ׄ─✞─ׄ─ׅ─ׄ─✞─ׄ─ׅ─ׄ─✞─ׄ─ׅ─ׄ─✞─ׄ─ׅ─ׄ─✞─ׄ─ׅ─ׄ─*
 global.libreria = 'Baileys';
