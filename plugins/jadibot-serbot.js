@@ -65,32 +65,34 @@ let blackJBOptions = {}
 
 if (!global.conns) global.conns = []
 
-// ========== FUNCIÓN PARA OBTENER EL NÚMERO DEL PRÓXIMO SUB-BOT ==========
-const getNextSubBotNumber = () => {
-  const subBots = global.conns.filter(c => c.user && c.ws.socket && c.ws.socket.readyState !== ws.CLOSED)
-  return subBots.length + 1
+function msToTime(duration) {
+  var seconds = Math.floor((duration / 1000) % 60),
+      minutes = Math.floor((duration / (1000 * 60)) % 60)
+  minutes = (minutes < 10) ? '0' + minutes : minutes
+  seconds = (seconds < 10) ? '0' + seconds : seconds
+  return minutes + ' m y ' + seconds + ' s '
 }
 
 // ========== FUNCIONES PARA CAMBIAR DATOS DEL SUB-BOT ==========
+const SUB_BOT_NAME = '🜸 BALDWIND SUB-BOT 🛸'
+const SUB_BOT_BIO = '—͟͟͞͞ 🜸 BALDWIND IV • SUB-BOT 🛸 ⌬'
 const SUB_BOT_PIC = 'https://files.catbox.moe/xdpxey.jpg'
 
-const changeSubBotName = async (sock, number) => {
+const changeSubBotName = async (sock) => {
   try {
-    const SUB_BOT_NAME = `🜸 BALDWIND SUB-BOT ${number} 🛸`
     await sock.updateProfileName(SUB_BOT_NAME)
     console.log(chalk.bold.green(`✅ Sub-Bot renombrado a: ${SUB_BOT_NAME}`))
-    return SUB_BOT_NAME
+    return true
   } catch (e) {
     console.log(chalk.bold.red(`❌ Error al cambiar nombre: ${e.message}`))
-    return null
+    return false
   }
 }
 
-const changeSubBotBio = async (sock, number) => {
+const changeSubBotBio = async (sock) => {
   try {
-    const SUB_BOT_BIO = `—͟͟͞͞ 🜸 BALDWIND IV • SUB-BOT ${number} 🛸 ⌬`
     await sock.updateProfileStatus(SUB_BOT_BIO)
-    console.log(chalk.bold.green(`✅ Biografía del Sub-Bot ${number} actualizada`))
+    console.log(chalk.bold.green(`✅ Biografía del Sub-Bot actualizada`))
     return true
   } catch (e) {
     console.log(chalk.bold.red(`❌ Error al cambiar biografía: ${e.message}`))
@@ -111,14 +113,6 @@ const changeSubBotProfilePic = async (sock) => {
     console.log(chalk.bold.red(`❌ Error al cambiar foto: ${e.message}`))
     return false
   }
-}
-
-function msToTime(duration) {
-  var seconds = Math.floor((duration / 1000) % 60),
-      minutes = Math.floor((duration / (1000 * 60)) % 60)
-  minutes = (minutes < 10) ? '0' + minutes : minutes
-  seconds = (seconds < 10) ? '0' + seconds : seconds
-  return minutes + ' m y ' + seconds + ' s '
 }
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
@@ -151,7 +145,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
   let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
   let id = `${who.split('@')[0]}`
-  let pathblackJadiBot = path.join(process.cwd(), 'núcleo•clover', 'blackJadiBot', id)
+  
+  // ========== CAMBIADO: núcleo•clover → baldwind-core ==========
+  let pathblackJadiBot = path.join(process.cwd(), 'baldwind-core', 'blackJadiBot', id)
 
   if (!fs.existsSync(pathblackJadiBot)) {
     fs.mkdirSync(pathblackJadiBot, { recursive: true })
@@ -294,20 +290,19 @@ export async function blackJadiBot(options) {
       }
       if (connection == 'open') {
         let userName = sock.authState.creds.me?.name || 'Anónimo'
-        
-        // Obtener el número del Sub-Bot (1, 2, 3, etc.)
-        const subBotNumber = getNextSubBotNumber()
-        
-        // ========== CAMBIAR DATOS DEL SUB-BOT AUTOMÁTICAMENTE ==========
-        const newName = await changeSubBotName(sock, subBotNumber)
-        await changeSubBotBio(sock, subBotNumber)
+
+        // Esperar 3 segundos antes de cambiar datos
+        await new Promise(resolve => setTimeout(resolve, 3000))
+
+        await changeSubBotName(sock)
+        await changeSubBotBio(sock)
         await changeSubBotProfilePic(sock)
 
         console.log(
           chalk.bold.cyanBright(
             `\n❒────────────【• SUB-BOT BALDWIND IV •】────────────❒\n│\n│ 🟢 ${userName} (+${path.basename(
               pathblackJadiBot
-            )}) conectado exitosamente.\n│ 👑 Creador: DEVLYONN\n│ 📛 Nuevo nombre: 🜸 BALDWIND SUB-BOT ${subBotNumber} 🛸\n│\n❒────────────【• CONECTADO •】────────────❒`
+            )}) conectado exitosamente.\n│ 👑 Creador: DEVLYONN\n│ 📛 Nuevo nombre: ${SUB_BOT_NAME}\n│\n❒────────────【• CONECTADO •】────────────❒`
           )
         )
         sock.isInit = true
@@ -323,7 +318,7 @@ export async function blackJadiBot(options) {
             {
               text: args[0]
                 ? `@${m.sender.split('@')[0]}, ya estás conectado, leyendo mensajes entrantes...\n\n🛸 BALDWIND IV • DEVLYONN`
-                : `@${m.sender.split('@')[0]}, *genial ya eres parte de nuestra familia BALDWIND IV Sub-Bots.*\n> Tu nombre ha sido cambiado a *🜸 BALDWIND SUB-BOT ${subBotNumber} 🛸*\n> Usa el comando .personalizar para personalizar tu bot.\n\n👑 Creador: DEVLYONN`,
+                : `@${m.sender.split('@')[0]}, *genial ya eres parte de nuestra familia BALDWIND IV Sub-Bots.*\n> Tu nombre ha sido cambiado a *${SUB_BOT_NAME}*\n> Usa el comando .personalizar para personalizar tu bot.\n\n👑 Creador: DEVLYONN`,
               mentions: [m.sender]
             },
             { quoted: m }
@@ -342,10 +337,12 @@ export async function blackJadiBot(options) {
       }
     }, 60000)
 
-    let handler = await import('../núcleo•clover/handler.js')
+    // ========== CAMBIADO: núcleo•clover → baldwind-core ==========
+    let handler = await import('../baldwind-core/handler.js')
+    
     let creloadHandler = async function (restatConn) {
       try {
-        const Handler = await import(`../núcleo•clover/handler.js?update=${Date.now()}`).catch(console.error)
+        const Handler = await import(`../baldwind-core/handler.js?update=${Date.now()}`).catch(console.error)
         if (Object.keys(Handler || {}).length) handler = Handler
       } catch (e) { }
       if (restatConn) {
