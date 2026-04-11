@@ -1,7 +1,7 @@
 {
-  "name": "black-clover-MD",
+  "name": "baldwind-iv",
   "version": "7.7.7",
-  "description": "El Mejor bot de WhatsApp",
+  "description": "🜸 BALDWIND IV - Bot de WhatsApp con temática medieval/cyberpunk",
   "main": "index.js",
   "type": "module",
 
@@ -21,21 +21,21 @@
     "eslint": "eslint .",
     "eslintfix": "eslint --fix ."
   },
-  "homepage": "https://github.com/thecarlos19/black-clover-MD",
+  "homepage": "https://github.com/Feroficial/Baldwind-Bot",
   "author": {
-    "name": "thecarlos19"
+    "name": "DEVLYONN"
   },
   "collaborators": {
-    "col1": "Antuan",
-    "col2": "Russell",
-    "col3": "Edgar"
+    "col1": "DEVLYONN",
+    "col2": "BALDWIND IV",
+    "col3": "Cyber Core"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thecarlos19/black-clover-MD.git"
+    "url": "git+https://github.com/Feroficial/Baldwind-Bot.git"
   },
   "bugs": {
-    "url": "https://github.com/thecarlos19/black-clover-MD/issues"
+    "url": "https://github.com/Feroficial/Baldwind-Bot/issues"
   },
   "license": "GPL-3.0-or-later",
   "dependencies": {
@@ -108,5 +108,5 @@
     "wa-sticker-formatter": "^4.3.2",
     "moment-timezone": "^0.5.37"
   },
-  "_note": "Compatible con todas las plataformas para bots de WhatsApp"
+  "_note": "🜸 BALDWIND IV - Compatible con todas las plataformas para bots de WhatsApp"
 }
