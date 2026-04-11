@@ -145,30 +145,30 @@ const connectionOptions = {
 
 global.conn = makeWASocket(connectionOptions)
 
-// ========== CÓDIGO DE 8 DÍGITOS ==========
+// ========== CÓDIGO DE 8 DÍGITOS CORREGIDO ==========
 if (opcion === '2') {
     if (!fs.existsSync(`./${global.sessions}/creds.json`)) {
         if (!conn.authState.creds.registered) {
-            // ========== PEDIR EL NÚMERO DEL USUARIO ==========
             let userNumber = await question(chalk.bgBlack(chalk.bold.greenBright(`✞ Ingresa el número del USUARIO (sin +, ej: 59177474230):\n🜸➤ `)));
             userNumber = userNumber.replace(/\D/g, '');
             rl.close();
             
-            setTimeout(async () => {
-                try {
-                    // EL CÓDIGO SE ENVÍA AL NÚMERO DEL USUARIO
-                    let codeBot = await conn.requestPairingCode(userNumber);
-                    codeBot = codeBot?.match(/.{1,4}/g)?.join("-") || codeBot;
-                    console.log(chalk.bold.white(chalk.bgMagenta(`🜸 CÓDIGO PARA ${userNumber}: ${codeBot} 🜸`)));
-                    console.log(chalk.cyan('📌 El usuario debe ingresar este código en: WhatsApp > Dispositivos vinculados'));
-                } catch (e) {
-                    console.log(chalk.red('❌ Error:', e.message));
-                }
-            }, 3000);
+            // ESPERAR A QUE LA CONEXIÓN ESTÉ LISTA
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            
+            try {
+                console.log(chalk.yellow('📱 Solicitando código...'));
+                let codeBot = await conn.requestPairingCode(userNumber);
+                let formattedCode = codeBot.match(/.{1,4}/g)?.join("-") || codeBot;
+                console.log(chalk.bold.white(chalk.bgMagenta(`🜸 CÓDIGO: ${formattedCode} 🜸`)));
+                console.log(chalk.cyan(`📌 El usuario ${userNumber} debe ingresar este código en: WhatsApp > Dispositivos vinculados`));
+            } catch (e) {
+                console.log(chalk.red('❌ Error:', e.message));
+                console.log(chalk.yellow('💡 Solución: Reinstala el Baileys con: npm install github:Muhammad-iqbal45/Baileys-MD'));
+            }
         }
     }
 }
-
 conn.isInit = false;
 conn.well = false;
 conn.logger.info(` ✞ H E C H O\n`);
