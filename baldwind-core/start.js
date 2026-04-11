@@ -101,29 +101,27 @@ const MethodMobile = process.argv.includes("mobile");
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 const question = (texto) => new Promise((resolver) => rl.question(texto, resolver));
 
-let opcion;
+let opcion = '1';
 const credsExist = fs.existsSync(`./${global.sessions}/creds.json`);
 
-// ========== FORZAR OPCIONES 1 Y 2 (BORRAR SESIÓN SI EXISTE) ==========
-if (credsExist) {
-    console.log(chalk.bold.yellow(`⚠️ Eliminando sesión anterior para nueva conexión...`));
-    fs.rmSync(`./${global.sessions}`, { recursive: true, force: true });
+// ========== SOLO PREGUNTAR SI NO HAY SESIÓN ==========
+if (!methodCodeQR && !methodCode && !credsExist) {
+    do {
+        opcion = await question(
+            chalk.bgYellow.black('⌬ BALDWIND IV - SELECCIONA MODO DE CONEXIÓN:\n') +
+            chalk.bold.yellow('1. Código QR\n') +
+            chalk.bold.cyan('2. Código de 8 dígitos\n🜸➤ ')
+        );
+        if (!/^[1-2]$/.test(opcion)) {
+            console.log(chalk.bold.redBright(`✞ Opción inválida. Elige 1 o 2.`));
+        }
+    } while (opcion !== '1' && opcion !== '2');
+    console.log(chalk.bold.green(`✅ Modo seleccionado: ${opcion === '1' ? 'QR' : 'Código de 8 dígitos'}\n`));
+} else {
+    // Si ya hay sesión, usar QR automático (no preguntar)
+    opcion = '1';
+    console.log(chalk.bold.green(`✅ Sesión existente detectada. Usando QR.\n`));
 }
-
-// Siempre preguntar opciones
-do {
-    opcion = await question(
-        chalk.bgYellow.black('⌬ BALDWIND IV - SELECCIONA MODO DE CONEXIÓN:\n') +
-        chalk.bold.yellow('1. Código QR\n') +
-        chalk.bold.cyan('2. Código de 8 dígitos\n🜸➤ ')
-    );
-
-    if (!/^[1-2]$/.test(opcion)) {
-        console.log(chalk.bold.redBright(`✞ Opción inválida. Elige 1 o 2.`));
-    }
-} while (opcion !== '1' && opcion !== '2');
-
-console.log(chalk.bold.green(`✅ Modo seleccionado: ${opcion === '1' ? 'QR' : 'Código de 8 dígitos'}\n`));
 
 console.info = () => {};
 console.debug = () => {};
@@ -152,13 +150,13 @@ const connectionOptions = {
 
 global.conn = makeWASocket(connectionOptions)
 
-// ========== PAIRING CODE (CÓDIGO DE 8 DÍGITOS) ==========
-if (opcion === '2') {
+// ========== PAIRING CODE (CÓDIGO DE 8 DÍGITOS) - SOLO SI NO HAY SESIÓN ==========
+if (opcion === '2' && !credsExist) {
     if (!fs.existsSync(`./${global.sessions}/creds.json`)) {
         if (!conn.authState.creds.registered) {
             let addNumber = phoneNumber;
             if (!addNumber) {
-                addNumber = await question(chalk.bgBlack(chalk.bold.greenBright(`✞ Ingresa tu número de WhatsApp (ej: 59177474230):\n🜸➤ `)));
+                addNumber = await question(chalk.bgBlack(chalk.bold.greenBright(`✞ Ingresa tu número (ej: 59177474230):\n🜸➤ `)));
                 addNumber = addNumber.replace(/\D/g, '');
                 rl.close();
             }
@@ -167,9 +165,9 @@ if (opcion === '2') {
                     let codeBot = await conn.requestPairingCode(addNumber);
                     codeBot = codeBot?.match(/.{1,4}/g)?.join("-") || codeBot;
                     console.log(chalk.bold.white(chalk.bgMagenta(`🜸 CÓDIGO BALDWIND IV 🜸`)), chalk.bold.white(codeBot));
-                    console.log(chalk.cyan('📌 Ingresa este código en: WhatsApp > Dispositivos vinculados > Vincular con número de teléfono'));
+                    console.log(chalk.cyan('📌 Ingresa este código en: WhatsApp > Dispositivos vinculados'));
                 } catch (e) {
-                    console.log(chalk.red('❌ Error al solicitar código:', e.message));
+                    console.log(chalk.red('❌ Error:', e.message));
                 }
             }, 3000);
         }
@@ -209,7 +207,7 @@ async function connectionUpdate(update) {
         switch (reason) {
             case DisconnectReason.badSession:
             case DisconnectReason.loggedOut:
-                console.log(chalk.bold.redBright(`\n⚠︎ SESIÓN INVÁLIDA O CERRADA, BORRA LA CARPETA ${global.sessions} Y REINICIA ⚠︎`));
+                console.log(chalk.bold.redBright(`\n⚠︎ SESIÓN INVÁLIDA, BORRA LA CARPETA ${global.sessions} Y REINICIA ⚠︎`));
                 break;
             case DisconnectReason.connectionClosed:
                 console.log(chalk.bold.magentaBright(`\n⚠︎ CONEXIÓN CERRADA, REINICIANDO...`));
@@ -218,13 +216,13 @@ async function connectionUpdate(update) {
                 console.log(chalk.bold.blueBright(`\n⚠︎ CONEXIÓN PERDIDA, RECONECTANDO...`));
                 break;
             case DisconnectReason.connectionReplaced:
-                console.log(chalk.bold.yellowBright(`\n⚠︎ CONEXIÓN REEMPLAZADA, OTRA SESIÓN INICIADA`));
+                console.log(chalk.bold.yellowBright(`\n⚠︎ CONEXIÓN REEMPLAZADA`));
                 return;
             case DisconnectReason.restartRequired:
                 console.log(chalk.bold.cyanBright(`\n☑ REINICIANDO SESIÓN...`));
                 break;
             case DisconnectReason.timedOut:
-                console.log(chalk.bold.yellowBright(`\n⚠︎ TIEMPO AGOTADO, REINTENTANDO CONEXIÓN...`));
+                console.log(chalk.bold.yellowBright(`\n⚠︎ TIEMPO AGOTADO, REINTENTANDO...`));
                 break;
             default:
                 console.log(chalk.bold.redBright(`\n⚠︎ DESCONEXIÓN DESCONOCIDA (${reason || 'Desconocido'})`));
@@ -241,7 +239,7 @@ async function connectionUpdate(update) {
 process.on('uncaughtException', (err) => {
     
     if (err.code === 'ENAMETOOLONG') {
-        console.error(chalk.red.bold(`✘ ERROR (ENAMETOOLONG): ${err.message}. (El bot NO se reiniciará)`));
+        console.error(chalk.red.bold(`✘ ERROR (ENAMETOOLONG): ${err.message}.`));
     } else {
         console.error(chalk.red.bold('✘ ERROR CRÍTICO CAPTURADO:'), err);
     }
@@ -498,7 +496,6 @@ setInterval(async () => {
 }, 1000 * 60 * 10)
 
 _quickTest().then(() => global.conn.logger.info(chalk.bold(`✞ H E C H O\n`.trim()))).catch(console.error)
-
 setInterval(async () => {
     if (global.stopped === 'close' || !global.conn || !global.conn?.user) return
     const _uptime = process.uptime() * 1000
