@@ -51,9 +51,9 @@ const handler = async (m, { conn, args}) => {
 
 const keywords = ['update', 'up', 'fix'];
 
-handler.help = ['fex update']; 
+handler.help = ['fix']; 
 handler.tags = ['owner'];
-handler.command = ['fexupdate', 'fix', 'update'];
+handler.command = ['iv', 'fix', 'update'];
 handler.rowner = true;
 
 handler.all = async function (m) {
