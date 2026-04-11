@@ -39,8 +39,10 @@ export async function handler(chatUpdate) {
 
     // ========== INICIALIZAR DATOS DEL USUARIO ==========
     try {
+      if (!global.db.data.users[m.sender]) {
+        global.db.data.users[m.sender] = {};
+      }
       let user = global.db.data.users[m.sender];
-      if (!user || typeof user !== 'object') global.db.data.users[m.sender] = user = {};
 
       Object.assign(user, {
         exp: isNumber(user.exp) ? user.exp : 0,
@@ -88,28 +90,37 @@ export async function handler(chatUpdate) {
         clanRank: user.clanRank || null
       });
 
-      Object.assign(chat, {
-    isBanned: 'isBanned' in chat ? chat.isBanned : false,
-    sAutoresponder: chat.sAutoresponder || '',
-    welcome: 'welcome' in chat ? chat.welcome : true,
-    autolevelup: 'autolevelup' in chat ? chat.autolevelup : false,
-    autoAceptar: 'autoAceptar' in chat ? chat.autoAceptar : true,
-    autosticker: 'autosticker' in chat ? chat.autosticker : false,
-    autoRechazar: 'autoRechazar' in chat ? chat.autoRechazar : true,
-    autoresponder: 'autoresponder' in chat ? chat.autoresponder : false,
-    detect: 'detect' in chat ? chat.detect : true,
-    antiBot: 'antiBot' in chat ? chat.antiBot : true,
-    antiBot2: 'antiBot2' in chat ? chat.antiBot2 : true,
-    modoadmin: 'modoadmin' in chat ? chat.modoadmin : false,
-    antiLink: 'antiLink' in chat ? chat.antiLink : false,  // ✅ CORREGIDO
-    reaction: 'reaction' in chat ? chat.reaction : false,
-    nsfw: 'nsfw' in chat ? chat.nsfw : false,
-    antifake: 'antifake' in chat ? chat.antifake : false,
-    delete: 'delete' in chat ? chat.delete : false,
-    expired: isNumber(chat.expired) ? chat.expired : 0
-});
+      // ========== INICIALIZAR DATOS DEL CHAT ==========
+      if (!global.db.data.chats[m.chat]) {
+        global.db.data.chats[m.chat] = {};
+      }
+      let chat = global.db.data.chats[m.chat];
 
-      var settings = global.db.data.settings[this.user.jid] || {};
+      Object.assign(chat, {
+        isBanned: 'isBanned' in chat ? chat.isBanned : false,
+        sAutoresponder: chat.sAutoresponder || '',
+        welcome: 'welcome' in chat ? chat.welcome : true,
+        autolevelup: 'autolevelup' in chat ? chat.autolevelup : false,
+        autoAceptar: 'autoAceptar' in chat ? chat.autoAceptar : true,
+        autosticker: 'autosticker' in chat ? chat.autosticker : false,
+        autoRechazar: 'autoRechazar' in chat ? chat.autoRechazar : true,
+        autoresponder: 'autoresponder' in chat ? chat.autoresponder : false,
+        detect: 'detect' in chat ? chat.detect : true,
+        antiBot: 'antiBot' in chat ? chat.antiBot : true,
+        antiBot2: 'antiBot2' in chat ? chat.antiBot2 : true,
+        modoadmin: 'modoadmin' in chat ? chat.modoadmin : false,
+        antiLink: 'antiLink' in chat ? chat.antiLink : false,
+        reaction: 'reaction' in chat ? chat.reaction : false,
+        nsfw: 'nsfw' in chat ? chat.nsfw : false,
+        antifake: 'antifake' in chat ? chat.antifake : false,
+        delete: 'delete' in chat ? chat.delete : false,
+        expired: isNumber(chat.expired) ? chat.expired : 0
+      });
+
+      if (!global.db.data.settings[this.user.jid]) {
+        global.db.data.settings[this.user.jid] = {};
+      }
+      var settings = global.db.data.settings[this.user.jid];
       Object.assign(settings, {
         self: 'self' in settings ? settings.self : false,
         restrict: 'restrict' in settings ? settings.restrict : true,
@@ -118,15 +129,14 @@ export async function handler(chatUpdate) {
         autoread: 'autoread' in settings ? settings.autoread : false,
         status: settings.status || 0
       });
-      global.db.data.settings[this.user.jid] = settings;
 
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error('Error inicializando datos:', e); }
 
     if (typeof m.text !== "string") m.text = "";
     globalThis.setting = global.db.data.settings[this.user.jid];
 
     const detectwhat = m.sender.includes('@lid') ? '@lid' : '@s.whatsapp.net';
-    const isROwner = [...global.owner.map(([number]) => number)].map(v => v.replace(/\D/g, "") + detectwhat).includes(m.sender);
+    const isROwner = global.owner ? [...global.owner.map(([number]) => number)].map(v => v.replace(/\D/g, "") + detectwhat).includes(m.sender) : false;
     const isOwner = isROwner || m.fromMe;
     const isPrems = isROwner || (global.db.data.users[m.sender]?.premiumTime || 0) > 0;
     const isMods = isROwner || (global.mods || []).includes(m.sender.split('@')[0]);
@@ -167,22 +177,10 @@ export async function handler(chatUpdate) {
     if (m.isGroup && m.text && !m.isBaileys) {
       const chat = global.db.data.chats[m.chat];
       if (chat && chat.antiLink === true) {
-        // Lista de enlaces prohibidos
         const linksProhibidos = [
-          'chat.whatsapp.com',
-          'whatsapp.com/channel',
-          'instagram.com',
-          'facebook.com',
-          'twitter.com',
-          'tiktok.com',
-          'youtube.com',
-          'youtu.be',
-          'wa.me',
-          't.me',
-          'discord.gg',
-          'linktr.ee',
-          'https://',
-          'http://'
+          'chat.whatsapp.com', 'whatsapp.com/channel', 'instagram.com', 'facebook.com',
+          'twitter.com', 'tiktok.com', 'youtube.com', 'youtu.be', 'wa.me',
+          't.me', 'discord.gg', 'linktr.ee', 'https://', 'http://'
         ]
         
         let tieneLink = false
@@ -200,21 +198,10 @@ export async function handler(chatUpdate) {
           const isBotAdmin = groupMetadata?.participants?.some(p => p.id === botJid && p.admin) || false
           
           if (isBotAdmin) {
-            // Eliminar el mensaje
             await this.sendMessage(m.chat, { delete: m.key }).catch(() => {})
-            
-            // Expulsar al usuario
             await this.groupParticipantsUpdate(m.chat, [m.sender], 'remove').catch(() => {})
-            
-            // Enviar advertencia
             await this.sendMessage(m.chat, {
               text: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 🚫 *ANTILINK ACTIVADO* 🚫\n\n> 👤 *Usuario:* @${m.sender.split('@')[0]}\n> 🔗 *Enlace detectado:* ${linkEncontrado}\n> ⚔️ *Expulsado automáticamente*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`,
-              mentions: [m.sender]
-            }).catch(() => {})
-          } else {
-            // Si el bot no es admin, solo advertir
-            await this.sendMessage(m.chat, {
-              text: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> ⚠️ *ANTILINK ACTIVADO* ⚠️\n\n> 👤 @${m.sender.split('@')[0]}\n> 🔗 *Enlace detectado:* ${linkEncontrado}\n> 📌 *El bot necesita ser administrador para expulsar*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`,
               mentions: [m.sender]
             }).catch(() => {})
           }
