@@ -10,7 +10,7 @@ import moment from 'moment-timezone';
 //*─✞─ CONFIGURACIÓN GLOBAL ─✞─*
 
 // Número del bot (déjalo vacío o pon el tuyo)
-global.botNumber = '59177474230';
+global.botNumber = '';
 
 //*─ׄ─ׅ─ׄ─✞─ׄ─ׅ─ׄ─✞─ׄ─ׅ─ׄ─✞─ׄ─ׅ─ׄ─✞─ׄ─ׅ─ׄ─✞─ׄ─ׅ─ׄ─*
 // ========== DETECCIÓN MÚLTIPLE DEL CREADOR ==========
