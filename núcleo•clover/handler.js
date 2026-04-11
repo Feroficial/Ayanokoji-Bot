@@ -46,193 +46,97 @@ export async function handler(chatUpdate) {
         exp: isNumber(user.exp) ? user.exp : 0,
         monedas: isNumber(user.monedas) ? user.monedas : 100,
         bank: isNumber(user.bank) ? user.bank : 0,
-        joincount: isNumber(user.joincount) ? user.joincount : 1,
-        diamond: isNumber(user.diamond) ? user.diamond : 3,
         level: isNumber(user.level) ? user.level : 1,
-        health: isNumber(user.health) ? user.health : 100,
-        mana: isNumber(user.mana) ? user.mana : 50,
-        strength: isNumber(user.strength) ? user.strength : 5,
-        defense: isNumber(user.defense) ? user.defense : 3,
-        crit: isNumber(user.crit) ? user.crit : 5,
-        evasion: isNumber(user.evasion) ? user.evasion : 5,
-        weapon: user.weapon || '🗡️ Espada de Madera',
-        armor: user.armor || '🛡️ Armadura de Cuero',
-        inventory: user.inventory || [],
         registered: 'registered' in user ? user.registered : false,
-        premium: 'premium' in user ? user.premium : false,
-        premiumTime: user.premium ? user.premiumTime || 0 : 0,
-        banned: 'banned' in user ? user.banned : false,
-        bannedReason: user.bannedReason || '',
-        warn: isNumber(user.warn) ? user.warn : 0,
-        lastadventure: isNumber(user.lastadventure) ? user.lastadventure : 0,
-        lastclaim: isNumber(user.lastclaim) ? user.lastclaim : 0,
-        lastcrime: isNumber(user.lastcrime) ? user.lastcrime : 0,
-        lastcofre: isNumber(user.lastcofre) ? user.lastcofre : 0,
-        lastdiamantes: isNumber(user.lastdiamantes) ? user.lastdiamantes : 0,
-        lastpago: isNumber(user.lastpago) ? user.lastpago : 0,
-        lastcode: isNumber(user.lastcode) ? user.lastcode : 0,
-        lastcodereg: isNumber(user.lastcodereg) ? user.lastcodereg : 0,
-        lastduel: isNumber(user.lastduel) ? user.lastduel : 0,
-        lastmining: isNumber(user.lastmining) ? user.lastmining : 0,
-        muto: 'muto' in user ? user.muto : false,
-        afk: isNumber(user.afk) ? user.afk : -1,
-        afkReason: user.afkReason || '',
         name: user.name || m.pushName || 'Anónimo',
         age: isNumber(user.age) ? user.age : -1,
         regTime: isNumber(user.regTime) ? user.regTime : -1,
-        role: user.role || '⚔️ Escudero',
-        country: user.country || '',
-        afinidad: user.afinidad || '',
-        nivelMagico: isNumber(user.nivelMagico) ? user.nivelMagico : 1,
-        clan: user.clan || null,
-        clanRank: user.clanRank || null
       });
 
       let chat = global.db.data.chats[m.chat];
       if (!chat || typeof chat !== 'object') global.db.data.chats[m.chat] = chat = {};
       Object.assign(chat, {
         isBanned: 'isBanned' in chat ? chat.isBanned : false,
-        sAutoresponder: chat.sAutoresponder || '',
         welcome: 'welcome' in chat ? chat.welcome : true,
-        autolevelup: 'autolevelup' in chat ? chat.autolevelup : false,
-        autoAceptar: 'autoAceptar' in chat ? chat.autoAceptar : true,
-        autosticker: 'autosticker' in chat ? chat.autosticker : false,
-        autoRechazar: 'autoRechazar' in chat ? chat.autoRechazar : true,
-        autoresponder: 'autoresponder' in chat ? chat.autoresponder : false,
-        detect: 'detect' in chat ? chat.detect : true,
-        antiBot: 'antiBot' in chat ? chat.antiBot : true,
-        antiBot2: 'antiBot2' in chat ? chat.antiBot2 : true,
-        modoadmin: 'modoadmin' in chat ? chat.modoadmin : false,
-        antiLink: 'antiLink' in chat ? chat.antiLink : true,
-        reaction: 'reaction' in chat ? chat.reaction : false,
-        nsfw: 'nsfw' in chat ? chat.nsfw : false,
-        antifake: 'antifake' in chat ? chat.antifake : false,
-        delete: 'delete' in chat ? chat.delete : false,
-        expired: isNumber(chat.expired) ? chat.expired : 0
       });
-
-      var settings = global.db.data.settings[this.user.jid] || {};
-      Object.assign(settings, {
-        self: 'self' in settings ? settings.self : false,
-        restrict: 'restrict' in settings ? settings.restrict : true,
-        jadibotmd: 'jadibotmd' in settings ? settings.jadibotmd : true,
-        antiPrivate: 'antiPrivate' in settings ? settings.antiPrivate : false,
-        autoread: 'autoread' in settings ? settings.autoread : false,
-        status: settings.status || 0
-      });
-      global.db.data.settings[this.user.jid] = settings;
 
     } catch (e) { console.error(e); }
 
     if (typeof m.text !== "string") m.text = "";
-    globalThis.setting = global.db.data.settings[this.user.jid];
-
-    const detectwhat = m.sender.includes('@lid') ? '@lid' : '@s.whatsapp.net';
-    const isROwner = [...global.owner.map(([number]) => number)].map(v => v.replace(/\D/g, "") + detectwhat).includes(m.sender);
-    const isOwner = isROwner || m.fromMe;
-    const isPrems = isROwner || (global.db.data.users[m.sender]?.premiumTime || 0) > 0;
-    const isMods = isROwner || (global.mods || []).includes(m.sender.split('@')[0]);
-
-    if (opts["queque"] && m.text && !isMods) {
-      const queque = this.msgqueque;
-      const previousID = queque[queque.length - 1];
-      queque.push(m.id || m.key.id);
-      setInterval(async () => { if (!queque.includes(previousID)) clearInterval(this); await delay(5000); }, 5000);
-    }
     if (m.isBaileys) return;
+
+    // ========== BIENVENIDA Y DESPEDIDA (MEJORADO) ==========
+    try {
+      // Verificar que sea un evento de grupo (entrada o salida)
+      if (m.messageStubType && m.isGroup) {
+        
+        // BIENVENIDA - Alguien entra al grupo (stubType = 1)
+        if (m.messageStubType === 1) {
+          const participants = m.messageStubParameters || []
+          if (participants.length > 0) {
+            const groupMetadata = await this.groupMetadata(m.chat).catch(() => null)
+            if (groupMetadata) {
+              for (let participant of participants) {
+                const userName = await this.getName(participant).catch(() => 'Guerrero')
+                const userNumber = participant.split('@')[0]
+                const totalMembers = groupMetadata.participants.length
+                
+                let welcomeText = `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n`
+                welcomeText += `> 🌿 *BIENVENIDO AL REINO* 🌿\n`
+                welcomeText += `> ⚔️ @${userNumber}\n`
+                welcomeText += `> 📛 *Nombre:* ${userName}\n`
+                welcomeText += `> 👥 *Miembros:* ${totalMembers}\n\n`
+                welcomeText += `✦ 𝗥𝗘𝗚𝗟𝗔𝗦 𝗗𝗘𝗟 𝗥𝗘𝗜𝗡𝗢 ✦\n`
+                welcomeText += `> 1️⃣ Respeta a todos\n`
+                welcomeText += `> 2️⃣ No enviar spam\n`
+                welcomeText += `> 3️⃣ Prohibido +18\n\n`
+                welcomeText += `✦ 𝗖𝗢𝗠𝗔𝗡𝗗𝗢𝗦 ✦\n`
+                welcomeText += `> 🔖 #menu - Ver menú\n`
+                welcomeText += `> 🔖 #perfil - Ver stats\n`
+                welcomeText += `> 🔖 #daily - Recompensa diaria\n\n`
+                welcomeText += `⧼⋆꙳•〔 🛸 𝗕𝗔𝗟𝗗𝗪𝗜𝗡𝗗 𝗜𝗩 〕⋆꙳•⧽\n`
+                welcomeText += `> 👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*\n`
+                welcomeText += `╰⋆꙳•❅‧*₊⋆꙳︎‧*❆₊⋆╯\n`
+                welcomeText += `⌬ ʙᴀʟᴅᴡɪɴᴅ ɪᴠ ᴄʏʙᴇʀ ᴍᴇɴᴜ 🧬`
+                
+                await this.sendMessage(m.chat, { text: welcomeText, mentions: [participant] })
+              }
+            }
+          }
+        }
+        
+        // DESPEDIDA - Alguien sale del grupo (stubType = 2)
+        if (m.messageStubType === 2) {
+          const participants = m.messageStubParameters || []
+          if (participants.length > 0) {
+            const groupMetadata = await this.groupMetadata(m.chat).catch(() => null)
+            if (groupMetadata) {
+              for (let participant of participants) {
+                const userName = await this.getName(participant).catch(() => 'Guerrero')
+                const userNumber = participant.split('@')[0]
+                
+                let goodbyeText = `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n`
+                goodbyeText += `> 🕯️ *UN GUERRERO HA PARTIDO* 🕯️\n`
+                goodbyeText += `> ⚔️ @${userNumber}\n`
+                goodbyeText += `> 📛 *Nombre:* ${userName}\n\n`
+                goodbyeText += `> 🌿 *Que el maná te guíe en tu camino...*\n\n`
+                goodbyeText += `⌬ ʙᴀʟᴅᴡɪɴᴅ ɪᴠ ᴄʏʙᴇʀ ᴍᴇɴᴜ 🧬`
+                
+                await this.sendMessage(m.chat, { text: goodbyeText, mentions: [participant] })
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error en welcome/goodbye:', err)
+    }
+
+    // ========== PROCESAR COMANDOS ==========
     m.exp += Math.ceil(Math.random() * 10);
     let usedPrefix;
     let _user = global.db.data.users[m.sender];
 
-    async function getLidFromJid(id, conn) { 
-      if (id.endsWith('@lid')) return id;
-      const res = await conn.onWhatsApp(id).catch(() => []);
-      return res[0]?.lid || id;
-    }
-
-    const senderLid = await getLidFromJid(m.sender, this);
-    const botLid = await getLidFromJid(this.user.jid, this);
-    const senderJid = m.sender;
-    const botJid = this.user.jid;
-
-    const groupMetadata = m.isGroup ? ((this.chats[m.chat] || {}).metadata || await this.groupMetadata(m.chat).catch(() => null)) : {};
-    const participants = m.isGroup && groupMetadata ? groupMetadata.participants || [] : [];
-
-    const user = participants.find(p => [p?.id, p?.jid].includes(senderLid) || [p?.id, p?.jid].includes(senderJid)) || {};
-    const bot = participants.find(p => [p?.id, p?.jid].includes(botLid) || [p?.id, p?.jid].includes(botJid)) || {};
-
-    const isRAdmin = user.admin === 'superadmin';
-    const isAdmin = isRAdmin || user.admin === 'admin';
-    const isBotAdmin = !!bot.admin;
-
-    // ========== BIENVENIDA Y DESPEDIDA CORREGIDO ==========
-try {
-  // Verificar que exista el evento y que sea en un grupo
-  if (m.messageStubType && m.isGroup) {
-    
-    // DETECTAR CUANDO ALGUIEN ENTRA AL GRUPO (stubType = 1)
-    if (m.messageStubType === 1) {
-      const participants = m.messageStubParameters || []
-      if (participants.length === 0) return
-      
-      const groupMetadata = await this.groupMetadata(m.chat).catch(() => null)
-      if (!groupMetadata) return
-      
-      for (let participant of participants) {
-        const userName = await this.getName(participant).catch(() => 'Guerrero')
-        const userNumber = participant.split('@')[0]
-        const totalMembers = groupMetadata.participants.length
-        
-        let welcomeText = `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n`
-        welcomeText += `> 🌿 *BIENVENIDO AL REINO* 🌿\n`
-        welcomeText += `> ⚔️ @${userNumber}\n`
-        welcomeText += `> 📛 *Nombre:* ${userName}\n`
-        welcomeText += `> 👥 *Miembros:* ${totalMembers}\n\n`
-        welcomeText += `✦ 𝗥𝗘𝗚𝗟𝗔𝗦 𝗗𝗘𝗟 𝗥𝗘𝗜𝗡𝗢 ✦\n`
-        welcomeText += `> 1️⃣ Respeta a todos\n`
-        welcomeText += `> 2️⃣ No enviar spam\n`
-        welcomeText += `> 3️⃣ Prohibido +18\n\n`
-        welcomeText += `✦ 𝗖𝗢𝗠𝗔𝗡𝗗𝗢𝗦 ✦\n`
-        welcomeText += `> 🔖 #menu - Ver menú\n`
-        welcomeText += `> 🔖 #perfil - Ver stats\n`
-        welcomeText += `> 🔖 #daily - Recompensa diaria\n\n`
-        welcomeText += `⧼⋆꙳•〔 🛸 𝗕𝗔𝗟𝗗𝗪𝗜𝗡𝗗 𝗜𝗩 〕⋆꙳•⧽\n`
-        welcomeText += `> 👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*\n`
-        welcomeText += `╰⋆꙳•❅‧*₊⋆꙳︎‧*❆₊⋆╯\n`
-        welcomeText += `⌬ ʙᴀʟᴅᴡɪɴᴅ ɪᴠ ᴄʏʙᴇʀ ᴍᴇɴᴜ 🧬`
-        
-        await this.sendMessage(m.chat, { text: welcomeText, mentions: [participant] })
-      }
-    }
-    
-    // DETECTAR CUANDO ALGUIEN SALE DEL GRUPO (stubType = 2)
-    if (m.messageStubType === 2) {
-      const participants = m.messageStubParameters || []
-      if (participants.length === 0) return
-      
-      const groupMetadata = await this.groupMetadata(m.chat).catch(() => null)
-      if (!groupMetadata) return
-      
-      for (let participant of participants) {
-        const userName = await this.getName(participant).catch(() => 'Guerrero')
-        const userNumber = participant.split('@')[0]
-        
-        let goodbyeText = `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n`
-        goodbyeText += `> 🕯️ *UN GUERRERO HA PARTIDO* 🕯️\n`
-        goodbyeText += `> ⚔️ @${userNumber}\n`
-        goodbyeText += `> 📛 *Nombre:* ${userName}\n\n`
-        goodbyeText += `> 🌿 *Que el maná te guíe en tu camino...*\n\n`
-        goodbyeText += `⌬ ʙᴀʟᴅᴡɪɴᴅ ɪᴠ ᴄʏʙᴇʀ ᴍᴇɴᴜ 🧬`
-        
-        await this.sendMessage(m.chat, { text: goodbyeText, mentions: [participant] })
-      }
-    }
-  }
-} catch (err) {
-  console.error('Error en welcome/goodbye:', err)
-}
-
-    // ========== PROCESAR PLUGINS ==========
     const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), './plugins');
     for (let name in global.plugins) {
       let plugin = global.plugins[name];
@@ -240,7 +144,6 @@ try {
       const __filename = join(___dirname, name);
 
       if (typeof plugin.all === 'function') await plugin.all.call(this, m, { chatUpdate, __dirname: ___dirname, __filename }).catch(console.error);
-      if (!opts['restrict'] && plugin.tags?.includes('admin')) continue;
 
       const str2Regex = str => str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
       let _prefix = plugin.customPrefix || this.prefix || global.prefix;
@@ -249,7 +152,7 @@ try {
         [[new RegExp(str2Regex(_prefix)).exec(m.text), new RegExp(str2Regex(_prefix))]]
       ).find(p => p[1]);
 
-      if (typeof plugin.before === 'function' && await plugin.before.call(this, m, { match, conn: this, participants, groupMetadata, user, bot, isROwner, isOwner, isRAdmin, isAdmin, isBotAdmin, isPrems, isMods, chatUpdate, __dirname: ___dirname, __filename })) continue;
+      if (typeof plugin.before === 'function' && await plugin.before.call(this, m, { match, conn: this, chatUpdate, __dirname: ___dirname, __filename })) continue;
       if (typeof plugin !== 'function') continue;
 
       if ((usedPrefix = (match[0] || '')[0])) {
@@ -259,93 +162,34 @@ try {
         let _args = noPrefix.trim().split` `.slice(1);
         let text = _args.join` `;
         command = (command || '').toLowerCase();
-        let fail = plugin.fail || global.dfail;
         let isAccept = plugin.command instanceof RegExp ? plugin.command.test(command) :
           Array.isArray(plugin.command) ? plugin.command.some(cmd => cmd instanceof RegExp ? cmd.test(command) : cmd === command) :
           plugin.command === command;
 
-        global.comando = command;
-        if ((m.id.startsWith('NJX-') || (m.id.startsWith('BAE5') && m.id.length === 16) || (m.id.startsWith('B24E') && m.id.length === 20))) return;
         if (!isAccept) continue;
-
-        m.plugin = name;
-        let chat = global.db.data.chats[m.chat];
-        let user = global.db.data.users[m.sender];
-        if (!['grupo-unbanchat.js', 'owner-exec.js', 'owner-exec2.js'].includes(name) && chat?.isBanned && !isROwner) return;
-        if (m.text && user.banned && !isROwner) { 
-          m.reply(`—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> ❌ *ESTÁS BANEADO*\n\n> 📌 *Motivo:* ${user.bannedReason || 'Sin especificar'}\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`);
-          return;
+        if (plugin.register && !_user.registered) {
+          m.reply(`—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 📜 *NO REGISTRADO*\n\n> 📌 Usa *#registrar Nombre.Edad*\n> 🎯 *Ejemplo:* #registrar Lyonn.17\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`);
+          continue;
         }
-
-        let adminMode = global.db.data.chats[m.chat].modoadmin;
-        let mini = `${plugin.botAdmin || plugin.admin || plugin.group || plugin || noPrefix}`;
-        if (adminMode && !isOwner && !isROwner && m.isGroup && !isAdmin && mini) return;
-        
-        if (plugin.rowner && !isROwner) { fail('rowner', m, this); continue; }
-        if (plugin.owner && !isOwner) { fail('owner', m, this); continue; }
-        if (plugin.mods && !isMods) { fail('mods', m, this); continue; }
-        if (plugin.premium && !isPrems) { fail('premium', m, this); continue; }
-        if (plugin.group && !m.isGroup) { fail('group', m, this); continue; }
-        if (plugin.botAdmin && !isBotAdmin) { fail('botAdmin', m, this); continue; }
-        if (plugin.admin && !isAdmin) { fail('admin', m, this); continue; }
-        if (plugin.private && m.isGroup) { fail('private', m, this); continue; }
-        if (plugin.register && !_user.registered) { fail('unreg', m, this, usedPrefix); continue; }
 
         m.isCommand = true;
-        let xp = 'exp' in plugin ? parseInt(plugin.exp) : 10;
-        m.exp += xp;
-        if (!isPrems && plugin.monedas && _user.monedas < plugin.monedas) {
-          this.reply(m.chat, `❮✦❯ Se agotaron tus ${global.monedas || 'monedas'}`, m);
-          continue;
-        }
-        if (plugin.level > _user.level) {
-          this.reply(m.chat, `❮✦❯ Se requiere el nivel: *${plugin.level}*\n\n• Tu nivel actual es: *${_user.level}*`, m);
-          continue;
-        }
-
-        let extra = { match, usedPrefix, noPrefix, _args, args, command, text, conn: this, participants, groupMetadata, user, bot, isROwner, isOwner, isRAdmin, isAdmin, isBotAdmin, isPrems, isMods, chatUpdate, __dirname: ___dirname, __filename };
+        let extra = { match, usedPrefix, noPrefix, _args, args, command, text, conn: this, chatUpdate, __dirname: ___dirname, __filename };
         try {
           await plugin.call(this, m, extra);
-          if (!isPrems) m.monedas = m.monedas || plugin.monedas || false;
         } catch (e) {
           m.error = e;
-          let text = format(e);
-          for (let key of Object.values(global.APIKeys || {})) text = text.replace(new RegExp(key, 'g'), 'Administrador');
-          m.reply(text);
-        } finally {
-          if (typeof plugin.after === 'function') await plugin.after.call(this, m, extra).catch(console.error);
-          if (m.monedas) this.reply(m.chat, `❮✦❯ Utilizaste ${+m.monedas} ${global.monedas || 'monedas'}`, m);
+          m.reply(format(e));
         }
         break;
       }
     }
 
   } catch (e) { console.error(e); } finally {
-    if (opts['queque'] && m.text) {
-      const quequeIndex = this.msgqueque.indexOf(m.id || m.key.id);
-      if (quequeIndex !== -1) this.msgqueque.splice(quequeIndex, 1);
-    }
-
-    if (m) {
+    if (m && global.db.data.users[m.sender]) {
       let utente = global.db.data.users[m.sender];
-      if (utente?.muto) await this.sendMessage(m.chat, { delete: { remoteJid: m.chat, fromMe: false, id: m.key.id, participant: m.key.participant }});
-      if (utente) {
-        utente.exp += m.exp || 0;
-        utente.monedas -= m.monedas || 0;
-      }
+      utente.exp += m.exp || 0;
+      utente.monedas -= m.monedas || 0;
     }
-
-    let stats = global.db.data.stats || {};
-    if (m.plugin) {
-      let now = +new Date();
-      let stat = stats[m.plugin] || { total: 0, success: 0, last: 0, lastSuccess: 0 };
-      stat.total += 1;
-      stat.last = now;
-      if (!m.error) { stat.success += 1; stat.lastSuccess = now; }
-      stats[m.plugin] = stat;
-    }
-
-    try { if (!opts['noprint']) await (await import('../lib/print.js')).default(m, this); } catch (e) { console.log(m, m.quoted, e); }
     if (opts['autoread']) await this.readMessages([m.key]);
   }
 }
@@ -360,7 +204,7 @@ global.dfail = (type, m, conn, usedPrefix) => {
     group: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 👥 *SOLO GRUPOS*\n\n> 📌 Este comando solo funciona en grupos.\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`,
     admin: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 🛡️ *FUNCIÓN RESTRINGIDA*\n\n> 📌 Solo los *Administradores del Grupo* pueden usar este comando.\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`,
     botAdmin: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 🤖 *BOT NO ES ADMIN*\n\n> 📌 El bot necesita ser *Administrador del Grupo* para usar este comando.\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`,
-    unreg: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 📜 *NO REGISTRADO*\n\n> 📌 Usa *${usedPrefix || '#'}registrar Nombre.Edad* para registrarte.\n> 🎯 *Ejemplo:* ${usedPrefix || '#'}registrar Lyonn.17\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`,
+    unreg: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 📜 *NO REGISTRADO*\n\n> 📌 Usa *#registrar Nombre.Edad* para registrarte.\n> 🎯 *Ejemplo:* #registrar Lyonn.17\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`,
     mods: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 🛡️ *ACCESO RESTRINGIDO*\n\n> 📌 Solo los *Moderadores* pueden usar este comando.\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`
   };
   if (msg[type]) return m.reply(msg[type]).then(() => m.react('❌'));
