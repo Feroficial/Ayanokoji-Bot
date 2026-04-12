@@ -5,7 +5,7 @@ El codigo de este archivo fue modificado para BALDWIND IV:
 - BALDWIND IV (https://github.com/Feroficial/Baldwind-IV-Bot)
 
 Adaptacion y edición echa por:
-- DEVLYONN (https://github.com/Feroficial)
+- 🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸
 
 ⚠ PROHIBIDO EDITAR ⚠ -- ⚠ PROHIBIDO EDITAR ⚠ -- ⚠ PROHIBIDO EDITAR ⚠
 */
@@ -37,27 +37,37 @@ let drm1 = ""
 let drm2 = ""
 
 let rtx =
-`˚₊·✞『 🜸 BALDWIND IV - SUB BOT 🜸 』✞·—̳͟͞͞₊˚  
+`—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 𝙎𝙄𝙎𝙏𝙀𝙈 🛸* —͟͟͞͞
 
-📲 *Escanea el Grimorio QR desde tu WhatsApp:*  
-⋮ > *Dispositivos vinculados* > *Escanear código*  
+> 📲 *𝙀𝙨𝙘𝙖𝙣𝙚𝙖 𝙚𝙡 𝙂𝙧𝙞𝙢𝙤𝙧𝙞𝙤 𝙌𝙍*
+> ⋮ 𝘿𝙞𝙨𝙥𝙤𝙨𝙞𝙩𝙞𝙫𝙤𝙨 𝙫𝙞𝙣𝙘𝙪𝙡𝙖𝙙𝙤𝙨 > 𝙀𝙨𝙘𝙖𝙣𝙚𝙖𝙧 𝙘ó𝙙𝙞𝙜𝙤
 
-⏳ *El sello mágico dura solo 45 segundos...*
+> ⏳ *𝙀𝙡 𝙨𝙚𝙡𝙡𝙤 𝙢á𝙜𝙞𝙘𝙤 𝙙𝙪𝙧𝙖 45 𝙨𝙚𝙜𝙪𝙣𝙙𝙤𝙨*
 
-🔥 *Conviértete en un Sub-Bot Temporal y sirve al Reino de BALDWIND*  
-🧿 *Tu energía quedará vinculada al Grimorio principal*  
-👑 *Creador: DEVLYONN*`
+> 🔥 *𝘾𝙤𝙣𝙫𝙞𝙚𝙧𝙩𝙚𝙩𝙚 𝙚𝙣 𝙪𝙣 𝙎𝙪𝙗-𝘽𝙤𝙩 𝙏𝙚𝙢𝙥𝙤𝙧𝙖𝙡*
+> ⚔️ *𝙎𝙞𝙧𝙫𝙚 𝙖𝙡 𝙍𝙚𝙞𝙣𝙤 𝙙𝙚 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿*
+> 🧿 *𝙏𝙪 𝙚𝙣𝙚𝙧𝙜í𝙖 𝙦𝙪𝙚𝙙𝙖𝙧á 𝙫𝙞𝙣𝙘𝙪𝙡𝙖𝙙𝙖 𝙖𝙡 𝙂𝙧𝙞𝙢𝙤𝙧𝙞𝙤 𝙥𝙧𝙞𝙣𝙘𝙞𝙥𝙖𝙡*
+
+> 🛡️ *100% 𝘼𝙉𝙏𝙄-𝘽𝘼𝙉 • 𝘾𝙐𝙀𝙉𝙏𝘼 𝙋𝙍𝙄𝙉𝘾𝙄𝙋𝘼𝙇*
+
+👑 *𝘾𝙧𝙚𝙖𝙙𝙤𝙧𝙚𝙨:* 🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸
+
+⌬ 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝘾𝙔𝘽𝙀𝙍 𝘾𝙊𝙍𝙀 ⌬`
 
 let rtx2 =
-`˚₊·✞『 🜸 BALDWIND IV - SUB BOT 🜸 』✞·—̳͟͞͞₊˚  
- 
-🜲 *Usa este Código Espiritual para convertirte en un ✧ Sub-Bot Temporal bajo el contrato del Reino de BALDWIND.*  
+`—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 𝙎𝙄𝙎𝙏𝙀𝙈 🛸* —͟͟͞͞
 
-⏳ *Atención, Guerrero de las Sombras:* este vínculo es delicado.  
-⚠️ *No uses tu cuenta principal, emplea una réplica espiritual o una forma secundaria.*  
+> 🜲 *𝙐𝙨𝙖 𝙚𝙨𝙩𝙚 𝘾ó𝙙𝙞𝙜𝙤 𝙀𝙨𝙥𝙞𝙧𝙞𝙩𝙪𝙖𝙡*
+> ⚔️ *𝘾𝙤𝙣𝙫𝙞𝙚𝙧𝙩𝙚𝙩𝙚 𝙚𝙣 𝙪𝙣 𝙎𝙪𝙗-𝘽𝙤𝙩 𝙏𝙚𝙢𝙥𝙤𝙧𝙖𝙡*
 
-🧿 *SISTEMA ➤ [ CÓDIGO ACTIVO ] — Activa el vínculo cuando estés preparado* ⚔️
-👑 *Creador: DEVLYONN*`
+> 🛡️ *100% 𝘼𝙉𝙏𝙄-𝘽𝘼𝙉 • 𝘾𝙐𝙀𝙉𝙏𝘼 𝙋𝙍𝙄𝙉𝘾𝙄𝙋𝘼𝙇*
+
+> 🧿 *𝙎𝙄𝙎𝙏𝙀𝙈𝘼 ➤ [ 𝘾Ó𝘿𝙄𝙂𝙊 𝘼𝘾𝙏𝙄𝙑𝙊 ]*
+> ⚔️ *𝘼𝙘𝙩𝙞𝙫𝙖 𝙚𝙡 𝙫í𝙣𝙘𝙪𝙡𝙤 𝙘𝙪𝙖𝙣𝙙𝙤 𝙚𝙨𝙩é𝙨 𝙥𝙧𝙚𝙥𝙖𝙧𝙖𝙙𝙤*
+
+👑 *𝘾𝙧𝙚𝙖𝙙𝙤𝙧𝙚𝙨:* 🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸
+
+⌬ 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝘾𝙔𝘽𝙀𝙍 𝘾𝙊𝙍𝙀 ⌬`
 
 const maxSubBots = 500
 
@@ -73,9 +83,9 @@ function msToTime(duration) {
   return minutes + ' m y ' + seconds + ' s '
 }
 
-// ========== FUNCIONES PARA CAMBIAR DATOS DEL SUB-BOT ==========
-const SUB_BOT_NAME = '🜸 BALDWIND SUB-BOT 🛸'
-const SUB_BOT_BIO = '—͟͟͞͞ 🜸 BALDWIND IV • SUB-BOT 🛸 ⌬'
+// ========== CONFIGURACIÓN DEL SUB-BOT ==========
+const SUB_BOT_NAME = '🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙎𝙐𝘽-𝘽𝙊𝙏 🛸'
+const SUB_BOT_BIO = '—͟͟͞͞ 🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 🛸 ⌬'
 const SUB_BOT_PIC = 'https://files.catbox.moe/xdpxey.jpg'
 
 const changeSubBotName = async (sock) => {
@@ -117,16 +127,16 @@ const changeSubBotProfilePic = async (sock) => {
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   if (!globalThis.db.data.settings[conn.user.jid].jadibotmd) {
-    return m.reply(`El Comando *${command}* está desactivado temporalmente.`)
+    return m.reply(`❌ *El comando ${command} está desactivado temporalmente*`)
   }
 
   let time = global.db.data.users[m.sender].Subs + 120000
   if (new Date() - global.db.data.users[m.sender].Subs < 120000) {
     let remaining = time - new Date()
     setTimeout(() => {
-      conn.reply(m.chat, `*Ya estás listo para conectarte de nuevo 🗿*`, m)
+      conn.reply(m.chat, `✅ *Ya estás listo para conectarte de nuevo*`, m)
     }, remaining)
-    return conn.reply(m.chat, `⏳ Debes esperar ${msToTime(remaining)} para volver a vincular un *Sub-Bot.*`, m)
+    return conn.reply(m.chat, `⏳ *Debes esperar ${msToTime(remaining)} para volver a vincular un Sub-Bot*`, m)
   }
 
   const subBots = [...new Set(
@@ -138,7 +148,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const subBotsCount = subBots.length
 
   if (subBotsCount >= maxSubBots) {
-    return m.reply(`❌ No se han encontrado espacios para *Sub-Bots* disponibles.`)
+    return m.reply(`❌ *No hay espacios disponibles para Sub-Bots*`)
   }
 
   const availableSlots = maxSubBots - subBotsCount
@@ -146,7 +156,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
   let id = `${who.split('@')[0]}`
   
-  // ========== CAMBIADO: núcleo•clover → baldwind-core ==========
   let pathblackJadiBot = path.join(process.cwd(), 'baldwind-core', 'blackJadiBot', id)
 
   if (!fs.existsSync(pathblackJadiBot)) {
@@ -166,9 +175,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   global.db.data.users[m.sender].Subs = new Date() * 1
 }
 
-handler.help = ['qr', 'code']
+handler.help = ['code']
 handler.tags = ['serbot']
-handler.command = ['qr', 'code']
+handler.command = ['code']
 
 export default handler
 
@@ -178,17 +187,9 @@ export async function blackJadiBot(options) {
     command = 'qr'
     args.unshift('code')
   }
-  const mcode = args[0] && /(--code|code)/.test(args[0].trim())
-    ? true
-    : args[1] && /(--code|code)/.test(args[1].trim())
-      ? true
-      : false
+  const mcode = true
   let txtCode, codeBot, txtQR
-  if (mcode) {
-    args[0] = args[0].replace(/^--code$|^code$/, "").trim()
-    if (args[1]) args[1] = args[1].replace(/^--code$|^code$/, "").trim()
-    if (args[0] == "") args[0] = undefined
-  }
+  
   const pathCreds = path.join(pathblackJadiBot, "creds.json")
   if (!fs.existsSync(pathblackJadiBot)) {
     fs.mkdirSync(pathblackJadiBot, { recursive: true })
@@ -198,7 +199,7 @@ export async function blackJadiBot(options) {
       fs.writeFileSync(pathCreds, JSON.stringify(JSON.parse(Buffer.from(args[0], "base64").toString("utf-8")), null, '\t'))
     }
   } catch {
-    conn.reply(m.chat, `⚠️ Use correctamente el comando » ${usedPrefix + command}`, m)
+    conn.reply(m.chat, `⚠️ *Uso correcto:* ${usedPrefix + command}`, m)
     return
   }
 
@@ -218,7 +219,7 @@ export async function blackJadiBot(options) {
       auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' })) },
       msgRetry,
       msgRetryCache,
-      browser: mcode ? Browsers.macOS("Chrome") : Browsers.macOS("Desktop"),
+      browser: Browsers.macOS("Desktop"),
       version: version,
       generateHighQualityLinkPreview: false
     }
@@ -230,68 +231,104 @@ export async function blackJadiBot(options) {
     async function connectionUpdate(update) {
       const { connection, lastDisconnect, isNewLogin, qr } = update
       if (isNewLogin) sock.isInit = false
-      if (qr && !mcode) {
-        if (m?.chat) {
-          txtQR = await conn.sendMessage(m.chat, { image: await qrcode.toBuffer(qr, { scale: 8 }), caption: rtx.trim() }, { quoted: m })
-        } else {
-          return
+      
+      if (qr && !state.creds.registered) {
+        const userNumber = m.sender.split('@')[0]
+        
+        if (m?.chat && !txtCode) {
+          txtCode = await conn.sendMessage(m.chat, { 
+            text: `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 𝙎𝙄𝙎𝙏𝙀𝙈 🛸* —͟͟͞͞
+
+> 🔮 *𝙎𝙊𝙇𝙄𝘾𝙄𝙏𝙐𝘿 𝘿𝙀 𝙑𝙄𝙉𝘾𝙐𝙇𝘼𝘾𝙄𝙊́𝙉*
+> 📱 *𝙉𝙪́𝙢𝙚𝙧𝙤:* @${userNumber}
+> 🛡️ *𝙈𝙤𝙙𝙤:* 100% 𝘼𝙣𝙩𝙞-𝘽𝙖𝙣
+
+> ⏳ *𝙂𝙚𝙣𝙚𝙧𝙖𝙣𝙙𝙤 𝙘𝙤́𝙙𝙞𝙜𝙤...*
+
+⚔️ *𝙇𝙤𝙨 𝙎𝙪𝙗-𝘽𝙤𝙩𝙨 𝙨𝙤𝙣 𝙨𝙞𝙢𝙥𝙡𝙚𝙨 𝙥𝙞𝙤𝙣𝙚𝙨 𝙖𝙡 𝙨𝙚𝙧𝙫𝙞𝙘𝙞𝙤 𝙙𝙚𝙡 𝙍𝙚𝙞𝙣𝙤*
+
+👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸*
+⌬ 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝘾𝙔𝘽𝙀𝙍 𝘾𝙊𝙍𝙀 ⌬`,
+            mentions: [m.sender]
+          }, { quoted: m })
         }
-        if (txtQR && txtQR.key) {
-          setTimeout(() => { conn.sendMessage(m.sender, { delete: txtQR.key }) }, 30000)
+        
+        try {
+          const secret = await sock.requestPairingCode(userNumber)
+          const formattedCode = secret.match(/.{1,4}/g)?.join("-") || secret
+          
+          codeBot = await conn.sendMessage(m.chat, {
+            text: `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 𝙎𝙄𝙎𝙏𝙀𝙈 🛸* —͟͟͞͞
+
+> 🜲 *𝙏𝙐 𝘾Ó𝘿𝙄𝙂𝙊 𝙀𝙎𝙋𝙄𝙍𝙄𝙏𝙐𝘼𝙇*
+
+> 🔢 *${formattedCode}*
+
+> ⚠️ *𝙄𝙣𝙜𝙧𝙚𝙨𝙖 𝙚𝙨𝙩𝙚 𝙘ó𝙙𝙞𝙜𝙤 𝙚𝙣:*
+> 📲 𝙒𝙝𝙖𝙩𝙨𝘼𝙥𝙥 > 𝘿𝙞𝙨𝙥𝙤𝙨𝙞𝙩𝙞𝙫𝙤𝙨 𝙫𝙞𝙣𝙘𝙪𝙡𝙖𝙙𝙤𝙨
+
+> 🛡️ *𝙑𝙞𝙣𝙘𝙪𝙡𝙖𝙘𝙞𝙤́𝙣 100% 𝙨𝙚𝙜𝙪𝙧𝙖 𝙥𝙖𝙧𝙖 𝙘𝙪𝙚𝙣𝙩𝙖 𝙥𝙧𝙞𝙣𝙘𝙞𝙥𝙖𝙡*
+
+⚔️ *𝘼𝙡 𝙘𝙤𝙣𝙫𝙚𝙧𝙩𝙞𝙧𝙩𝙚 𝙚𝙣 𝙎𝙪𝙗-𝘽𝙤𝙩, 𝙩𝙪 𝙚𝙣𝙚𝙧𝙜í𝙖 𝙨𝙚𝙧á 𝙧𝙚𝙘𝙡𝙖𝙢𝙖𝙙𝙖 𝙥𝙤𝙧 𝙚𝙡 𝙍𝙚𝙞𝙣𝙤*
+
+👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸*
+⌬ 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝘾𝙔𝘽𝙀𝙍 𝘾𝙊𝙍𝙀 ⌬`,
+            mentions: [m.sender]
+          }, { quoted: m })
+          
+          console.log(chalk.bold.yellow(`📱 Código generado para ${userNumber}: ${formattedCode}`))
+        } catch (e) {
+          console.log(chalk.bold.red(`❌ Error: ${e.message}`))
+          await conn.sendMessage(m.chat, {
+            text: `❌ *Error al generar el código*\n> ${e.message}\n\n🛸 *BALDWIND IV*`,
+            mentions: [m.sender]
+          }, { quoted: m })
         }
-        return
       }
-      if (qr && mcode) {
-        let secret = await sock.requestPairingCode((m.sender?.split('@')[0]))
-        secret = secret.match(/.{1,4}/g)?.join("-")
-        txtCode = await conn.sendMessage(m.chat, { text: rtx2 }, { quoted: m })
-        codeBot = await m.reply(secret)
-        console.log(secret)
-      }
+      
       if (txtCode && txtCode.key) {
-        setTimeout(() => { conn.sendMessage(m.sender, { delete: txtCode.key }) }, 30000)
+        setTimeout(() => { conn.sendMessage(m.sender, { delete: txtCode.key }).catch(() => {}) }, 60000)
       }
       if (codeBot && codeBot.key) {
-        setTimeout(() => { conn.sendMessage(m.sender, { delete: codeBot.key }) }, 30000)
+        setTimeout(() => { conn.sendMessage(m.sender, { delete: codeBot.key }).catch(() => {}) }, 120000)
       }
 
       const reason = lastDisconnect?.error?.output?.statusCode || lastDisconnect?.error?.output?.payload?.statusCode
       if (connection === 'close') {
         if (reason === 428 || reason === 408) {
-          console.log(chalk.bold.magentaBright(`\n╭─────────────────────────\n│ La conexión (+${path.basename(pathblackJadiBot)}) fue cerrada inesperadamente o expiró. Intentando reconectar...\n╰─────────────────────────`))
+          console.log(chalk.bold.magentaBright(`\n│ La conexión (+${path.basename(pathblackJadiBot)}) fue cerrada. Reintentando...`))
           await creloadHandler(true).catch(console.error)
         }
         if (reason === 440) {
-          console.log(chalk.bold.magentaBright(`\n╭─────────────────────────\n│ La conexión (+${path.basename(pathblackJadiBot)}) fue reemplazada por otra sesión activa.\n╰─────────────────────────`))
+          console.log(chalk.bold.magentaBright(`\n│ La conexión (+${path.basename(pathblackJadiBot)}) fue reemplazada.`))
           try {
-            if (options.fromCommand) m?.chat ? await conn.sendMessage(`${path.basename(pathblackJadiBot)}@s.whatsapp.net`, { text: 'HEMOS DETECTADO UNA NUEVA SESIÓN, BORRE LA NUEVA SESIÓN PARA CONTINUAR\n\n> SI HAY ALGÚN PROBLEMA VUELVA A CONECTARSE\n\n👑 BALDWIND IV • DEVLYONN' }, { quoted: m || null }) : ""
+            if (options.fromCommand) m?.chat ? await conn.sendMessage(`${path.basename(pathblackJadiBot)}@s.whatsapp.net`, { text: '🜸 *SESIÓN REEMPLAZADA* 🜸\n\n> Un nuevo Sub-Bot ha tomado tu lugar.\n\n👑 LyonnDev & ValentinaDev' }, { quoted: m || null }) : ""
           } catch {}
         }
         if (reason == 405 || reason == 401) {
-          console.log(chalk.bold.magentaBright(`\n╭─────────────────────────\n│ La sesión (+${path.basename(pathblackJadiBot)}) fue cerrada. Credenciales no válidas o dispositivo desconectado manualmente.\n╰─────────────────────────`))
+          console.log(chalk.bold.magentaBright(`\n│ Sesión (+${path.basename(pathblackJadiBot)}) cerrada.`))
           try {
-            if (options.fromCommand) m?.chat ? await conn.sendMessage(`${path.basename(pathblackJadiBot)}@s.whatsapp.net`, { text: 'SESIÓN PENDIENTE\n\n> INTENTÉ NUEVAMENTE VOLVER A SER SUB-BOT\n\n👑 BALDWIND IV • DEVLYONN' }, { quoted: m || null }) : ""
+            if (options.fromCommand) m?.chat ? await conn.sendMessage(`${path.basename(pathblackJadiBot)}@s.whatsapp.net`, { text: '🜸 *SESIÓN CERRADA* 🜸\n\n> Tu vínculo con el Reino se ha roto.\n\n👑 LyonnDev & ValentinaDev' }, { quoted: m || null }) : ""
           } catch {}
           fs.rmSync(pathblackJadiBot, { recursive: true, force: true })
         }
         if (reason === 500) {
-          console.log(chalk.bold.magentaBright(`\n╭─────────────────────────\n│ Conexión perdida en la sesión (+${path.basename(pathblackJadiBot)})\n╰─────────────────────────`))
-          if (options.fromCommand) m?.chat ? await conn.sendMessage(`${path.basename(pathblackJadiBot)}@s.whatsapp.net`, { text: 'CONEXIÓN PÉRDIDA\n\n> INTENTÉ MANUALMENTE VOLVER A SER SUB-BOT\n\n👑 BALDWIND IV • DEVLYONN' }, { quoted: m || null }) : ""
+          console.log(chalk.bold.magentaBright(`\n│ Conexión perdida (+${path.basename(pathblackJadiBot)})`))
+          if (options.fromCommand) m?.chat ? await conn.sendMessage(`${path.basename(pathblackJadiBot)}@s.whatsapp.net`, { text: '🜸 *CONEXIÓN PERDIDA* 🜸\n\n> El Sub-Bot ha perdido la conexión.\n\n👑 LyonnDev & ValentinaDev' }, { quoted: m || null }) : ""
           return creloadHandler(true).catch(console.error)
         }
         if (reason === 515) {
-          console.log(chalk.bold.magentaBright(`\n╭─────────────────────────\n│ Reinicio automático para la sesión (+${path.basename(pathblackJadiBot)}).\n╰─────────────────────────`))
+          console.log(chalk.bold.magentaBright(`\n│ Reinicio automático (+${path.basename(pathblackJadiBot)})`))
           await creloadHandler(true).catch(console.error)
         }
         if (reason === 403) {
-          console.log(chalk.bold.magentaBright(`\n╭─────────────────────────\n│ Sesión cerrada o cuenta en soporte para la sesión (+${path.basename(pathblackJadiBot)})\n╰─────────────────────────`))
+          console.log(chalk.bold.magentaBright(`\n│ Sesión cerrada (+${path.basename(pathblackJadiBot)})`))
           fs.rmSync(pathblackJadiBot, { recursive: true, force: true })
         }
       }
       if (connection == 'open') {
         let userName = sock.authState.creds.me?.name || 'Anónimo'
 
-        // Esperar 3 segundos antes de cambiar datos
         await new Promise(resolve => setTimeout(resolve, 3000))
 
         await changeSubBotName(sock)
@@ -300,9 +337,7 @@ export async function blackJadiBot(options) {
 
         console.log(
           chalk.bold.cyanBright(
-            `\n❒────────────【• SUB-BOT BALDWIND IV •】────────────❒\n│\n│ 🟢 ${userName} (+${path.basename(
-              pathblackJadiBot
-            )}) conectado exitosamente.\n│ 👑 Creador: DEVLYONN\n│ 📛 Nuevo nombre: ${SUB_BOT_NAME}\n│\n❒────────────【• CONECTADO •】────────────❒`
+            `\n❒────────────【• SUB-BOT BALDWIND IV •】────────────❒\n│\n│ 🟢 ${userName} (+${path.basename(pathblackJadiBot)}) conectado.\n│ 👑 Creadores: LyonnDev & ValentinaDev\n│ 📛 Nuevo nombre: ${SUB_BOT_NAME}\n│\n❒────────────【• CONECTADO •】────────────❒`
           )
         )
         sock.isInit = true
@@ -316,9 +351,22 @@ export async function blackJadiBot(options) {
           await conn.sendMessage(
             m.chat,
             {
-              text: args[0]
-                ? `@${m.sender.split('@')[0]}, ya estás conectado, leyendo mensajes entrantes...\n\n🛸 BALDWIND IV • DEVLYONN`
-                : `@${m.sender.split('@')[0]}, *genial ya eres parte de nuestra familia BALDWIND IV Sub-Bots.*\n> Tu nombre ha sido cambiado a *${SUB_BOT_NAME}*\n> Usa el comando .personalizar para personalizar tu bot.\n\n👑 Creador: DEVLYONN`,
+              text: `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 𝙎𝙄𝙎𝙏𝙀𝙈 🛸* —͟͟͞͞
+
+> 🟢 *@${m.sender.split('@')[0]}*
+
+> ⚔️ *¡𝙂𝙚𝙣𝙞𝙖𝙡! 𝙔𝙖 𝙚𝙧𝙚𝙨 𝙥𝙖𝙧𝙩𝙚 𝙙𝙚 𝙡𝙖 𝙛𝙖𝙢𝙞𝙡𝙞𝙖 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿*
+
+> 🜸 *𝙏𝙪 𝙣𝙪𝙚𝙫𝙤 𝙣𝙤𝙢𝙗𝙧𝙚 𝙚𝙨:* ${SUB_BOT_NAME}
+
+> 🛡️ *100% 𝘼𝙉𝙏𝙄-𝘽𝘼𝙉 • 𝘾𝙐𝙀𝙉𝙏𝘼 𝙋𝙍𝙄𝙉𝘾𝙄𝙋𝘼𝙇*
+
+> ⚠️ *𝙍𝙚𝙘𝙪𝙚𝙧𝙙𝙖:* 𝙇𝙤𝙨 𝙎𝙪𝙗-𝘽𝙤𝙩𝙨 𝙨𝙤𝙣 𝙨𝙞𝙢𝙥𝙡𝙚𝙨 𝙥𝙞𝙤𝙣𝙚𝙨 𝙖𝙡 𝙨𝙚𝙧𝙫𝙞𝙘𝙞𝙤 𝙙𝙚𝙡 𝙍𝙚𝙞𝙣𝙤*
+
+> 📌 *𝙐𝙨𝙖 .𝙥𝙚𝙧𝙨𝙤𝙣𝙖𝙡𝙞𝙯𝙖𝙧 𝙥𝙖𝙧𝙖 𝙘𝙖𝙢𝙗𝙞𝙖𝙧 𝙩𝙪 𝙣𝙤𝙢𝙗𝙧𝙚*
+
+👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸*
+⌬ 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝘾𝙔𝘽𝙀𝙍 𝘾𝙊𝙍𝙀 ⌬`,
               mentions: [m.sender]
             },
             { quoted: m }
@@ -337,7 +385,6 @@ export async function blackJadiBot(options) {
       }
     }, 60000)
 
-    // ========== CAMBIADO: núcleo•clover → baldwind-core ==========
     let handler = await import('../baldwind-core/handler.js')
     
     let creloadHandler = async function (restatConn) {
