@@ -1,13 +1,7 @@
 /*
 ⚠ PROHIBIDO EDITAR ⚠ 
-
-El codigo de este archivo fue modificado para BALDWIND IV:
-- BALDWIND IV (https://github.com/Feroficial/Baldwind-IV-Bot)
-
-Adaptacion y edición echa por:
-- 🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸
-
-⚠ PROHIBIDO EDITAR ⚠ -- ⚠ PROHIBIDO EDITAR ⚠ -- ⚠ PROHIBIDO EDITAR ⚠
+SISTEMA DE SUB-BOTS PARA BALDWIND IV
+Creado por: 🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸
 */
 
 import { useMultiFileAuthState, DisconnectReason, makeCacheableSignalKeyStore, fetchLatestBaileysVersion, Browsers } from "@whiskeysockets/baileys"
@@ -21,26 +15,29 @@ import { fileURLToPath } from 'url'
 import { makeWASocket } from '../lib/simple.js'
 import fetch from 'node-fetch'
 
-const { exec } = await import('child_process')
-const { CONNECTING } = ws
-
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-let crm1 = "Y2QgcGx1Z2lucy"
-let crm2 = "A7IG1kNXN1b"
-let crm3 = "SBpbmZvLWRvbmFyLmpz"
-let crm4 = "IF9hdXRvcmVzcG9uZGVyLmpzIGluZm8tYm90Lmpz"
-
 const maxSubBots = 500
-let blackJBOptions = {}
 
 if (!global.conns) global.conns = []
+if (!global.subBotStatus) global.subBotStatus = new Map() // Para rastrear estado de sub-bots
 
 // ========== CONFIGURACIÓN DEL SUB-BOT ==========
 const SUB_BOT_NAME = '🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙎𝙐𝘽-𝘽𝙊𝙏 🛸'
 const SUB_BOT_BIO = '—͟͟͞͞ 🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 🛸 ⌬'
 const SUB_BOT_PIC = 'https://files.catbox.moe/xdpxey.jpg'
+
+// ========== FUNCIÓN PARA ENVIAR NOTIFICACIONES ==========
+async function sendNotification(conn, chatId, text, mentions = [], quoted = null) {
+  try {
+    await conn.sendMessage(chatId, { text, mentions }, { quoted })
+    return true
+  } catch (e) {
+    console.log('Error enviando notificación:', e)
+    return false
+  }
+}
 
 const changeSubBotName = async (sock) => {
   try {
@@ -48,7 +45,6 @@ const changeSubBotName = async (sock) => {
     console.log(chalk.bold.green(`✅ Sub-Bot renombrado a: ${SUB_BOT_NAME}`))
     return true
   } catch (e) {
-    console.log(chalk.bold.red(`❌ Error al cambiar nombre: ${e.message}`))
     return false
   }
 }
@@ -59,7 +55,6 @@ const changeSubBotBio = async (sock) => {
     console.log(chalk.bold.green(`✅ Biografía del Sub-Bot actualizada`))
     return true
   } catch (e) {
-    console.log(chalk.bold.red(`❌ Error al cambiar biografía: ${e.message}`))
     return false
   }
 }
@@ -74,28 +69,18 @@ const changeSubBotProfilePic = async (sock) => {
     }
     return true
   } catch (e) {
-    console.log(chalk.bold.red(`❌ Error al cambiar foto: ${e.message}`))
     return false
   }
 }
 
-// ========== FUNCIÓN PARA ENVIAR NOTIFICACIÓN ==========
-async function sendNotification(conn, chatId, text, mentions = [], quoted = null) {
-  try {
-    await conn.sendMessage(chatId, { text, mentions }, { quoted })
-    return true
-  } catch (e) {
-    console.log('Error enviando notificación:', e)
-    return false
-  }
-}
-
-let handler = async (m, { conn, args, usedPrefix, command }) => {
-  if (!globalThis.db.data.settings[conn.user.jid].jadibotmd) {
-    return m.reply(`❌ *El comando ${command} está desactivado temporalmente*`)
+// ========== HANDLER DEL COMANDO ==========
+let handler = async (m, { conn, usedPrefix }) => {
+  // Verificar si la función está activada
+  if (global.db.data.settings[conn.user.jid]?.jadibotmd === false) {
+    return m.reply(`❌ *El sistema de Sub-Bots está desactivado*\n\n> Usa *${usedPrefix}jadibot on* para activarlo`)
   }
 
-  // Verificar cooldown
+  // Verificar cooldown (2 minutos)
   const user = global.db.data.users[m.sender]
   const now = Date.now()
   const cooldownTime = 120000
@@ -104,201 +89,344 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     const remaining = cooldownTime - (now - user.subCooldown)
     const minutes = Math.floor(remaining / 60000)
     const seconds = Math.floor((remaining % 60000) / 1000)
-    return conn.reply(m.chat, `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 🛸* —͟͟͞͞\n\n> ⏳ *𝙀𝙨𝙥𝙚𝙧𝙖 ${minutes} 𝙢 ${seconds} 𝙨 𝙥𝙖𝙧𝙖 𝙫𝙤𝙡𝙫𝙚𝙧 𝙖 𝙫𝙞𝙣𝙘𝙪𝙡𝙖𝙧*\n\n⌬ 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 ⌬`, m)
+    return m.reply(`—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 🛸* —͟͟͞͞\n\n> ⏳ *Espera ${minutes}m ${seconds}s para volver a vincular*\n\n👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 🜸*`)
   }
 
-  const subBots = [...new Set(
-    global.conns.filter(c =>
-      c.user && c.ws.socket && c.ws.socket.readyState !== ws.CLOSED
-    ).map(c => c)
-  )]
-
-  if (subBots.length >= maxSubBots) {
-    return m.reply(`❌ *No hay espacios disponibles para Sub-Bots*`)
+  // Verificar límite de sub-bots
+  const activeSubBots = global.conns.filter(c => c.user && c.ws?.socket?.readyState === ws.OPEN).length
+  if (activeSubBots >= maxSubBots) {
+    return m.reply(`❌ *Límite de Sub-Bots alcanzado (${maxSubBots})*`)
   }
 
-  let who = m.sender
-  let id = `${who.split('@')[0]}`
-  let pathblackJadiBot = path.join(process.cwd(), 'baldwind-core', 'blackJadiBot', id)
-
-  if (!fs.existsSync(pathblackJadiBot)) {
-    fs.mkdirSync(pathblackJadiBot, { recursive: true })
+  // Verificar si ya tiene un sub-bot activo
+  const existingSubBot = global.conns.find(c => c.subBotOwner === m.sender)
+  if (existingSubBot) {
+    return m.reply(`—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 🛸* —͟͟͞͞\n\n> ⚠️ *YA TIENES UN SUB-BOT ACTIVO*\n\n> 📌 *Si quieres vincular otro, primero desconecta el actual*\n\n👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 🜸*`)
   }
 
-  blackJBOptions.pathblackJadiBot = pathblackJadiBot
-  blackJBOptions.m = m
-  blackJBOptions.conn = conn
-  blackJBOptions.args = args
-  blackJBOptions.usedPrefix = usedPrefix
-  blackJBOptions.command = command
-  blackJBOptions.fromCommand = true
-  blackJBOptions.sender = m.sender
+  // Mensaje inicial
+  await sendNotification(conn, m.chat, `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 🛸* —͟͟͞͞
 
-  await blackJadiBot(blackJBOptions)
+> 🔮 *INICIANDO VINCULACIÓN*
+> 📱 *Número:* ${m.sender.split('@')[0]}
+
+> ⏳ *Generando código mágico...*
+
+👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 🜸*`, [m.sender], m)
+
+  // Crear carpeta para el usuario
+  const userDir = path.join(process.cwd(), 'baldwind-core', 'blackJadiBot', m.sender.split('@')[0])
+  if (!fs.existsSync(userDir)) {
+    fs.mkdirSync(userDir, { recursive: true })
+  }
+
+  // Iniciar el sub-bot
+  await startSubBot(m, conn, userDir)
 }
 
-handler.help = ['code']
-handler.tags = ['serbot']
-handler.command = ['code']
+handler.help = ['code', 'jadibot', 'serbot']
+handler.tags = ['jadibot']
+handler.command = /^(code|jadibot|serbot|subbot)$/i
 
 export default handler
 
-export async function blackJadiBot(options) {
-  let { pathblackJadiBot, m, conn, args, usedPrefix, command, sender } = options
-  
-  const pathCreds = path.join(pathblackJadiBot, "creds.json")
-  if (!fs.existsSync(pathblackJadiBot)) {
-    fs.mkdirSync(pathblackJadiBot, { recursive: true })
-  }
-  
-  const comb = Buffer.from(crm1 + crm2 + crm3 + crm4, "base64")
-
-  global.conns = global.conns || []
-
-  exec(comb.toString("utf-8"), async (err, stdout, stderr) => {
+// ========== FUNCIÓN PRINCIPAL DEL SUB-BOT ==========
+async function startSubBot(m, mainConn, sessionPath) {
+  try {
     const { version } = await fetchLatestBaileysVersion()
-    const msgRetry = () => { }
     const msgRetryCache = new NodeCache()
-    const { state, saveCreds } = await useMultiFileAuthState(pathblackJadiBot)
+    const { state, saveCreds } = await useMultiFileAuthState(sessionPath)
 
-    const connectionOptions = {
-      logger: pino({ level: "fatal" }),
+    const sock = makeWASocket({
+      logger: pino({ level: "silent" }),
       printQRInTerminal: false,
-      auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' })) },
-      msgRetry,
-      msgRetryCache,
+      auth: {
+        creds: state.creds,
+        keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' }))
+      },
       browser: Browsers.macOS("Desktop"),
       version: version,
-      generateHighQualityLinkPreview: false
-    }
+      generateHighQualityLinkPreview: false,
+      defaultQueryTimeoutMs: undefined,
+      keepAliveIntervalMs: 30000
+    })
 
-    let sock = makeWASocket(connectionOptions)
-    sock.isInit = false
-    let isInit = true
     let codeSent = false
-    let pairingRequestSent = false
+    let pairingComplete = false
+    let reconnectAttempts = 0
+    let isConnected = false
+    
+    // Guardar dueño del sub-bot
+    sock.subBotOwner = m.sender
+    sock.subBotOwnerName = m.pushName || 'Anónimo'
+    sock.subBotChatId = m.chat
 
-    async function connectionUpdate(update) {
-      const { connection, lastDisconnect, isNewLogin, qr } = update
-      if (isNewLogin) sock.isInit = false
-      
-      // ========== SOLICITAR CÓDIGO DE PAREJA ==========
-      if (connection === 'open' && !pairingRequestSent && !state.creds.registered) {
-        pairingRequestSent = true
-        const userNumber = (sender || m.sender).split('@')[0]
-        
-        // Notificar que se está generando el código
-        await sendNotification(conn, m.chat, `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 𝙎𝙄𝙎𝙏𝙀𝙈 🛸* —͟͟͞͞\n\n> 🔮 *𝙎𝙊𝙇𝙄𝘾𝙄𝙏𝙐𝘿 𝘿𝙀 𝙑𝙄𝙉𝘾𝙐𝙇𝘼𝘾𝙄𝙊́𝙉*\n> 📱 *𝙉𝙪́𝙢𝙚𝙧𝙤:* @${userNumber}\n> 🛡️ *𝙈𝙤𝙙𝙤:* 100% 𝘼𝙣𝙩𝙞-𝘽𝙖𝙣\n\n> ⏳ *𝙂𝙚𝙣𝙚𝙧𝙖𝙣𝙙𝙤 𝙘𝙤́𝙙𝙞𝙜𝙤...*\n\n👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸*`, [m.sender], m)
+    // Evento de actualización de conexión
+    sock.ev.on('connection.update', async (update) => {
+      const { connection, lastDisconnect, qr } = update
+      const statusCode = lastDisconnect?.error?.output?.statusCode
+
+      // ========== GENERAR CÓDIGO ==========
+      if (connection === 'open' && !codeSent && !state.creds.registered) {
+        codeSent = true
+        const userNumber = m.sender.split('@')[0]
         
         try {
-          // Esperar a que el socket esté listo
-          await new Promise(resolve => setTimeout(resolve, 5000))
-          
-          // Solicitar código de pareja
+          await new Promise(resolve => setTimeout(resolve, 3000))
           const code = await sock.requestPairingCode(userNumber)
           const formattedCode = code.match(/.{1,4}/g)?.join("-") || code
           
-          // Enviar el código al usuario
-          await sendNotification(conn, m.chat, `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 𝙎𝙄𝙎𝙏𝙀𝙈 🛸* —͟͟͞͞\n\n> 🜲 *𝙏𝙐 𝘾Ó𝘿𝙄𝙂𝙊 𝙀𝙎𝙋𝙄𝙍𝙄𝙏𝙐𝘼𝙇*\n\n> 🔢 *${formattedCode}*\n\n> ⚠️ *𝙄𝙣𝙜𝙧𝙚𝙨𝙖 𝙚𝙨𝙩𝙚 𝙘ó𝙙𝙞𝙜𝙤 𝙚𝙣:*\n> 📲 𝙒𝙝𝙖𝙩𝙨𝘼𝙥𝙥 > 𝘿𝙞𝙨𝙥𝙤𝙨𝙞𝙩𝙞𝙫𝙤𝙨 𝙫𝙞𝙣𝙘𝙪𝙡𝙖𝙙𝙤𝙨 > 𝙑𝙞𝙣𝙘𝙪𝙡𝙖𝙧 𝙘𝙤𝙣 𝙣𝙪́𝙢𝙚𝙧𝙤 𝙙𝙚 𝙩𝙚𝙡𝙚́𝙛𝙤𝙣𝚘\n\n> 🛡️ *100% 𝘼𝙉𝙏𝙄-𝘽𝘼𝙉 • 𝘾𝙐𝙀𝙉𝙏𝘼 𝙋𝙍𝙄𝙉𝘾𝙄𝙋𝘼𝙇*\n\n👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸*`, [m.sender], m)
+          await sendNotification(mainConn, m.chat, `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 🛸* —͟͟͞͞
+
+> 🜲 *TU CÓDIGO ESPIRITUAL*
+
+> 🔢 *${formattedCode}*
+
+> ⚠️ *Ingresa este código en:*
+> 📲 WhatsApp > Dispositivos vinculados > Vincular con número de teléfono
+
+> ⏳ *El código expira en 5 minutos*
+
+> 🛡️ *100% ANTI-BAN • CUENTA PRINCIPAL*
+
+👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 🜸*`, [m.sender], m)
           
           console.log(chalk.bold.yellow(`📱 Código generado para ${userNumber}: ${formattedCode}`))
         } catch (e) {
-          console.log(chalk.bold.red(`❌ Error al generar código: ${e.message}`))
-          await sendNotification(conn, m.chat, `❌ *Error al generar el código*\n> ${e.message}\n\n🛸 *BALDWIND IV*`, [m.sender], m)
-          pairingRequestSent = false
+          console.log(chalk.bold.red(`❌ Error: ${e.message}`))
+          await sendNotification(mainConn, m.chat, `❌ *Error al generar el código*\n> ${e.message}\n\n🛸 *BALDWIND IV*`, [m.sender], m)
+          codeSent = false
         }
       }
 
-      const reason = lastDisconnect?.error?.output?.statusCode || lastDisconnect?.error?.output?.payload?.statusCode
-      if (connection === 'close') {
-        if (reason === 428 || reason === 408) {
-          console.log(chalk.bold.magentaBright(`\n│ La conexión (+${path.basename(pathblackJadiBot)}) fue cerrada. Reintentando...`))
-          await creloadHandler(true).catch(console.error)
-        }
-        if (reason == 405 || reason == 401) {
-          console.log(chalk.bold.magentaBright(`\n│ Sesión (+${path.basename(pathblackJadiBot)}) cerrada.`))
-          fs.rmSync(pathblackJadiBot, { recursive: true, force: true })
-        }
-        if (reason === 500) {
-          console.log(chalk.bold.magentaBright(`\n│ Conexión perdida (+${path.basename(pathblackJadiBot)})`))
-          return creloadHandler(true).catch(console.error)
-        }
-        if (reason === 403) {
-          console.log(chalk.bold.magentaBright(`\n│ Sesión cerrada (+${path.basename(pathblackJadiBot)})`))
-          fs.rmSync(pathblackJadiBot, { recursive: true, force: true })
-        }
-      }
-      
-      if (connection == 'open' && state.creds.registered) {
-        let userName = sock.authState.creds.me?.name || 'Anónimo'
-
+      // ========== CONEXIÓN EXITOSA ==========
+      if (connection === 'open' && state.creds.registered && !pairingComplete) {
+        pairingComplete = true
+        isConnected = true
+        reconnectAttempts = 0
+        
+        // Configurar el sub-bot
         await new Promise(resolve => setTimeout(resolve, 3000))
-
         await changeSubBotName(sock)
         await changeSubBotBio(sock)
         await changeSubBotProfilePic(sock)
-
-        // Activar cooldown
-        if (sender) {
-          const userData = global.db.data.users[sender]
-          if (userData) {
-            userData.subCooldown = Date.now()
-          }
-        }
-
-        console.log(
-          chalk.bold.cyanBright(
-            `\n❒────────────【• SUB-BOT BALDWIND IV •】────────────❒\n│\n│ 🟢 ${userName} (+${path.basename(pathblackJadiBot)}) conectado.\n│ 👑 Creadores: LyonnDev & ValentinaDev\n│ 📛 Nuevo nombre: ${SUB_BOT_NAME}\n│\n❒────────────【• CONECTADO •】────────────❒`
-          )
-        )
-        sock.isInit = true
+        
+        // Guardar cooldown
+        const user = global.db.data.users[m.sender]
+        if (user) user.subCooldown = Date.now()
+        
+        // Agregar a la lista de sub-bots activos
         global.conns.push(sock)
+        global.subBotStatus.set(m.sender, { connected: true, since: Date.now() })
+        
+        console.log(chalk.bold.green(`✅ Sub-Bot conectado: ${m.sender.split('@')[0]}`))
+        
+        // ========== NOTIFICACIÓN DE CONEXIÓN EXITOSA ==========
+        await sendNotification(mainConn, m.chat, `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 🛸* —͟͟͞͞
 
-        if (m?.chat) {
-          await sendNotification(conn, m.chat, `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 𝙎𝙄𝙎𝙏𝙀𝙈 🛸* —͟͟͞͞\n\n> 🟢 *@${(sender || m.sender).split('@')[0]}*\n\n> ⚔️ *¡𝙂𝙚𝙣𝙞𝙖𝙡! 𝙔𝙖 𝙚𝙧𝙚𝙨 𝙥𝙖𝙧𝙩𝙚 𝙙𝙚 𝙡𝙖 𝙛𝙖𝙢𝙞𝙡𝙞𝙖 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿*\n\n> 🜸 *𝙏𝙪 𝙣𝙪𝙚𝙫𝙤 𝙣𝙤𝙢𝙗𝙧𝙚 𝙚𝙨:* ${SUB_BOT_NAME}\n\n> 🛡️ *100% 𝘼𝙉𝙏𝙄-𝘽𝘼𝙉 • 𝘾𝙐𝙀𝙉𝙏𝘼 𝙋𝙍𝙄𝙉𝘾𝙄𝙋𝘼𝙇*\n\n> ⚠️ *𝙍𝙚𝙘𝙪𝙚𝙧𝙙𝙖:* 𝙇𝙤𝙨 𝙎𝙪𝙗-𝘽𝙤𝙩𝙨 𝙨𝙤𝙣 𝙨𝙞𝙢𝙥𝙡𝙚𝙨 𝙥𝙞𝙤𝙣𝙚𝙨 𝙖𝙡 𝙨𝙚𝙧𝙫𝙞𝙘𝙞𝙤 𝙙𝙚𝙡 𝙍𝙚𝙞𝙣𝙤*\n\n👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸*`, [m.sender], m)
+> 🟢 *¡VINCULACIÓN EXITOSA!*
+
+> ⚔️ *@${m.sender.split('@')[0]} ahora es un Sub-Bot de BALDWIND IV*
+
+> 🜸 *Nombre:* ${SUB_BOT_NAME}
+> 📊 *Estado:* 🟢 CONECTADO
+> ⏰ *Hora:* ${new Date().toLocaleTimeString()}
+
+> 🛡️ *100% ANTI-BAN*
+
+> ⚠️ *Recuerda: Los Sub-Bots son simples peones al servicio del Reino*
+
+👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 🜸*`, [m.sender], m)
+
+        // Enviar mensaje privado al dueño
+        try {
+          await sendNotification(mainConn, m.sender, `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 🛸* —͟͟͞͞
+
+> 🟢 *TU SUB-BOT ESTÁ ACTIVO*
+
+> ⚔️ *¡Bienvenido al ejército de BALDWIND IV!*
+
+> 📌 *Comandos disponibles:*
+> • *${global.prefix}menusub* - Ver menú de sub-bot
+> • *${global.prefix}infosub* - Información del sub-bot
+
+👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 🜸*`)
+        } catch(e) {}
+      }
+
+      // ========== DESCONEXIÓN ==========
+      if (connection === 'close') {
+        isConnected = false
+        
+        if (statusCode === 401 || statusCode === 405 || statusCode === 403) {
+          // Sesión eliminada permanentemente
+          console.log(chalk.bold.red(`❌ Sub-Bot eliminado: ${m.sender.split('@')[0]}`))
+          
+          // ========== NOTIFICACIÓN DE ELIMINACIÓN ==========
+          await sendNotification(mainConn, m.chat, `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 🛸* —͟͟͞͞
+
+> 🔴 *SUB-BOT DESVINCULADO*
+
+> ⚔️ *@${m.sender.split('@')[0]} ya no es Sub-Bot*
+
+> 📌 *Motivo:* Sesión cerrada permanentemente
+> ⏰ *Hora:* ${new Date().toLocaleTimeString()}
+
+> 💫 *Puedes volver a vincular con #code*
+
+👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 🜸*`, [m.sender], m)
+          
+          // Limpiar
+          fs.rmSync(sessionPath, { recursive: true, force: true })
+          const index = global.conns.indexOf(sock)
+          if (index !== -1) global.conns.splice(index, 1)
+          global.subBotStatus.delete(m.sender)
+          
+        } else if (statusCode === 428 || statusCode === 408 || statusCode === 500) {
+          // Reconexión automática
+          reconnectAttempts++
+          console.log(chalk.bold.yellow(`⚠️ Sub-Bot desconectado, reconectando... Intento ${reconnectAttempts}`))
+          
+          // ========== NOTIFICACIÓN DE DESCONEXIÓN ==========
+          await sendNotification(mainConn, m.chat, `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 🛸* —͟͟͞͞
+
+> 🟡 *SUB-BOT DESCONECTADO*
+
+> ⚔️ *@${m.sender.split('@')[0]}*
+
+> 📌 *Motivo:* Pérdida de conexión
+> 🔄 *Reconectando automáticamente...*
+> 📊 *Intento #${reconnectAttempts}*
+
+> ⏰ *Hora:* ${new Date().toLocaleTimeString()}
+
+👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 🜸*`, [m.sender], m)
+          
+          // Intentar reconectar
+          setTimeout(async () => {
+            if (!isConnected && sock) {
+              try {
+                await sock.connect()
+              } catch(e) {
+                console.log(chalk.bold.red(`❌ Error al reconectar: ${e.message}`))
+              }
+            }
+          }, 5000)
+        } else {
+          // Desconexión normal
+          console.log(chalk.bold.yellow(`⚠️ Sub-Bot desconectado: ${m.sender.split('@')[0]}`))
+          
+          // ========== NOTIFICACIÓN DE DESCONEXIÓN ==========
+          await sendNotification(mainConn, m.chat, `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 🛸* —͟͟͞͞
+
+> 🟠 *SUB-BOT DESCONECTADO*
+
+> ⚔️ *@${m.sender.split('@')[0]}*
+
+> 📌 *Motivo:* Conexión cerrada
+> ⏰ *Hora:* ${new Date().toLocaleTimeString()}
+
+> 💫 *Usa #code para volver a vincular*
+
+👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 🜸*`, [m.sender], m)
         }
       }
-    }
 
-    setInterval(async () => {
-      if (!sock.user) {
-        try { sock.ws?.close() } catch { }
-        sock.ev.removeAllListeners()
-        let i = global.conns.indexOf(sock)
-        if (i < 0) return
-        delete global.conns[i]
-        global.conns.splice(i, 1)
-      }
-    }, 60000)
+      // ========== RECONEXIÓN EXITOSA ==========
+      if (connection === 'open' && !isConnected && pairingComplete) {
+        isConnected = true
+        console.log(chalk.bold.green(`✅ Sub-Bot reconectado: ${m.sender.split('@')[0]}`))
+        
+        // ========== NOTIFICACIÓN DE RECONEXIÓN ==========
+        await sendNotification(mainConn, m.chat, `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 🛸* —͟͟͞͞
 
-    let handler = await import('../baldwind-core/handler.js')
-    
-    let creloadHandler = async function (restatConn) {
-      try {
-        const Handler = await import(`../baldwind-core/handler.js?update=${Date.now()}`).catch(console.error)
-        if (Object.keys(Handler || {}).length) handler = Handler
-      } catch (e) { }
-      if (restatConn) {
-        const oldChats = sock.chats
-        try { sock.ws?.close() } catch { }
-        sock.ev.removeAllListeners()
-        sock = makeWASocket(connectionOptions, { chats: oldChats })
-        isInit = true
+> 🟢 *SUB-BOT RECONECTADO*
+
+> ⚔️ *@${m.sender.split('@')[0]}*
+
+> 📌 *Conexión restablecida exitosamente*
+> ⏰ *Hora:* ${new Date().toLocaleTimeString()}
+
+> 🛡️ *Servicio restaurado*
+
+👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 🜸*`, [m.sender], m)
       }
-      if (!isInit) {
-        sock.ev.off("messages.upsert", sock.handler)
-        sock.ev.off("connection.update", sock.connectionUpdate)
-        sock.ev.off('creds.update', sock.credsUpdate)
+    })
+
+    // Guardar credenciales
+    sock.ev.on('creds.update', saveCreds)
+
+    // Monitorear salud de la conexión (cada 30 segundos)
+    const healthInterval = setInterval(() => {
+      if (sock.user && sock.ws?.socket?.readyState === ws.OPEN) {
+        if (!isConnected) {
+          isConnected = true
+          console.log(chalk.bold.green(`✅ Sub-Bot saludable: ${m.sender.split('@')[0]}`))
+        }
+      } else if (sock.user && sock.ws?.socket?.readyState !== ws.OPEN) {
+        if (isConnected) {
+          isConnected = false
+          console.log(chalk.bold.yellow(`⚠️ Sub-Bot con problemas: ${m.sender.split('@')[0]}`))
+        }
       }
-      sock.handler = handler.handler.bind(sock)
-      sock.connectionUpdate = connectionUpdate.bind(sock)
-      sock.credsUpdate = saveCreds.bind(sock)
-      sock.ev.on("messages.upsert", sock.handler)
-      sock.ev.on("connection.update", sock.connectionUpdate)
-      sock.ev.on("creds.update", sock.credsUpdate)
-      isInit = false
-      return true
-    }
-    creloadHandler(false)
-  })
+    }, 30000)
+
+    // Limpiar intervalo cuando se cierra
+    sock.ev.on('connection.update', (update) => {
+      if (update.connection === 'close') {
+        clearInterval(healthInterval)
+      }
+    })
+
+    // Manejar mensajes entrantes del sub-bot
+    sock.ev.on('messages.upsert', async (msgUpdate) => {
+      const msg = msgUpdate.messages[0]
+      if (!msg.message) return
+      
+      // Comando para info del sub-bot
+      const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text || ''
+      if (text.toLowerCase() === '#infosub' || text.toLowerCase() === '!infosub') {
+        await sock.sendMessage(msg.key.remoteJid, {
+          text: `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 🛸* —͟͟͞͞
+
+> 🜸 *INFORMACIÓN DEL SUB-BOT*
+
+> 📛 *Nombre:* ${SUB_BOT_NAME}
+> 👑 *Dueño:* @${m.sender.split('@')[0]}
+> 📊 *Estado:* ${isConnected ? '🟢 CONECTADO' : '🔴 DESCONECTADO'}
+> ⏰ *Vinculado:* ${new Date().toLocaleDateString()}
+
+> 🛡️ *BALDWIND IV - CYBER CORE*
+
+👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 🜸*`,
+          mentions: [m.sender]
+        })
+      }
+    })
+
+  } catch (e) {
+    console.log(chalk.bold.red(`❌ Error en Sub-Bot: ${e.message}`))
+    await sendNotification(mainConn, m.chat, `❌ *Error al iniciar Sub-Bot*\n> ${e.message}`, [m.sender], m)
+  }
+}
+
+// ========== COMANDO PARA VER SUB-BOTS ACTIVOS ==========
+export async function listSubBots(m, conn) {
+  const activeBots = global.conns.filter(c => c.user && c.ws?.socket?.readyState === ws.OPEN)
+  
+  if (activeBots.length === 0) {
+    return m.reply(`—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 🛸* —͟͟͞͞\n\n> 📌 *No hay Sub-Bots activos en este momento*`)
+  }
+  
+  let text = `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏𝙎 🛸* —͟͟͞͞\n\n> 📊 *SUB-BOTS ACTIVOS: ${activeBots.length}*\n\n`
+  
+  for (let i = 0; i < activeBots.length; i++) {
+    const bot = activeBots[i]
+    const owner = bot.subBotOwner?.split('@')[0] || 'Desconocido'
+    text += `> ${i + 1}. 👤 @${owner}\n`
+  }
+  
+  text += `\n👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 🜸*`
+  
+  await conn.sendMessage(m.chat, { text, mentions: activeBots.map(b => b.subBotOwner).filter(Boolean) })
 }
