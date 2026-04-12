@@ -133,16 +133,16 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     return m.reply(`❌ *El comando ${command} está desactivado temporalmente*`)
   }
 
-  // ========== VERIFICAR COOLDOWN (pero NO activarlo todavía) ==========
+  // Verificar cooldown
   const user = global.db.data.users[m.sender]
   const now = Date.now()
-  const cooldownTime = 120000 // 2 minutos
+  const cooldownTime = 120000
   
   if (user.subCooldown && now - user.subCooldown < cooldownTime) {
     const remaining = cooldownTime - (now - user.subCooldown)
     const minutes = Math.floor(remaining / 60000)
     const seconds = Math.floor((remaining % 60000) / 1000)
-    return conn.reply(m.chat, `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 🛸* —͟͟͞͞\n\n> ⏳ *𝙀𝙨𝙥𝙚𝙧𝙖 ${minutes} 𝙢 ${seconds} 𝙨 𝙥𝙖𝙧𝙖 𝙫𝙤𝙡𝙫𝙚𝙧 𝙖 𝙫𝙞𝙣𝙘𝙪𝙡𝙖𝙧 𝙪𝙣 𝙎𝙪𝙗-𝘽𝙤𝙩*\n\n⌬ 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 ⌬`, m)
+    return conn.reply(m.chat, `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 🛸* —͟͟͞͞\n\n> ⏳ *𝙀𝙨𝙥𝙚𝙧𝙖 ${minutes} 𝙢 ${seconds} 𝙨 𝙥𝙖𝙧𝙖 𝙫𝙤𝙡𝙫𝙚𝙧 𝙖 𝙫𝙞𝙣𝙘𝙪𝙡𝙖𝙧*\n\n⌬ 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 ⌬`, m)
   }
 
   const subBots = [...new Set(
@@ -151,17 +151,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     ).map(c => c)
   )]
 
-  const subBotsCount = subBots.length
-
-  if (subBotsCount >= maxSubBots) {
+  if (subBots.length >= maxSubBots) {
     return m.reply(`❌ *No hay espacios disponibles para Sub-Bots*`)
   }
 
-  const availableSlots = maxSubBots - subBotsCount
-
-  let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
+  let who = m.sender
   let id = `${who.split('@')[0]}`
-  
   let pathblackJadiBot = path.join(process.cwd(), 'baldwind-core', 'blackJadiBot', id)
 
   if (!fs.existsSync(pathblackJadiBot)) {
@@ -175,13 +170,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   blackJBOptions.usedPrefix = usedPrefix
   blackJBOptions.command = command
   blackJBOptions.fromCommand = true
-
-  // Guardar el sender para activar cooldown después de conexión exitosa
   blackJBOptions.sender = m.sender
 
   await blackJadiBot(blackJBOptions)
-  
-  // NO activar cooldown aquí - se activará cuando el Sub-Bot se conecte exitosamente
 }
 
 handler.help = ['code']
@@ -192,26 +183,12 @@ export default handler
 
 export async function blackJadiBot(options) {
   let { pathblackJadiBot, m, conn, args, usedPrefix, command, sender } = options
-  if (command === 'code') {
-    command = 'qr'
-    args.unshift('code')
-  }
-  const mcode = true
-  let txtCode, codeBot, txtQR
   
   const pathCreds = path.join(pathblackJadiBot, "creds.json")
   if (!fs.existsSync(pathblackJadiBot)) {
     fs.mkdirSync(pathblackJadiBot, { recursive: true })
   }
-  try {
-    if (args[0] && args[0] != undefined) {
-      fs.writeFileSync(pathCreds, JSON.stringify(JSON.parse(Buffer.from(args[0], "base64").toString("utf-8")), null, '\t'))
-    }
-  } catch {
-    conn.reply(m.chat, `⚠️ *Uso correcto:* ${usedPrefix + command}`, m)
-    return
-  }
-
+  
   const comb = Buffer.from(crm1 + crm2 + crm3 + crm4, "base64")
 
   global.conns = global.conns || []
@@ -236,17 +213,20 @@ export async function blackJadiBot(options) {
     let sock = makeWASocket(connectionOptions)
     sock.isInit = false
     let isInit = true
+    let codeSent = false
 
     async function connectionUpdate(update) {
       const { connection, lastDisconnect, isNewLogin, qr } = update
       if (isNewLogin) sock.isInit = false
       
-      if (qr && !state.creds.registered) {
+      // ========== CUANDO HAY QR, GENERAR CÓDIGO DE 8 DÍGITOS ==========
+      if (qr && !state.creds.registered && !codeSent) {
+        codeSent = true
         const userNumber = (sender || m.sender).split('@')[0]
         
-        if (m?.chat && !txtCode) {
-          txtCode = await conn.sendMessage(m.chat, { 
-            text: `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 𝙎𝙄𝙎𝙏𝙀𝙈 🛸* —͟͟͞͞
+        // Mensaje de solicitud
+        await conn.sendMessage(m.chat, { 
+          text: `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 𝙎𝙄𝙎𝙏𝙀𝙈 🛸* —͟͟͞͞
 
 > 🔮 *𝙎𝙊𝙇𝙄𝘾𝙄𝙏𝙐𝘿 𝘿𝙀 𝙑𝙄𝙉𝘾𝙐𝙇𝘼𝘾𝙄𝙊́𝙉*
 > 📱 *𝙉𝙪́𝙢𝙚𝙧𝙤:* @${userNumber}
@@ -254,19 +234,19 @@ export async function blackJadiBot(options) {
 
 > ⏳ *𝙂𝙚𝙣𝙚𝙧𝙖𝙣𝙙𝙤 𝙘𝙤́𝙙𝙞𝙜𝙤...*
 
-⚔️ *𝙇𝙤𝙨 𝙎𝙪𝙗-𝘽𝙤𝙩𝙨 𝙨𝙤𝙣 𝙨𝙞𝙢𝙥𝙡𝙚𝙨 𝙥𝙞𝙤𝙣𝙚𝙨 𝙖𝙡 𝙨𝙚𝙧𝙫𝙞𝙘𝙞𝙤 𝙙𝙚𝙡 𝙍𝙚𝙞𝙣𝙤*
-
 👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸*
 ⌬ 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝘾𝙔𝘽𝙀𝙍 𝘾𝙊𝙍𝙀 ⌬`,
-            mentions: [m.sender]
-          }, { quoted: m })
-        }
+          mentions: [m.sender]
+        }, { quoted: m })
         
         try {
+          // Esperar un poco para asegurar la conexión
+          await new Promise(resolve => setTimeout(resolve, 3000))
+          
           const secret = await sock.requestPairingCode(userNumber)
           const formattedCode = secret.match(/.{1,4}/g)?.join("-") || secret
           
-          codeBot = await conn.sendMessage(m.chat, {
+          await conn.sendMessage(m.chat, {
             text: `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 𝙎𝙄𝙎𝙏𝙀𝙈 🛸* —͟͟͞͞
 
 > 🜲 *𝙏𝙐 𝘾Ó𝘿𝙄𝙂𝙊 𝙀𝙎𝙋𝙄𝙍𝙄𝙏𝙐𝘼𝙇*
@@ -274,11 +254,9 @@ export async function blackJadiBot(options) {
 > 🔢 *${formattedCode}*
 
 > ⚠️ *𝙄𝙣𝙜𝙧𝙚𝙨𝙖 𝙚𝙨𝙩𝙚 𝙘ó𝙙𝙞𝙜𝙤 𝙚𝙣:*
-> 📲 𝙒𝙝𝙖𝙩𝙨𝘼𝙥𝙥 > 𝘿𝙞𝙨𝙥𝙤𝙨𝙞𝙩𝙞𝙫𝙤𝙨 𝙫𝙞𝙣𝙘𝙪𝙡𝙖𝙙𝙤𝙨
+> 📲 𝙒𝙝𝙖𝙩𝙨𝘼𝙥𝙥 > 𝘿𝙞𝙨𝙥𝙤𝙨𝙞𝙩𝙞𝙫𝙤𝙨 𝙫𝙞𝙣𝙘𝙪𝙡𝙖𝙙𝙤𝙨 > 𝙑𝙞𝙣𝙘𝙪𝙡𝙖𝙧 𝙘𝙤𝙣 𝙣𝙪́𝙢𝙚𝙧𝙤 𝙙𝙚 𝙩𝙚𝙡𝙚́𝙛𝙤𝙣𝙤
 
-> 🛡️ *𝙑𝙞𝙣𝙘𝙪𝙡𝙖𝙘𝙞𝙤́𝙣 100% 𝙨𝙚𝙜𝙪𝙧𝙖 𝙥𝙖𝙧𝙖 𝙘𝙪𝙚𝙣𝙩𝙖 𝙥𝙧𝙞𝙣𝙘𝙞𝙥𝙖𝙡*
-
-⚔️ *𝘼𝙡 𝙘𝙤𝙣𝙫𝙚𝙧𝙩𝙞𝙧𝙩𝙚 𝙚𝙣 𝙎𝙪𝙗-𝘽𝙤𝙩, 𝙩𝙪 𝙚𝙣𝙚𝙧𝙜í𝙖 𝙨𝙚𝙧á 𝙧𝙚𝙘𝙡𝙖𝙢𝙖𝙙𝙖 𝙥𝙤𝙧 𝙚𝙡 𝙍𝙚𝙞𝙣𝙤*
+> 🛡️ *100% 𝘼𝙉𝙏𝙄-𝘽𝘼𝙉 • 𝘾𝙐𝙀𝙉𝙏𝘼 𝙋𝙍𝙄𝙉𝘾𝙄𝙋𝘼𝙇*
 
 👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸*
 ⌬ 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝘾𝙔𝘽𝙀𝙍 𝘾𝙊𝙍𝙀 ⌬`,
@@ -292,14 +270,8 @@ export async function blackJadiBot(options) {
             text: `❌ *Error al generar el código*\n> ${e.message}\n\n🛸 *BALDWIND IV*`,
             mentions: [m.sender]
           }, { quoted: m })
+          codeSent = false
         }
-      }
-      
-      if (txtCode && txtCode.key) {
-        setTimeout(() => { conn.sendMessage(m.sender, { delete: txtCode.key }).catch(() => {}) }, 60000)
-      }
-      if (codeBot && codeBot.key) {
-        setTimeout(() => { conn.sendMessage(m.sender, { delete: codeBot.key }).catch(() => {}) }, 120000)
       }
 
       const reason = lastDisconnect?.error?.output?.statusCode || lastDisconnect?.error?.output?.payload?.statusCode
@@ -308,27 +280,13 @@ export async function blackJadiBot(options) {
           console.log(chalk.bold.magentaBright(`\n│ La conexión (+${path.basename(pathblackJadiBot)}) fue cerrada. Reintentando...`))
           await creloadHandler(true).catch(console.error)
         }
-        if (reason === 440) {
-          console.log(chalk.bold.magentaBright(`\n│ La conexión (+${path.basename(pathblackJadiBot)}) fue reemplazada.`))
-          try {
-            if (options.fromCommand) m?.chat ? await conn.sendMessage(`${path.basename(pathblackJadiBot)}@s.whatsapp.net`, { text: '🜸 *SESIÓN REEMPLAZADA* 🜸\n\n> Un nuevo Sub-Bot ha tomado tu lugar.\n\n👑 LyonnDev & ValentinaDev' }, { quoted: m || null }) : ""
-          } catch {}
-        }
         if (reason == 405 || reason == 401) {
           console.log(chalk.bold.magentaBright(`\n│ Sesión (+${path.basename(pathblackJadiBot)}) cerrada.`))
-          try {
-            if (options.fromCommand) m?.chat ? await conn.sendMessage(`${path.basename(pathblackJadiBot)}@s.whatsapp.net`, { text: '🜸 *SESIÓN CERRADA* 🜸\n\n> Tu vínculo con el Reino se ha roto.\n\n👑 LyonnDev & ValentinaDev' }, { quoted: m || null }) : ""
-          } catch {}
           fs.rmSync(pathblackJadiBot, { recursive: true, force: true })
         }
         if (reason === 500) {
           console.log(chalk.bold.magentaBright(`\n│ Conexión perdida (+${path.basename(pathblackJadiBot)})`))
-          if (options.fromCommand) m?.chat ? await conn.sendMessage(`${path.basename(pathblackJadiBot)}@s.whatsapp.net`, { text: '🜸 *CONEXIÓN PERDIDA* 🜸\n\n> El Sub-Bot ha perdido la conexión.\n\n👑 LyonnDev & ValentinaDev' }, { quoted: m || null }) : ""
           return creloadHandler(true).catch(console.error)
-        }
-        if (reason === 515) {
-          console.log(chalk.bold.magentaBright(`\n│ Reinicio automático (+${path.basename(pathblackJadiBot)})`))
-          await creloadHandler(true).catch(console.error)
         }
         if (reason === 403) {
           console.log(chalk.bold.magentaBright(`\n│ Sesión cerrada (+${path.basename(pathblackJadiBot)})`))
@@ -344,7 +302,7 @@ export async function blackJadiBot(options) {
         await changeSubBotBio(sock)
         await changeSubBotProfilePic(sock)
 
-        // ========== ACTIVAR COOLDOWN SOLO CUANDO SE CONECTA EXITOSAMENTE ==========
+        // Activar cooldown
         if (sender) {
           const userData = global.db.data.users[sender]
           if (userData) {
@@ -361,10 +319,6 @@ export async function blackJadiBot(options) {
         sock.isInit = true
         global.conns.push(sock)
 
-        try {
-          await sock.groupAcceptInvite('IJjWzYg976PFSXOJ3uJDOM')
-        } catch {}
-
         if (m?.chat)
           await conn.sendMessage(
             m.chat,
@@ -380,8 +334,6 @@ export async function blackJadiBot(options) {
 > 🛡️ *100% 𝘼𝙉𝙏𝙄-𝘽𝘼𝙉 • 𝘾𝙐𝙀𝙉𝙏𝘼 𝙋𝙍𝙄𝙉𝘾𝙄𝙋𝘼𝙇*
 
 > ⚠️ *𝙍𝙚𝙘𝙪𝙚𝙧𝙙𝙖:* 𝙇𝙤𝙨 𝙎𝙪𝙗-𝘽𝙤𝙩𝙨 𝙨𝙤𝙣 𝙨𝙞𝙢𝙥𝙡𝙚𝙨 𝙥𝙞𝙤𝙣𝙚𝙨 𝙖𝙡 𝙨𝙚𝙧𝙫𝙞𝙘𝙞𝙤 𝙙𝙚𝙡 𝙍𝙚𝙞𝙣𝙤*
-
-> 📌 *𝙐𝙨𝙖 .𝙥𝙚𝙧𝙨𝙤𝙣𝙖𝙡𝙞𝙯𝙖𝙧 𝙥𝙖𝙧𝙖 𝙘𝙖𝙢𝙗𝙞𝙖𝙧 𝙩𝙪 𝙣𝙤𝙢𝙗𝙧𝙚*
 
 👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸*
 ⌬ 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝘾𝙔𝘽𝙀𝙍 𝘾𝙊𝙍𝙀 ⌬`,
