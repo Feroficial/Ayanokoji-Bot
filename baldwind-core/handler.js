@@ -20,6 +20,36 @@ const clockString = (ms) => {
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
 
+// ========== SISTEMA DE RECARGA AUTOMÁTICA DE DATABASE ==========
+// Recargar database cada 30 segundos
+setInterval(async () => {
+  if (global.db && global.loadDatabase) {
+    try {
+      await global.loadDatabase();
+      console.log(chalk.cyan('🔄 [AUTO] Database recargada automáticamente'));
+    } catch(e) {
+      console.log(chalk.red('❌ Error recargando database:', e));
+    }
+  }
+}, 30000); // Cada 30 segundos
+
+// Recargar cuando se modifica database.json
+const dbPath = './database.json';
+if (fs.existsSync(dbPath)) {
+  watchFile(dbPath, async () => {
+    console.log(chalk.yellow('📁 [WATCH] Database modificada, recargando...'));
+    if (global.loadDatabase) {
+      try {
+        await global.loadDatabase();
+        console.log(chalk.green('✅ Database recargada correctamente'));
+      } catch(e) {
+        console.log(chalk.red('❌ Error:', e));
+      }
+    }
+  });
+}
+// ========== FIN SISTEMA DE RECARGA ==========
+
 export async function handler(chatUpdate) {
   this.msgqueque ||= [];
   this.uptime ||= Date.now();
@@ -99,7 +129,7 @@ export async function handler(chatUpdate) {
       Object.assign(chat, {
         isBanned: 'isBanned' in chat ? chat.isBanned : false,
         sAutoresponder: chat.sAutoresponder || '',
-        welcome: 'welcome' in chat ? chat.welcome : true, // ACTIVADO POR DEFECTO
+        welcome: 'welcome' in chat ? chat.welcome : true,
         autolevelup: 'autolevelup' in chat ? chat.autolevelup : false,
         autoAceptar: 'autoAceptar' in chat ? chat.autoAceptar : true,
         autosticker: 'autosticker' in chat ? chat.autosticker : false,
@@ -174,37 +204,26 @@ export async function handler(chatUpdate) {
     const isBotAdmin = !!bot.admin;
 
     // ========== SISTEMA DE WELCOME (BIENVENIDA) ==========
-    // Detectar cuando alguien entra al grupo
     if (m.isGroup && chatUpdate.type === 'notify' && chatUpdate.messages[0]?.messageStubType) {
       const msgStub = chatUpdate.messages[0];
       const stubType = msgStub.messageStubType;
       
-      // Tipos de eventos de WhatsApp
-      // 27 = ADD (alguien fue agregado)
-      // 28 = REMOVE (alguien fue eliminado)
-      // 29 = LEAVE (alguien salió)
-      
       if (stubType === 27 || stubType === 29) {
         const chat = global.db.data.chats[m.chat];
         
-        // Verificar si welcome está activado
         if (chat && chat.welcome === true) {
-          // Obtener los números afectados
           const affectedJids = msgStub.messageStubParameters || [];
           
           for (const jid of affectedJids) {
             if (stubType === 27) {
-              // 🎉 BIENVENIDA - Alguien se unió
               const userName = await this.getName(jid);
               const groupName = groupMetadata?.subject || 'este grupo';
               const memberCount = participants.length + 1;
               
-              // Obtener datos del usuario si existen
               let userData = global.db.data.users[jid] || {};
               let userLevel = userData.level || 1;
               let userRole = userData.role || '⚔️ Escudero';
               
-              // Mensaje de bienvenida personalizado
               const welcomeMessage = `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> ✨ *BIENVENIDO/A* ✨\n\n> 👤 *Nombre:* @${jid.split('@')[0]}\n> 📊 *Nivel:* ${userLevel}\n> 🛡️ *Rol:* ${userRole}\n> 👥 *Miembros:* ${memberCount}\n\n> 🌟 *Disfruta tu estadía en ${groupName}*\n\n> 📌 *Usa #menu para ver los comandos*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸* | *LYONNDEV*`;
               
               await this.sendMessage(m.chat, { 
@@ -212,7 +231,6 @@ export async function handler(chatUpdate) {
                 mentions: [jid]
               });
               
-              // Bonus de bienvenida para el nuevo usuario
               if (userData) {
                 userData.monedas = (userData.monedas || 0) + 50;
                 userData.exp = (userData.exp || 0) + 100;
@@ -222,7 +240,6 @@ export async function handler(chatUpdate) {
               }
               
             } else if (stubType === 29) {
-              // 👋 DESPEDIDA - Alguien salió
               const userName = await this.getName(jid);
               const memberCount = participants.length;
               
@@ -408,6 +425,7 @@ export async function handler(chatUpdate) {
   }
 }
 
+
 // ========== MENSAJES DE ERROR ==========
 global.dfail = (type, m, conn, usedPrefix) => {
   const msg = {
@@ -424,6 +442,7 @@ global.dfail = (type, m, conn, usedPrefix) => {
   if (msg[type]) return m.reply(msg[type]).then(() => m.react('❌'));
 };
 
+// ========== WATCH FILE DEL HANDLER ==========
 let file = global.__filename(import.meta.url, true);
 watchFile(file, async () => {
   unwatchFile(file);
