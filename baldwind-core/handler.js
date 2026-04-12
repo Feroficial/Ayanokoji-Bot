@@ -100,7 +100,6 @@ export async function handler(chatUpdate) {
         clanRank: user.clanRank || null
       });
 
-      // ========== INICIALIZAR DATOS DEL CHAT ==========
       if (!global.db.data.chats[m.chat]) {
         global.db.data.chats[m.chat] = {};
       }
@@ -185,16 +184,49 @@ export async function handler(chatUpdate) {
     const isAdmin = isRAdmin || user.admin === 'admin';
     const isBotAdmin = !!bot.admin;
 
-    // ========== SISTEMA DE WELCOME (CORREGIDO) ==========
-    if (m.isGroup && m.message?.groupParticipantUpdate) {
-      const update = m.message.groupParticipantUpdate;
-      const action = update.action;
-      const participants_jids = update.participants || [];
+    // ========== SISTEMA DE WELCOME (MULTI-MÉTODO) ==========
+    if (m.isGroup) {
       const chat = global.db.data.chats[m.chat];
+      let esEventoGrupo = false;
+      let tipoEvento = '';
+      let participantesEvento = [];
       
-      // Cuando alguien SE UNE al grupo
-      if (action === 'add' && chat && chat.welcome === true) {
-        for (const jid of participants_jids) {
+      // MÉTODO 1: messageStubType (27 = add, 29 = remove)
+      if (m.messageStubType === 27) {
+        esEventoGrupo = true;
+        tipoEvento = 'add';
+        participantesEvento = m.messageStubParameters || [];
+        console.log(chalk.yellow('📢 Evento detectado: messageStubType ADD'));
+      }
+      else if (m.messageStubType === 29) {
+        esEventoGrupo = true;
+        tipoEvento = 'remove';
+        participantesEvento = m.messageStubParameters || [];
+        console.log(chalk.yellow('📢 Evento detectado: messageStubType REMOVE'));
+      }
+      
+      // MÉTODO 2: groupParticipantUpdate
+      if (m.message?.groupParticipantUpdate) {
+        esEventoGrupo = true;
+        tipoEvento = m.message.groupParticipantUpdate.action;
+        participantesEvento = m.message.groupParticipantUpdate.participants || [];
+        console.log(chalk.yellow(`📢 Evento detectado: groupParticipantUpdate ${tipoEvento}`));
+      }
+      
+      // MÉTODO 3: protocolMessage con groupInviteMessage
+      if (m.message?.protocolMessage?.type === 13) {
+        const inviteMsg = m.message.protocolMessage.groupInviteMessage;
+        if (inviteMsg && inviteMsg.groupJid === m.chat) {
+          esEventoGrupo = true;
+          tipoEvento = 'add';
+          participantesEvento = [m.sender];
+          console.log(chalk.yellow('📢 Evento detectado: protocolMessage GROUP_INVITE'));
+        }
+      }
+      
+      // PROCESAR EVENTO SI ES DE TIPO ADD
+      if (esEventoGrupo && tipoEvento === 'add' && chat && chat.welcome === true) {
+        for (const jid of participantesEvento) {
           try {
             let userData = global.db.data.users[jid] || {};
             let userLevel = userData.level || 1;
@@ -228,9 +260,9 @@ export async function handler(chatUpdate) {
         }
       }
       
-      // Cuando alguien SALE del grupo
-      if (action === 'remove' && chat && chat.welcome === true) {
-        for (const jid of participants_jids) {
+      // PROCESAR EVENTO SI ES DE TIPO REMOVE
+      if (esEventoGrupo && tipoEvento === 'remove' && chat && chat.welcome === true) {
+        for (const jid of participantesEvento) {
           try {
             let memberCount = participants.length;
             
