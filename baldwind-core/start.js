@@ -1,3 +1,4 @@
+
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1'
 import './config.js'
 import cluster from 'cluster'
@@ -150,7 +151,6 @@ async function requestPairingCode() {
     if (pairingRequested) return
     pairingRequested = true
     
-    // Esperar 3 segundos para que la conexión esté lista
     await new Promise(resolve => setTimeout(resolve, 3000))
     
     try {
@@ -178,7 +178,6 @@ async function connectionUpdate(update) {
     const reason = new Boom(lastDisconnect?.error)?.output?.statusCode
     global.stopped = connection
 
-    // 👇 CLAVE: Pedir el código cuando la conexión está en 'connecting' o hay QR
     if (opcion === '2' && (connection === 'connecting' || qr) && !pairingRequested && !global.conn.authState.creds.registered) {
         await requestPairingCode()
     }
@@ -223,8 +222,103 @@ async function connectionUpdate(update) {
     }
 }
 
-// Asignar el evento
+// Asignar el evento de conexión
 global.conn.ev.on('connection.update', connectionUpdate)
+
+// ========== SISTEMA DE WELCOME (GRUPOS) ==========
+global.conn.ev.on('group-participants.update', async (update) => {
+    try {
+        const { id, participants, action } = update;
+        
+        // Cargar database si es necesario
+        if (!global.db.data) await loadDatabase();
+        
+        // Inicializar datos del chat si no existen
+        if (!global.db.data.chats[id]) {
+            global.db.data.chats[id] = {};
+        }
+        
+        const chat = global.db.data.chats[id];
+        
+        // Solo procesar si el welcome está activado
+        if (!chat || chat.welcome !== true) return;
+        
+        // Obtener metadata del grupo
+        const groupMetadata = await global.conn.groupMetadata(id).catch(() => null);
+        const groupName = groupMetadata?.subject || 'el grupo';
+        const memberCount = groupMetadata?.participants?.length || 0;
+        
+        // ========== CUANDO ALGUIEN SE UNE ==========
+        if (action === 'add') {
+            for (const jid of participants) {
+                try {
+                    // Inicializar datos del usuario
+                    if (!global.db.data.users[jid]) {
+                        global.db.data.users[jid] = {};
+                    }
+                    
+                    let userData = global.db.data.users[jid];
+                    let userLevel = userData.level || 1;
+                    let userRole = userData.role || '⚔️ Escudero';
+                    
+                    // Mensaje de bienvenida (personalizado o por defecto)
+                    let welcomeText = chat.welcomeMessage || `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> ✨ BIENVENIDO/A ✨\n\n> 👤 @user\n> 📊 Nivel: @level\n> 🛡️ Rol: @role\n> 👥 Miembros: @count\n\n> 🌟 Disfruta @group\n\n👑 *🜸 DEVL yONN 🜸*`;
+                    
+                    // Reemplazar variables
+                    welcomeText = welcomeText
+                        .replace(/@user/g, `@${jid.split('@')[0]}`)
+                        .replace(/@level/g, userLevel)
+                        .replace(/@role/g, userRole)
+                        .replace(/@count/g, memberCount)
+                        .replace(/@group/g, groupName);
+                    
+                    // Enviar mensaje de bienvenida
+                    await global.conn.sendMessage(id, {
+                        text: welcomeText,
+                        mentions: [jid]
+                    });
+                    
+                    // Bonus de bienvenida (monedas y exp)
+                    if (chat.welcomeBonus !== false) {
+                        userData.monedas = (userData.monedas || 0) + 50;
+                        userData.exp = (userData.exp || 0) + 100;
+                        
+                        // Enviar mensaje privado con el bonus
+                        try {
+                            await global.conn.sendMessage(jid, {
+                                text: `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🎁 *BONUS DE BIENVENIDA* 🎁\n\n> 💰 *+50 Monedas*\n> ✨ *+100 EXP*\n\n> 📌 *Usa #menu para comenzar tu aventura*\n\n👑 *🜸 DEVL yONN 🜸*`
+                            });
+                        } catch(e) {}
+                    }
+                    
+                    console.log(chalk.green(`✅ Welcome enviado a ${jid} en ${id}`));
+                } catch (e) {
+                    console.log(chalk.red(`❌ Error en welcome (add): ${e.message}`));
+                }
+            }
+        }
+        
+        // ========== CUANDO ALGUIEN SALE ==========
+        if (action === 'remove') {
+            for (const jid of participants) {
+                try {
+                    const goodbyeText = `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 👋 HASTA PRONTO 👋\n\n> 👤 @${jid.split('@')[0]} ha abandonado el grupo\n> 👥 Miembros restantes: ${memberCount}\n\n👑 *🜸 DEVL yONN 🜸*`;
+                    
+                    await global.conn.sendMessage(id, {
+                        text: goodbyeText,
+                        mentions: [jid]
+                    });
+                    
+                    console.log(chalk.yellow(`👋 Despedida enviada por ${jid} en ${id}`));
+                } catch (e) {
+                    console.log(chalk.red(`❌ Error en welcome (remove): ${e.message}`));
+                }
+            }
+        }
+    } catch (e) {
+        console.log(chalk.red(`❌ Error en event group-participants: ${e.message}`));
+    }
+});
 
 // ========== SIEMPRE LLAMAR AL RELOAD HANDLER ==========
 let isInit = true
@@ -533,4 +627,4 @@ async function isValidPhoneNumber(number) {
     } catch {
         return false
     }
-  }
+}
