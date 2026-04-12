@@ -23,6 +23,7 @@ const getBotTypeText = (conn) => {
   }
 }
 
+// ===== MENÚ MODIFICADO 💖 =====
 const defaultMenu = {
   before: `
 —͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »
@@ -35,13 +36,15 @@ const defaultMenu = {
 > 📊 ᴄᴏᴍᴀɴᴅᴏꜱ ᴛᴏᴛᴀʟᴇꜱ: %totalCmds
 
 ✦  𝗕𝗔𝗟𝗗𝗪𝗜𝗡𝗗 𝗜𝗩  •  𝗘𝗟𝗜𝗧𝗘 𝗠𝗘𝗡𝗨  ✦
-👑  ᴄʀᴇᴀᴅᴏʀ:  ★  ᴅᴇᴠʟʏᴏɴɴ  ★
+❤️  ᴄʀᴇᴀᴅᴏʀᴇꜱ: *˖°𓆩 LyonnDev 🫶🏻 ValentinaDev 𓆪°˖*
 %readmore
 `.trimStart(),
+
   header: '\n⧼⋆꙳•〔 🛸 %category 〕⋆꙳•⧽',
   body: '> 🔖 %cmd',
   footer: '╰⋆꙳•❅‧*₊⋆꙳︎‧*❆₊⋆╯',
-  after: '\n⌬ ʙᴀʟᴅᴡɪɴᴅ ɪᴠ ᴄʏʙᴇʀ ᴍᴇɴᴜ 🧬 - ᴄᴏɴᴇᴄᴛᴀᴅᴏ ᴘᴏʀ: ᴅᴇᴠʟʏᴏɴɴ'
+
+  after: '\n⌬ ʙᴀʟᴅᴡɪɴᴅ ɪᴠ ᴄʏʙᴇʀ ᴍᴇɴᴜ 🧬\n❤️ ᴄᴏɴᴇᴄᴛᴀᴅᴏ ᴘᴏʀ: *LyonnDev 🫶🏻 ValentinaDev*'
 }
 
 const menuDir = './media/menu'
@@ -71,7 +74,6 @@ let handler = async (m, { conn, usedPrefix }) => {
 
   const user = global.db.data.users[m.sender] || { level: 0, exp: 0 }
 
-  // ========== CONTADOR DE COMANDOS ==========
   let totalComandos = 0
   let comandosPorTag = new Map()
   
@@ -95,15 +97,9 @@ let handler = async (m, { conn, usedPrefix }) => {
   }
 
   const tagsMap = { main: 'ꜱɪꜱᴛᴇᴍᴀ', group: 'ɢʀᴜᴘᴏꜱ', serbot: 'ꜱᴜʙ ʙᴏᴛꜱ' }
-  for (const { tags: tg } of help) {
-    for (const t of tg) {
-      if (t && !tagsMap[t]) tagsMap[t] = textCyberpunk(t)
-    }
-  }
 
   const replace = {
     name: await conn.getName(m.sender),
-    level: user.level,
     totalreg: Object.keys(global.db.data.users).length,
     mode: global.opts.self ? 'Privado' : 'Público',
     muptime: clockString(process.uptime() * 1000),
@@ -114,7 +110,6 @@ let handler = async (m, { conn, usedPrefix }) => {
     totalCmds: totalComandos
   }
 
-  // Construir menú con contadores por categoría
   let text = menu.before
 
   for (const tag of Object.keys(tagsMap)) {
@@ -138,7 +133,6 @@ let handler = async (m, { conn, usedPrefix }) => {
     ? fs.readFileSync(menuMedia.video)
     : defaultVideo
 
-  // SIN BOTONES, SOLO VIDEO Y TEXTO
   await conn.sendMessage(m.chat, {
     video,
     gifPlayback: false,
@@ -147,7 +141,7 @@ let handler = async (m, { conn, usedPrefix }) => {
     contextInfo: {
       externalAdReply: {
         title: 'ʙᴀʟᴅᴡɪɴᴅ ɪᴠ | ᴄʏʙᴇʀ ᴠᴇʀꜱɪᴏɴ',
-        body: '┊࣪ ˖ ᴄʀᴇᴀᴅᴏ ʙʏ • ᴅᴇᴠʟʏᴏɴɴ ♱',
+        body: '❤️ ᴄʀᴇᴀᴅᴏ ᴘᴏʀ • LyonnDev 🫶🏻 ValentinaDev',
         thumbnail: null,
         sourceUrl: 'https://github.com/Feroficial/Baldwind-IV-Bot.git',
         mediaType: 1,
