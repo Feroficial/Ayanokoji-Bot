@@ -1,5 +1,4 @@
-let handler = async (m, { conn, args, isROwner, isAdmin, isOwner }) => {
-  // Solo admins y el owner pueden usar este comando
+let handler = async (m, { conn, args, usedPrefix, isROwner, isAdmin, isOwner }) => {
   if (!isAdmin && !isROwner && !isOwner) {
     return m.reply(`—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 🛡️ *ACCESO RESTRINGIDO*\n\n> 📌 Solo los *Administradores del Grupo* pueden usar este comando.\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`);
   }
@@ -10,7 +9,6 @@ let handler = async (m, { conn, args, isROwner, isAdmin, isOwner }) => {
   
   const chat = global.db.data.chats[m.chat];
   
-  // Si no hay argumentos, mostrar estado actual
   if (args.length === 0) {
     const estado = chat.welcome ? '✅ ACTIVADO' : '❌ DESACTIVADO';
     return m.reply(`—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> 🎉 *SISTEMA DE BIENVENIDA*\n\n> 📊 *Estado actual:* ${estado}\n\n> 📌 *Comandos disponibles:*\n> • *${usedPrefix}welcome on* - Activar bienvenidas\n> • *${usedPrefix}welcome off* - Desactivar bienvenidas\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`);
