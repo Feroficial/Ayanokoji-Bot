@@ -6,7 +6,7 @@ let handler = async (m, { args, usedPrefix, isAdmin, isROwner, isOwner }) => {
   
   if (args.length === 0) {
     const estado = chat.welcome ? '✅ ACTIVADO' : '❌ DESACTIVADO';
-    return m.reply(`*WELCOME SYSTEM*\n\n> Estado: ${estado}\n\n*Comandos:*\n• ${usedPrefix}welcome on\n• ${usedPrefix}welcome off\n• ${usedPrefix}setwelcome <texto>`);
+    return m.reply(`*WELCOME SYSTEM*\n\n> Estado: ${estado}\n\n*Comandos:*\n• ${usedPrefix}welcome on\n• ${usedPrefix}welcome off`);
   }
 
   const action = args[0].toLowerCase();
