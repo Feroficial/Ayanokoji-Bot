@@ -50,7 +50,7 @@ let rtx =
 
 > 🛡️ *100% 𝘼𝙉𝙏𝙄-𝘽𝘼𝙉 • 𝘾𝙐𝙀𝙉𝙏𝘼 𝙋𝙍𝙄𝙉𝘾𝙄𝙋𝘼𝙇*
 
-👑 *𝘾𝙧𝙚𝙖𝙙𝙤𝙧𝙚𝙨:* 🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸
+👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸*
 
 ⌬ 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝘾𝙔𝘽𝙀𝙍 𝘾𝙊𝙍𝙀 ⌬`
 
@@ -60,12 +60,15 @@ let rtx2 =
 > 🜲 *𝙐𝙨𝙖 𝙚𝙨𝙩𝙚 𝘾ó𝙙𝙞𝙜𝙤 𝙀𝙨𝙥𝙞𝙧𝙞𝙩𝙪𝙖𝙡*
 > ⚔️ *𝘾𝙤𝙣𝙫𝙞𝙚𝙧𝙩𝙚𝙩𝙚 𝙚𝙣 𝙪𝙣 𝙎𝙪𝙗-𝘽𝙤𝙩 𝙏𝙚𝙢𝙥𝙤𝙧𝙖𝙡*
 
+> ⏳ *𝘼𝙙𝙫𝙚𝙧𝙩𝙚𝙣𝙘𝙞𝙖:* 𝙚𝙨𝙩𝙚 𝙫í𝙣𝙘𝙪𝙡𝙤 𝙚𝙨 𝙙𝙚𝙡𝙞𝙘𝙖𝙙𝙤
+> ⚠️ *𝙉𝙤 𝙪𝙨𝙚𝙨 𝙩𝙪 𝙘𝙪𝙚𝙣𝙩𝙖 𝙥𝙧𝙞𝙣𝙘𝙞𝙥𝙖𝙡*
+
 > 🛡️ *100% 𝘼𝙉𝙏𝙄-𝘽𝘼𝙉 • 𝘾𝙐𝙀𝙉𝙏𝘼 𝙋𝙍𝙄𝙉𝘾𝙄𝙋𝘼𝙇*
 
 > 🧿 *𝙎𝙄𝙎𝙏𝙀𝙈𝘼 ➤ [ 𝘾Ó𝘿𝙄𝙂𝙊 𝘼𝘾𝙏𝙄𝙑𝙊 ]*
 > ⚔️ *𝘼𝙘𝙩𝙞𝙫𝙖 𝙚𝙡 𝙫í𝙣𝙘𝙪𝙡𝙤 𝙘𝙪𝙖𝙣𝙙𝙤 𝙚𝙨𝙩é𝙨 𝙥𝙧𝙚𝙥𝙖𝙧𝙖𝙙𝙤*
 
-👑 *𝘾𝙧𝙚𝙖𝙙𝙤𝙧𝙚𝙨:* 🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸
+👑 *🜸 𝙇𝙮𝙤𝙣𝙣𝘿𝙚𝙫 & 𝙑𝙖𝙡𝙚𝙣𝙩𝙞𝙣𝙖𝘿𝙚𝙫 🜸*
 
 ⌬ 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝘾𝙔𝘽𝙀𝙍 𝘾𝙊𝙍𝙀 ⌬`
 
@@ -130,13 +133,16 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     return m.reply(`❌ *El comando ${command} está desactivado temporalmente*`)
   }
 
-  let time = global.db.data.users[m.sender].Subs + 120000
-  if (new Date() - global.db.data.users[m.sender].Subs < 120000) {
-    let remaining = time - new Date()
-    setTimeout(() => {
-      conn.reply(m.chat, `✅ *Ya estás listo para conectarte de nuevo*`, m)
-    }, remaining)
-    return conn.reply(m.chat, `⏳ *Debes esperar ${msToTime(remaining)} para volver a vincular un Sub-Bot*`, m)
+  // ========== VERIFICAR COOLDOWN (pero NO activarlo todavía) ==========
+  const user = global.db.data.users[m.sender]
+  const now = Date.now()
+  const cooldownTime = 120000 // 2 minutos
+  
+  if (user.subCooldown && now - user.subCooldown < cooldownTime) {
+    const remaining = cooldownTime - (now - user.subCooldown)
+    const minutes = Math.floor(remaining / 60000)
+    const seconds = Math.floor((remaining % 60000) / 1000)
+    return conn.reply(m.chat, `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 🛸* —͟͟͞͞\n\n> ⏳ *𝙀𝙨𝙥𝙚𝙧𝙖 ${minutes} 𝙢 ${seconds} 𝙨 𝙥𝙖𝙧𝙖 𝙫𝙤𝙡𝙫𝙚𝙧 𝙖 𝙫𝙞𝙣𝙘𝙪𝙡𝙖𝙧 𝙪𝙣 𝙎𝙪𝙗-𝘽𝙤𝙩*\n\n⌬ 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 ⌬`, m)
   }
 
   const subBots = [...new Set(
@@ -170,9 +176,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   blackJBOptions.command = command
   blackJBOptions.fromCommand = true
 
-  await blackJadiBot(blackJBOptions)
+  // Guardar el sender para activar cooldown después de conexión exitosa
+  blackJBOptions.sender = m.sender
 
-  global.db.data.users[m.sender].Subs = new Date() * 1
+  await blackJadiBot(blackJBOptions)
+  
+  // NO activar cooldown aquí - se activará cuando el Sub-Bot se conecte exitosamente
 }
 
 handler.help = ['code']
@@ -182,7 +191,7 @@ handler.command = ['code']
 export default handler
 
 export async function blackJadiBot(options) {
-  let { pathblackJadiBot, m, conn, args, usedPrefix, command } = options
+  let { pathblackJadiBot, m, conn, args, usedPrefix, command, sender } = options
   if (command === 'code') {
     command = 'qr'
     args.unshift('code')
@@ -233,7 +242,7 @@ export async function blackJadiBot(options) {
       if (isNewLogin) sock.isInit = false
       
       if (qr && !state.creds.registered) {
-        const userNumber = m.sender.split('@')[0]
+        const userNumber = (sender || m.sender).split('@')[0]
         
         if (m?.chat && !txtCode) {
           txtCode = await conn.sendMessage(m.chat, { 
@@ -335,6 +344,15 @@ export async function blackJadiBot(options) {
         await changeSubBotBio(sock)
         await changeSubBotProfilePic(sock)
 
+        // ========== ACTIVAR COOLDOWN SOLO CUANDO SE CONECTA EXITOSAMENTE ==========
+        if (sender) {
+          const userData = global.db.data.users[sender]
+          if (userData) {
+            userData.subCooldown = Date.now()
+            await global.db.write()
+          }
+        }
+
         console.log(
           chalk.bold.cyanBright(
             `\n❒────────────【• SUB-BOT BALDWIND IV •】────────────❒\n│\n│ 🟢 ${userName} (+${path.basename(pathblackJadiBot)}) conectado.\n│ 👑 Creadores: LyonnDev & ValentinaDev\n│ 📛 Nuevo nombre: ${SUB_BOT_NAME}\n│\n❒────────────【• CONECTADO •】────────────❒`
@@ -353,7 +371,7 @@ export async function blackJadiBot(options) {
             {
               text: `—͟͟͞͞   *🜸 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿 𝙄𝙑 • 𝙎𝙐𝘽-𝘽𝙊𝙏 𝙎𝙄𝙎𝙏𝙀𝙈 🛸* —͟͟͞͞
 
-> 🟢 *@${m.sender.split('@')[0]}*
+> 🟢 *@${(sender || m.sender).split('@')[0]}*
 
 > ⚔️ *¡𝙂𝙚𝙣𝙞𝙖𝙡! 𝙔𝙖 𝙚𝙧𝙚𝙨 𝙥𝙖𝙧𝙩𝙚 𝙙𝙚 𝙡𝙖 𝙛𝙖𝙢𝙞𝙡𝙞𝙖 𝘽𝘼𝙇𝘿𝙒𝙄𝙉𝘿*
 
