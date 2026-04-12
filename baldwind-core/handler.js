@@ -99,7 +99,7 @@ export async function handler(chatUpdate) {
       Object.assign(chat, {
         isBanned: 'isBanned' in chat ? chat.isBanned : false,
         sAutoresponder: chat.sAutoresponder || '',
-        welcome: 'welcome' in chat ? chat.welcome : true,
+        welcome: 'welcome' in chat ? chat.welcome : true, // ACTIVADO POR DEFECTO
         autolevelup: 'autolevelup' in chat ? chat.autolevelup : false,
         autoAceptar: 'autoAceptar' in chat ? chat.autoAceptar : true,
         autosticker: 'autosticker' in chat ? chat.autosticker : false,
@@ -173,7 +173,72 @@ export async function handler(chatUpdate) {
     const isAdmin = isRAdmin || user.admin === 'admin';
     const isBotAdmin = !!bot.admin;
 
-    // ========== SISTEMA ANTILINK (COLOCADO ANTES DE PROCESAR PLUGINS) ==========
+    // ========== SISTEMA DE WELCOME (BIENVENIDA) ==========
+    // Detectar cuando alguien entra al grupo
+    if (m.isGroup && chatUpdate.type === 'notify' && chatUpdate.messages[0]?.messageStubType) {
+      const msgStub = chatUpdate.messages[0];
+      const stubType = msgStub.messageStubType;
+      
+      // Tipos de eventos de WhatsApp
+      // 27 = ADD (alguien fue agregado)
+      // 28 = REMOVE (alguien fue eliminado)
+      // 29 = LEAVE (alguien salió)
+      
+      if (stubType === 27 || stubType === 29) {
+        const chat = global.db.data.chats[m.chat];
+        
+        // Verificar si welcome está activado
+        if (chat && chat.welcome === true) {
+          // Obtener los números afectados
+          const affectedJids = msgStub.messageStubParameters || [];
+          
+          for (const jid of affectedJids) {
+            if (stubType === 27) {
+              // 🎉 BIENVENIDA - Alguien se unió
+              const userName = await this.getName(jid);
+              const groupName = groupMetadata?.subject || 'este grupo';
+              const memberCount = participants.length + 1;
+              
+              // Obtener datos del usuario si existen
+              let userData = global.db.data.users[jid] || {};
+              let userLevel = userData.level || 1;
+              let userRole = userData.role || '⚔️ Escudero';
+              
+              // Mensaje de bienvenida personalizado
+              const welcomeMessage = `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> ✨ *BIENVENIDO/A* ✨\n\n> 👤 *Nombre:* @${jid.split('@')[0]}\n> 📊 *Nivel:* ${userLevel}\n> 🛡️ *Rol:* ${userRole}\n> 👥 *Miembros:* ${memberCount}\n\n> 🌟 *Disfruta tu estadía en ${groupName}*\n\n> 📌 *Usa #menu para ver los comandos*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸* | *LYONNDEV*`;
+              
+              await this.sendMessage(m.chat, { 
+                text: welcomeMessage,
+                mentions: [jid]
+              });
+              
+              // Bonus de bienvenida para el nuevo usuario
+              if (userData) {
+                userData.monedas = (userData.monedas || 0) + 50;
+                userData.exp = (userData.exp || 0) + 100;
+                await this.sendMessage(jid, {
+                  text: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> 🎁 *BONUS DE BIENVENIDA* 🎁\n\n> 💰 *+50 Monedas*\n> ✨ *+100 EXP*\n\n> 📌 *Usa #menu para comenzar tu aventura*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`
+                }).catch(() => {});
+              }
+              
+            } else if (stubType === 29) {
+              // 👋 DESPEDIDA - Alguien salió
+              const userName = await this.getName(jid);
+              const memberCount = participants.length;
+              
+              const goodbyeMessage = `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> 👋 *HASTA PRONTO* 👋\n\n> 👤 @${jid.split('@')[0]} *ha abandonado el grupo*\n> 👥 *Miembros restantes:* ${memberCount}\n\n> 🌟 *Siempre serás bienvenido de vuelta*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`;
+              
+              await this.sendMessage(m.chat, { 
+                text: goodbyeMessage,
+                mentions: [jid]
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // ========== SISTEMA ANTILINK ==========
     if (m.isGroup && m.text && !m.isBaileys) {
       const chat = global.db.data.chats[m.chat];
       
@@ -195,7 +260,6 @@ export async function handler(chatUpdate) {
           }
         }
         
-        // También detectar URLs con regex
         const urlRegex = /(https?:\/\/[^\s]+)/gi
         if (urlRegex.test(m.text) && !tieneLink) {
           tieneLink = true
@@ -203,13 +267,11 @@ export async function handler(chatUpdate) {
         }
         
         if (tieneLink && !isAdmin && !isRAdmin && !isOwner && !isROwner) {
-          // Eliminar el mensaje
           try {
             await this.sendMessage(m.chat, { delete: m.key })
           } catch (e) {}
           
           if (isBotAdmin) {
-            // Expulsar al usuario
             try {
               await this.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
             } catch (e) {}
@@ -349,7 +411,7 @@ export async function handler(chatUpdate) {
 // ========== MENSAJES DE ERROR ==========
 global.dfail = (type, m, conn, usedPrefix) => {
   const msg = {
-    rowner: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 🛑 *ACCESO RESTRINGIDO*\n\n> 👑 Solo el *Creador Supremo* puede ejecutar este comando.\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`,
+    rowner: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 🛑 *ACCESO RESTRINGIDO*\n\n> 👑 Solo el *Creador Supremo* puede ejecutar este comando.\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸* | *LYONNDEV*`,
     owner: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> ⚙️🔒 *MÓDULO BLOQUEADO*\n\n> 📌 Solo el *Dueño del Bot* puede usar este comando.\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`,
     premium: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 💎 *REQUIERE PREMIUM*\n\n> 📌 Este comando es exclusivo para usuarios *Premium*.\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`,
     private: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 🔒 *SOLO CHAT PRIVADO*\n\n> 📌 Este comando solo funciona en chats privados.\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`,
