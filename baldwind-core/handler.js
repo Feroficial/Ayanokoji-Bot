@@ -12,43 +12,23 @@ const { proto } = (await import('@whiskeysockets/baileys')).default;
 const isNumber = x => typeof x === 'number' && !isNaN(x);
 const delay = ms => isNumber(ms) && new Promise(resolve => setTimeout(() => resolve(), ms));
 
-const clockString = (ms) => {
-  if (!ms || isNaN(ms)) return '00:00:00';
-  const hours = Math.floor(ms / 3600000);
-  const minutes = Math.floor(ms / 60000) % 60;
-  const seconds = Math.floor(ms / 1000) % 60;
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-};
-
-// ========== SISTEMA DE RECARGA AUTOMÁTICA DE DATABASE ==========
-// Recargar database cada 30 segundos
+// ========== RECARGA AUTOMÁTICA DE DATABASE ==========
 setInterval(async () => {
   if (global.db && global.loadDatabase) {
     try {
       await global.loadDatabase();
-      console.log(chalk.cyan('🔄 [AUTO] Database recargada automáticamente'));
-    } catch(e) {
-      console.log(chalk.red('❌ Error recargando database:', e));
-    }
+      console.log(chalk.cyan('🔄 Database recargada automáticamente'));
+    } catch(e) {}
   }
-}, 30000); // Cada 30 segundos
+}, 30000);
 
-// Recargar cuando se modifica database.json
 const dbPath = './database.json';
 if (fs.existsSync(dbPath)) {
   watchFile(dbPath, async () => {
-    console.log(chalk.yellow('📁 [WATCH] Database modificada, recargando...'));
-    if (global.loadDatabase) {
-      try {
-        await global.loadDatabase();
-        console.log(chalk.green('✅ Database recargada correctamente'));
-      } catch(e) {
-        console.log(chalk.red('❌ Error:', e));
-      }
-    }
+    console.log(chalk.yellow('📁 Database modificada, recargando...'));
+    if (global.loadDatabase) await global.loadDatabase();
   });
 }
-// ========== FIN SISTEMA DE RECARGA ==========
 
 export async function handler(chatUpdate) {
   this.msgqueque ||= [];
@@ -67,7 +47,7 @@ export async function handler(chatUpdate) {
     m.exp = 0;
     m.monedas = false;
 
-    // ========== INICIALIZAR DATOS DEL USUARIO ==========
+    // ========== INICIALIZAR DATOS ==========
     try {
       if (!global.db.data.users[m.sender]) {
         global.db.data.users[m.sender] = {};
@@ -120,7 +100,6 @@ export async function handler(chatUpdate) {
         clanRank: user.clanRank || null
       });
 
-      // ========== INICIALIZAR DATOS DEL CHAT ==========
       if (!global.db.data.chats[m.chat]) {
         global.db.data.chats[m.chat] = {};
       }
@@ -130,6 +109,8 @@ export async function handler(chatUpdate) {
         isBanned: 'isBanned' in chat ? chat.isBanned : false,
         sAutoresponder: chat.sAutoresponder || '',
         welcome: 'welcome' in chat ? chat.welcome : true,
+        welcomeMessage: chat.welcomeMessage || '—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> ✨ *BIENVENIDO/A* ✨\n\n> 👤 *Nombre:* @user\n> 📊 *Nivel:* @level\n> 🛡️ *Rol:* @role\n> 👥 *Miembros:* @count\n\n> 🌟 *Disfruta tu estadía en @group*\n\n> 📌 *Usa #menu para ver los comandos*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*',
+        welcomeBonus: 'welcomeBonus' in chat ? chat.welcomeBonus : true,
         autolevelup: 'autolevelup' in chat ? chat.autolevelup : false,
         autoAceptar: 'autoAceptar' in chat ? chat.autoAceptar : true,
         autosticker: 'autosticker' in chat ? chat.autosticker : false,
@@ -203,53 +184,72 @@ export async function handler(chatUpdate) {
     const isAdmin = isRAdmin || user.admin === 'admin';
     const isBotAdmin = !!bot.admin;
 
-    // ========== SISTEMA DE WELCOME (BIENVENIDA) ==========
-    if (m.isGroup && chatUpdate.type === 'notify' && chatUpdate.messages[0]?.messageStubType) {
-      const msgStub = chatUpdate.messages[0];
-      const stubType = msgStub.messageStubType;
+    // ========== SISTEMA DE WELCOME (CORREGIDO) ==========
+    // Detectar cuando alguien entra o sale del grupo
+    if (m.isGroup && m.messageStubType) {
+      const chat = global.db.data.chats[m.chat];
       
-      if (stubType === 27 || stubType === 29) {
-        const chat = global.db.data.chats[m.chat];
+      // Tipos de eventos de WhatsApp
+      // 27 = ADD (alguien fue agregado)
+      // 28 = REMOVE (alguien fue eliminado)
+      // 29 = LEAVE (alguien salió)
+      
+      if ((m.messageStubType === 27 || m.messageStubType === 29) && chat && chat.welcome === true) {
+        const affectedJids = m.messageStubParameters || [];
         
-        if (chat && chat.welcome === true) {
-          const affectedJids = msgStub.messageStubParameters || [];
-          
-          for (const jid of affectedJids) {
-            if (stubType === 27) {
-              const userName = await this.getName(jid);
-              const groupName = groupMetadata?.subject || 'este grupo';
-              const memberCount = participants.length + 1;
-              
-              let userData = global.db.data.users[jid] || {};
-              let userLevel = userData.level || 1;
-              let userRole = userData.role || '⚔️ Escudero';
-              
-              const welcomeMessage = `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> ✨ *BIENVENIDO/A* ✨\n\n> 👤 *Nombre:* @${jid.split('@')[0]}\n> 📊 *Nivel:* ${userLevel}\n> 🛡️ *Rol:* ${userRole}\n> 👥 *Miembros:* ${memberCount}\n\n> 🌟 *Disfruta tu estadía en ${groupName}*\n\n> 📌 *Usa #menu para ver los comandos*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸* | *LYONNDEV*`;
-              
-              await this.sendMessage(m.chat, { 
-                text: welcomeMessage,
-                mentions: [jid]
-              });
-              
+        for (const jid of affectedJids) {
+          if (m.messageStubType === 27) {
+            // BIENVENIDA
+            const userName = await this.getName(jid);
+            const groupName = groupMetadata?.subject || 'este grupo';
+            const memberCount = participants.length + 1;
+            
+            let userData = global.db.data.users[jid] || {};
+            let userLevel = userData.level || 1;
+            let userRole = userData.role || '⚔️ Escudero';
+            
+            // Reemplazar variables en el mensaje personalizado
+            let welcomeText = chat.welcomeMessage || '—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> ✨ *BIENVENIDO/A* ✨\n\n> 👤 *Nombre:* @user\n> 📊 *Nivel:* @level\n> 🛡️ *Rol:* @role\n> 👥 *Miembros:* @count\n\n> 🌟 *Disfruta tu estadía en @group*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*';
+            
+            welcomeText = welcomeText
+              .replace(/@user/g, `@${jid.split('@')[0]}`)
+              .replace(/@level/g, userLevel)
+              .replace(/@role/g, userRole)
+              .replace(/@count/g, memberCount)
+              .replace(/@group/g, groupName);
+            
+            await this.sendMessage(m.chat, { 
+              text: welcomeText,
+              mentions: [jid]
+            });
+            
+            // Bonus de bienvenida
+            if (chat.welcomeBonus !== false) {
               if (userData) {
                 userData.monedas = (userData.monedas || 0) + 50;
                 userData.exp = (userData.exp || 0) + 100;
-                await this.sendMessage(jid, {
-                  text: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> 🎁 *BONUS DE BIENVENIDA* 🎁\n\n> 💰 *+50 Monedas*\n> ✨ *+100 EXP*\n\n> 📌 *Usa #menu para comenzar tu aventura*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`
-                }).catch(() => {});
+                try {
+                  await this.sendMessage(jid, {
+                    text: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> 🎁 *BONUS DE BIENVENIDA* 🎁\n\n> 💰 *+50 Monedas*\n> ✨ *+100 EXP*\n\n> 📌 *Usa #menu para comenzar tu aventura*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`
+                  }).catch(() => {});
+                } catch(e) {}
               }
-              
-            } else if (stubType === 29) {
-              const userName = await this.getName(jid);
-              const memberCount = participants.length;
-              
-              const goodbyeMessage = `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> 👋 *HASTA PRONTO* 👋\n\n> 👤 @${jid.split('@')[0]} *ha abandonado el grupo*\n> 👥 *Miembros restantes:* ${memberCount}\n\n> 🌟 *Siempre serás bienvenido de vuelta*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`;
-              
-              await this.sendMessage(m.chat, { 
-                text: goodbyeMessage,
-                mentions: [jid]
-              });
             }
+            
+            console.log(chalk.green(`✅ Bienvenida enviada a ${jid.split('@')[0]} en ${m.chat}`));
+            
+          } else if (m.messageStubType === 29) {
+            // DESPEDIDA
+            const memberCount = participants.length;
+            
+            const goodbyeMessage = `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> 👋 *HASTA PRONTO* 👋\n\n> 👤 @${jid.split('@')[0]} *ha abandonado el grupo*\n> 👥 *Miembros restantes:* ${memberCount}\n\n> 🌟 *Siempre serás bienvenido de vuelta*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`;
+            
+            await this.sendMessage(m.chat, { 
+              text: goodbyeMessage,
+              mentions: [jid]
+            });
+            
+            console.log(chalk.yellow(`👋 Despedida enviada por ${jid.split('@')[0]} en ${m.chat}`));
           }
         }
       }
@@ -378,7 +378,8 @@ export async function handler(chatUpdate) {
           continue;
         }
 
-        let extra = { match, usedPrefix, noPrefix, _args, args, command, text, conn: this, participants, groupMetadata, user, bot, isROwner, isOwner, isRAdmin, isAdmin, isBotAdmin, isPrems, isMods, chatUpdate, __dirname: ___dirname, __filename };
+        
+      let extra = { match, usedPrefix, noPrefix, _args, args, command, text, conn: this, participants, groupMetadata, user, bot, isROwner, isOwner, isRAdmin, isAdmin, isBotAdmin, isPrems, isMods, chatUpdate, __dirname: ___dirname, __filename };
         try {
           await plugin.call(this, m, extra);
           if (!isPrems) m.monedas = m.monedas || plugin.monedas || false;
@@ -425,11 +426,9 @@ export async function handler(chatUpdate) {
   }
 }
 
-
-// ========== MENSAJES DE ERROR ==========
 global.dfail = (type, m, conn, usedPrefix) => {
   const msg = {
-    rowner: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 🛑 *ACCESO RESTRINGIDO*\n\n> 👑 Solo el *Creador Supremo* puede ejecutar este comando.\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸* | *LYONNDEV*`,
+    rowner: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 🛑 *ACCESO RESTRINGIDO*\n\n> 👑 Solo el *Creador Supremo* puede ejecutar este comando.\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`,
     owner: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> ⚙️🔒 *MÓDULO BLOQUEADO*\n\n> 📌 Solo el *Dueño del Bot* puede usar este comando.\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`,
     premium: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 💎 *REQUIERE PREMIUM*\n\n> 📌 Este comando es exclusivo para usuarios *Premium*.\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`,
     private: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n> 🔒 *SOLO CHAT PRIVADO*\n\n> 📌 Este comando solo funciona en chats privados.\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`,
@@ -442,7 +441,6 @@ global.dfail = (type, m, conn, usedPrefix) => {
   if (msg[type]) return m.reply(msg[type]).then(() => m.react('❌'));
 };
 
-// ========== WATCH FILE DEL HANDLER ==========
 let file = global.__filename(import.meta.url, true);
 watchFile(file, async () => {
   unwatchFile(file);
