@@ -1,4 +1,3 @@
-
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1'
 import './config.js'
 import cluster from 'cluster'
@@ -30,6 +29,7 @@ const phoneUtil = PhoneNumberUtil.getInstance()
 const { DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, jidNormalizedUser } = await import('@whiskeysockets/baileys')
 import readline, { createInterface } from 'readline'
 import NodeCache from 'node-cache'
+import fetch from 'node-fetch'
 
 const { CONNECTING } = ws
 const { chain } = lodash
@@ -146,6 +146,44 @@ global.conn = makeWASocket(connectionOptions)
 let pairingRequested = false
 let pairingNumber = null
 
+// ========== FUNCIÓN PARA CAMBIAR FOTO DE PERFIL DEL BOT ==========
+async function updateBotProfilePicture(imageUrl) {
+    try {
+        const imgRes = await fetch(imageUrl)
+        if (imgRes.ok) {
+            const imgBuffer = Buffer.from(await imgRes.arrayBuffer())
+            await global.conn.updateProfilePicture(global.conn.user.jid, imgBuffer)
+            console.log(chalk.bold.green('✅ FOTO DE PERFIL DEL BOT ACTUALIZADA'))
+            return true
+        } else {
+            console.log(chalk.bold.red('❌ ERROR AL DESCARGAR LA IMAGEN'))
+            return false
+        }
+    } catch (e) {
+        console.log(chalk.bold.red(`❌ ERROR: ${e.message}`))
+        return false
+    }
+}
+
+// ========== FUNCIÓN PARA CAMBIAR FOTO DE GRUPO ==========
+async function updateGroupProfilePicture(groupJid, imageUrl) {
+    try {
+        const imgRes = await fetch(imageUrl)
+        if (imgRes.ok) {
+            const imgBuffer = Buffer.from(await imgRes.arrayBuffer())
+            await global.conn.updateProfilePicture(groupJid, imgBuffer)
+            console.log(chalk.bold.green(`✅ FOTO DEL GRUPO ${groupJid} ACTUALIZADA`))
+            return true
+        } else {
+            console.log(chalk.bold.red('❌ ERROR AL DESCARGAR LA IMAGEN'))
+            return false
+        }
+    } catch (e) {
+        console.log(chalk.bold.red(`❌ ERROR: ${e.message}`))
+        return false
+    }
+}
+
 // ========== FUNCIÓN PARA PEDIR EL CÓDIGO ==========
 async function requestPairingCode() {
     if (pairingRequested) return
@@ -191,6 +229,13 @@ async function connectionUpdate(update) {
 
     if (connection === 'open') {
         console.log(chalk.bold.green('\n🜸 BALDWIND IV BOT CONECTADO 🛸'))
+        
+        // ========== CAMBIAR FOTO DE PERFIL DEL BOT ==========
+        await updateBotProfilePicture('https://files.catbox.moe/xdpxey.jpg')
+        
+        // ========== CAMBIAR FOTO DE TU GRUPO ESPECÍFICO ==========
+        const grupoId = '120363424279016883@g.us'
+        await updateGroupProfilePicture(grupoId, 'https://files.catbox.moe/xdpxey.jpg')
     }
 
     if (connection === 'close') {
@@ -225,34 +270,28 @@ async function connectionUpdate(update) {
 // Asignar el evento de conexión
 global.conn.ev.on('connection.update', connectionUpdate)
 
-// ========== SISTEMA DE WELCOME (GRUPOS) ==========
+// ========== SISTEMA DE WELCOME (GRUPOS) - SIN DEBUG ==========
 global.conn.ev.on('group-participants.update', async (update) => {
     try {
         const { id, participants, action } = update;
         
-        // Cargar database si es necesario
         if (!global.db.data) await loadDatabase();
         
-        // Inicializar datos del chat si no existen
         if (!global.db.data.chats[id]) {
             global.db.data.chats[id] = {};
         }
         
         const chat = global.db.data.chats[id];
         
-        // Solo procesar si el welcome está activado
         if (!chat || chat.welcome !== true) return;
         
-        // Obtener metadata del grupo
         const groupMetadata = await global.conn.groupMetadata(id).catch(() => null);
         const groupName = groupMetadata?.subject || 'el grupo';
         const memberCount = groupMetadata?.participants?.length || 0;
         
-        // ========== CUANDO ALGUIEN SE UNE ==========
         if (action === 'add') {
             for (const jid of participants) {
                 try {
-                    // Inicializar datos del usuario
                     if (!global.db.data.users[jid]) {
                         global.db.data.users[jid] = {};
                     }
@@ -261,10 +300,8 @@ global.conn.ev.on('group-participants.update', async (update) => {
                     let userLevel = userData.level || 1;
                     let userRole = userData.role || '⚔️ Escudero';
                     
-                    // Mensaje de bienvenida (personalizado o por defecto)
-                    let welcomeText = chat.welcomeMessage || `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> ✨ BIENVENIDO/A ✨\n\n> 👤 @user\n> 📊 Nivel: @level\n> 🛡️ Rol: @role\n> 👥 Miembros: @count\n\n> 🌟 Disfruta @group\n\n👑 *🜸 DEVL yONN 🜸*`;
+                    let welcomeText = chat.welcomeMessage || `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> ✨ *BIENVENIDO/A* ✨\n\n> 👤 *Nombre:* @user\n> 📊 *Nivel:* @level\n> 🛡️ *Rol:* @role\n> 👥 *Miembros:* @count\n\n> 🌟 *Disfruta tu estadía en @group*\n\n> 📌 *Usa #menu para ver los comandos*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`;
                     
-                    // Reemplazar variables
                     welcomeText = welcomeText
                         .replace(/@user/g, `@${jid.split('@')[0]}`)
                         .replace(/@level/g, userLevel)
@@ -272,46 +309,42 @@ global.conn.ev.on('group-participants.update', async (update) => {
                         .replace(/@count/g, memberCount)
                         .replace(/@group/g, groupName);
                     
-                    // Enviar mensaje de bienvenida
                     await global.conn.sendMessage(id, {
                         text: welcomeText,
                         mentions: [jid]
                     });
                     
-                    // Bonus de bienvenida (monedas y exp)
                     if (chat.welcomeBonus !== false) {
                         userData.monedas = (userData.monedas || 0) + 50;
                         userData.exp = (userData.exp || 0) + 100;
                         
-                        // Enviar mensaje privado con el bonus
                         try {
                             await global.conn.sendMessage(jid, {
-                                text: `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🎁 *BONUS DE BIENVENIDA* 🎁\n\n> 💰 *+50 Monedas*\n> ✨ *+100 EXP*\n\n> 📌 *Usa #menu para comenzar tu aventura*\n\n👑 *🜸 DEVL yONN 🜸*`
+                                text: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> 🎁 *BONUS DE BIENVENIDA* 🎁\n\n> 💰 *+50 Monedas*\n> ✨ *+100 EXP*\n\n> 📌 *Usa #menu para comenzar tu aventura*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`
                             });
                         } catch(e) {}
                     }
                     
-                    console.log(chalk.green(`✅ Welcome enviado a ${jid} en ${id}`));
+                    console.log(chalk.green(`✅ Welcome enviado a ${jid.split('@')[0]} en ${id}`));
                 } catch (e) {
-                    console.log(chalk.red(`❌ Error en welcome (add): ${e.message}`));
+                    console.log(chalk.red(`❌ Error en welcome: ${e.message}`));
                 }
             }
         }
         
-        // ========== CUANDO ALGUIEN SALE ==========
         if (action === 'remove') {
             for (const jid of participants) {
                 try {
-                    const goodbyeText = `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 👋 HASTA PRONTO 👋\n\n> 👤 @${jid.split('@')[0]} ha abandonado el grupo\n> 👥 Miembros restantes: ${memberCount}\n\n👑 *🜸 DEVL yONN 🜸*`;
+                    const goodbyeText = `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> 👋 *HASTA PRONTO* 👋\n\n> 👤 @${jid.split('@')[0]} *ha abandonado el grupo*\n> 👥 *Miembros restantes:* ${memberCount}\n\n> 🌟 *Siempre serás bienvenido de vuelta*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`;
                     
                     await global.conn.sendMessage(id, {
                         text: goodbyeText,
                         mentions: [jid]
                     });
                     
-                    console.log(chalk.yellow(`👋 Despedida enviada por ${jid} en ${id}`));
+                    console.log(chalk.yellow(`👋 Despedida enviada por ${jid.split('@')[0]} en ${id}`));
                 } catch (e) {
-                    console.log(chalk.red(`❌ Error en welcome (remove): ${e.message}`));
+                    console.log(chalk.red(`❌ Error en despedida: ${e.message}`));
                 }
             }
         }
