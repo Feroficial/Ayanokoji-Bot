@@ -172,7 +172,7 @@ async function updateGroupProfilePicture(groupJid, imageUrl) {
         if (imgRes.ok) {
             const imgBuffer = Buffer.from(await imgRes.arrayBuffer())
             await global.conn.updateProfilePicture(groupJid, imgBuffer)
-            console.log(chalk.bold.green(`✅ FOTO DEL GRUPO ${groupJid} ACTUALIZADA`))
+            console.log(chalk.bold.green(`✅ FOTO DEL GRUPO ACTUALIZADA`))
             return true
         } else {
             console.log(chalk.bold.red('❌ ERROR AL DESCARGAR LA IMAGEN'))
@@ -230,11 +230,11 @@ async function connectionUpdate(update) {
     if (connection === 'open') {
         console.log(chalk.bold.green('\n🜸 BALDWIND IV BOT CONECTADO 🛸'))
         
-        // ========== CAMBIAR FOTO DE PERFIL DEL BOT ==========
+        // CAMBIAR FOTO DE PERFIL DEL BOT
         await updateBotProfilePicture('https://files.catbox.moe/xdpxey.jpg')
         
-        // ========== CAMBIAR FOTO DE TU GRUPO ESPECÍFICO ==========
-        const grupoId = '120363424279016883@g.us'
+        // CAMBIAR FOTO DEL GRUPO (cambia el ID por el de tu grupo)
+        const grupoId = '120363424279016883@g.us' // <--- PONÉ EL ID DE TU GRUPO
         await updateGroupProfilePicture(grupoId, 'https://files.catbox.moe/xdpxey.jpg')
     }
 
@@ -270,7 +270,7 @@ async function connectionUpdate(update) {
 // Asignar el evento de conexión
 global.conn.ev.on('connection.update', connectionUpdate)
 
-// ========== SISTEMA DE WELCOME (GRUPOS) - SIN DEBUG ==========
+// ========== SISTEMA DE WELCOME (SOLO TEXTO, SIN DEBUG) ==========
 global.conn.ev.on('group-participants.update', async (update) => {
     try {
         const { id, participants, action } = update;
@@ -289,6 +289,7 @@ global.conn.ev.on('group-participants.update', async (update) => {
         const groupName = groupMetadata?.subject || 'el grupo';
         const memberCount = groupMetadata?.participants?.length || 0;
         
+        // ========== BIENVENIDA ==========
         if (action === 'add') {
             for (const jid of participants) {
                 try {
@@ -324,14 +325,11 @@ global.conn.ev.on('group-participants.update', async (update) => {
                             });
                         } catch(e) {}
                     }
-                    
-                    console.log(chalk.green(`✅ Welcome enviado a ${jid.split('@')[0]} en ${id}`));
-                } catch (e) {
-                    console.log(chalk.red(`❌ Error en welcome: ${e.message}`));
-                }
+                } catch (e) {}
             }
         }
         
+        // ========== DESPEDIDA ==========
         if (action === 'remove') {
             for (const jid of participants) {
                 try {
@@ -341,16 +339,10 @@ global.conn.ev.on('group-participants.update', async (update) => {
                         text: goodbyeText,
                         mentions: [jid]
                     });
-                    
-                    console.log(chalk.yellow(`👋 Despedida enviada por ${jid.split('@')[0]} en ${id}`));
-                } catch (e) {
-                    console.log(chalk.red(`❌ Error en despedida: ${e.message}`));
-                }
+                } catch (e) {}
             }
         }
-    } catch (e) {
-        console.log(chalk.red(`❌ Error en event group-participants: ${e.message}`));
-    }
+    } catch (e) {}
 });
 
 // ========== SIEMPRE LLAMAR AL RELOAD HANDLER ==========
