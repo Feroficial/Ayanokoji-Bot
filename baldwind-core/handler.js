@@ -256,7 +256,7 @@ export async function handler(chatUpdate) {
             'careverga', 'carechimba', 'huevón', 'huevona', 'webón', 'webona',
             'baboso', 'babosa', 'tonto', 'tonta', 'bruto', 'bruta', 'bestia',
             'cerdo', 'cerda', 'zopenco', 'zoquete', 'menso', 'mensa', 'pendejada',
-            'cagon', 'cagón', 'cagona', 'culiao', 'culiado', 'weon', 'weona',
+            'cagon', 'cagón', 'cagona', 'culiao', 'culiado', 'se la come', 'weona',
             'chupapico', 'chupapija', 'mamahuevo', 'mamaguevo', 'come mierda',
             'pedazo de mierda', 'carepicha', 'caremonda', 'culero', 'culera',
             'maldito', 'maldita', 'desgraciado', 'desgraciada', 'infeliz',
