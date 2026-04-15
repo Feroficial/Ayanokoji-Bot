@@ -55,8 +55,8 @@ let handler = async (m, { conn, isAdmin, isROwner, isOwner }) => {
   }
 };
 
-handler.help = ['topiactivos'];
+handler.help = ['topactivos'];
 handler.tags = ['group'];
-handler.command = /^(topiactivos|activos|active)$/i;
+handler.command = /^(topactivos|activos|active)$/i;
 handler.group = true;
 export default handler;
