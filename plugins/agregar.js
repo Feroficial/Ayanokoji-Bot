@@ -10,10 +10,8 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner, isROwner }) 
   let number = userJid.split('@')[0];
   let numberClean = number.replace(/[^0-9]/g, '');
   
-  // Verificar que no sea el creador
   if (numberClean === '59177474230') return m.reply('❌ No puedes agregarte a ti mismo');
 
-  // Verificar si ya existe
   let yaExiste = false;
   if (global.owner) {
     for (let ow of global.owner) {
@@ -26,7 +24,6 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner, isROwner }) 
   
   if (yaExiste) return m.reply(`⚠️ @${number} ya es asistente`, { mentions: [userJid] });
 
-  // Agregar
   if (!global.owner) global.owner = [];
   global.owner.push([numberClean, rango, true]);
   if (!global.mods) global.mods = [];
@@ -37,9 +34,8 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner, isROwner }) 
   m.reply(`✅ *@${number} ahora es asistente*\n🏆 Rango: ${rango}`, { mentions: [userJid] });
 };
 
+handler.help = ['agregar @user <rango>'];
+handler.tags = ['owner'];
 handler.command = /^(agregar|addcoowner|darowner)$/i;
-handler.help = ["agregar"];
-handler.tags = ["owner"];
 handler.rowner = true;
-
 export default handler;
