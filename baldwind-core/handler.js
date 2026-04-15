@@ -97,7 +97,8 @@ export async function handler(chatUpdate) {
         afinidad: user.afinidad || '',
         nivelMagico: isNumber(user.nivelMagico) ? user.nivelMagico : 1,
         clan: user.clan || null,
-        clanRank: user.clanRank || null
+        clanRank: user.clanRank || null,
+        lastMsg: user.lastMsg || 0
       });
 
       if (!global.db.data.chats[m.chat]) {
@@ -237,231 +238,72 @@ export async function handler(chatUpdate) {
       }
     }
 
-    // ========== SISTEMA ANTI INSULTOS (SOLO ESPAÑOL) ==========
-    if (m.isGroup && m.text && !m.isBaileys) {
+    // ========== SISTEMA ANTI INSULTOS ==========
+    if (m.isGroup && m.text && !m.isBaileys && !isAdmin && !isRAdmin && !isOwner && !isROwner) {
       const chat = global.db.data.chats[m.chat];
       
-      // Verificar si el anti insultos está activado
       if (chat && chat.antiInsultos === true) {
-        // Los admins, dueños y creador no reciben advertencias
-        if (isAdmin || isRAdmin || isOwner || isROwner) {
-          // No hacer nada, son inmunes
-        } else {
-          // Lista de insultos en español
-          const insultos = [
-            'puto', 'puta', 'pendejo', 'pendeja', 'mierda', 'verga', 'coño', 'carajo',
-            'imbecil', 'imbécil', 'estupido', 'estúpido', 'idiota', 'tarado', 'tarada',
-            'gilipollas', 'capullo', 'subnormal', 'retrasado', 'retrasada',
-            'hijodeputa', 'hijo de puta', 'malparido', 'malparida', 'gonorrea',
-            'careverga', 'carechimba', 'huevón', 'huevona', 'webón', 'webona',
-            'baboso', 'babosa', 'tonto', 'tonta', 'bruto', 'bruta', 'bestia',
-            'cerdo', 'cerda', 'zopenco', 'zoquete', 'menso', 'mensa', 'pendejada',
-            'cagon', 'cagón', 'cagona', 'culiao', 'culiado', 'se la come', 'weona',
-            'chupapico', 'chupapija', 'mamahuevo', 'mamaguevo', 'come mierda',
-            'pedazo de mierda', 'carepicha', 'caremonda', 'culero', 'culera',
-            'maldito', 'maldita', 'desgraciado', 'desgraciada', 'infeliz',
-            'hijueputa', 'hijueputas', 'maricon', 'maricón', 'marica'
-          ];
-          
-          let esInsulto = false;
-          let insultoEncontrado = '';
-          const textoLower = m.text.toLowerCase();
-          
-          for (let insulto of insultos) {
-            if (textoLower.includes(insulto)) {
-              esInsulto = true;
-              insultoEncontrado = insulto;
-              break;
-            }
-          }
-          
-          if (esInsulto) {
-            // Inicializar datos de advertencias
-            if (!global.db.data.users[m.sender]) {
-              global.db.data.users[m.sender] = {};
-            }
-            
-            let userWarn = global.db.data.users[m.sender];
-            userWarn.warn = (userWarn.warn || 0) + 1;
-            let warns = userWarn.warn;
-            userWarn.warnReason = insultoEncontrado;
-            
-            // Intentar eliminar el mensaje insultante
-            try {
-              await this.sendMessage(m.chat, { delete: m.key });
-            } catch(e) {}
-            
-            // Si tiene 3 advertencias, expulsar
-            if (warns >= 3) {
-              if (isBotAdmin) {
-                try {
-                  await this.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
-                  userWarn.warn = 0;
-                  userWarn.warnReason = '';
-                  
-                  await this.sendMessage(m.chat, {
-                    text: `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🚫 *USUARIO EXPULSADO* 🚫\n\n> 👤 *Usuario:* @${m.sender.split('@')[0]}\n> ⚠️ *Motivo:* 3 advertencias por insultos\n> 📌 *Ha sido expulsado del grupo*\n\n👑 *🜸 DEVL yONN 🜸*`,
-                    mentions: [m.sender]
-                  });
-                } catch(e) {}
-              } else {
-                await this.sendMessage(m.chat, {
-                  text: `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> ⚠️ *ADVERTENCIA #${warns}/3* ⚠️\n\n> 👤 @${m.sender.split('@')[0]}\n> 🔥 *Has alcanzado el límite de advertencias*\n> 📌 *El bot necesita ser administrador para expulsar*\n\n👑 *🜸 DEVL yONN 🜸*`,
-                  mentions: [m.sender]
-                });
-              }
-            } else {
-              // Enviar advertencia
-              await this.sendMessage(m.chat, {
-                text: `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> ⚠️ *ADVERTENCIA #${warns}/3* ⚠️\n\n> 👤 @${m.sender.split('@')[0]}\n> 🔥 *Insulto detectado:* "${insultoEncontrado}"\n> 📌 *No insultes a los demás miembros*\n> 💀 *A la 3ra advertencia serás expulsado*\n\n👑 *🜸 DEVL yONN 🜸*`,
-                mentions: [m.sender]
-              });
-            }
-            
-            console.log(chalk.red(`⚠️ AntiInsultos: ${m.sender.split('@')[0]} - Advertencia #${warns} por: "${insultoEncontrado}"`));
-          }
-        }
-      }
-    }
-
-// ========== SISTEMA ANTI NÚMEROS PROHIBIDOS ==========
-if (m.isGroup && m.text && !m.isBaileys) {
-  const chat = global.db.data.chats[m.chat];
-  
-  // Solo si está activado en el grupo
-  if (chat && chat.antiFraude === true) {
-    
-    // Lista de códigos de país peligrosos
-    const codigosPeligrosos = [
-      '+232', '232', '00232',  // Sierra Leona
-      '+504', '504', '001268', // Antigua
-      '+876', '876', '001876', // Jamaica
-      '+473', '473', '001473', // Granada
-      '+809', '809', '001809', // República Dominicana
-      '+829', '829', '001829', // República Dominicana
-      '+849', '849', '001849', // República Dominicana
-      '+370', '370', '00370',  // Lituania
-      '+371', '371', '00371',  // Letonia
-      '+375', '375', '00375',  // Bielorrusia
-      '+381', '381', '00381',  // Serbia
-      '+225', '225', '00225',  // Costa de Marfil
-      '+233', '233', '00233',  // Ghana
-      '+234', '234', '00234',  // Nigeria
-      '+91', '91', '0091',     // India
-      '+7', '7', '007',        // Rusia
-      '+255', '255', '00255',  // Tanzania
-      '+563', '563', '00563',  // Chile
-      '+92', '92', '0092'      // Pakistán
-    ];
-    
-    let tieneNumeroProhibido = false;
-    let codigoEncontrado = '';
-    const textoLower = m.text.toLowerCase();
-    
-    // Buscar códigos peligrosos en el texto
-    for (let codigo of codigosPeligrosos) {
-      if (textoLower.includes(codigo.toLowerCase())) {
-        tieneNumeroProhibido = true;
-        codigoEncontrado = codigo;
-        break;
-      }
-    }
-    
-    // También detectar números de teléfono completos (formato internacional)
-    const regexNumero = /(\+?\d{2,4}\d{7,12})/g;
-    let numerosEncontrados = m.text.match(regexNumero);
-    
-    if (numerosEncontrados) {
-      for (let num of numerosEncontrados) {
-        for (let codigo of codigosPeligrosos) {
-          if (num.includes(codigo.replace('+', '').replace('00', ''))) {
-            tieneNumeroProhibido = true;
-            codigoEncontrado = codigo;
+        const insultos = [
+          'puto', 'puta', 'pendejo', 'pendeja', 'mierda', 'verga', 'coño', 'carajo',
+          'imbecil', 'imbécil', 'estupido', 'estúpido', 'idiota', 'tarado', 'tarada',
+          'gilipollas', 'capullo', 'subnormal', 'retrasado', 'retrasada',
+          'hijodeputa', 'hijo de puta', 'malparido', 'malparida', 'gonorrea',
+          'careverga', 'carechimba', 'huevón', 'huevona', 'webón', 'webona',
+          'baboso', 'babosa', 'tonto', 'tonta', 'bruto', 'bruta', 'bestia',
+          'cerdo', 'cerda', 'zopenco', 'zoquete', 'menso', 'mensa', 'pendejada',
+          'cagon', 'cagón', 'cagona', 'culiao', 'culiado', 'weon', 'weona'
+        ];
+        
+        let esInsulto = false;
+        let insultoEncontrado = '';
+        const textoLower = m.text.toLowerCase();
+        
+        for (let insulto of insultos) {
+          if (textoLower.includes(insulto)) {
+            esInsulto = true;
+            insultoEncontrado = insulto;
             break;
           }
         }
+        
+        if (esInsulto) {
+          let userWarn = global.db.data.users[m.sender];
+          userWarn.warn = (userWarn.warn || 0) + 1;
+          let warns = userWarn.warn;
+          userWarn.warnReason = insultoEncontrado;
+          
+          try {
+            await this.sendMessage(m.chat, { delete: m.key });
+          } catch(e) {}
+          
+          if (warns >= 3) {
+            if (isBotAdmin) {
+              try {
+                await this.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
+                userWarn.warn = 0;
+                userWarn.warnReason = '';
+                
+                await this.sendMessage(m.chat, {
+                  text: `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🚫 *USUARIO EXPULSADO* 🚫\n\n> 👤 *Usuario:* @${m.sender.split('@')[0]}\n> ⚠️ *Motivo:* 3 advertencias por insultos\n> 📌 *Ha sido expulsado del grupo*\n\n👑 *🜸 DEVL yONN 🜸*`,
+                  mentions: [m.sender]
+                });
+              } catch(e) {}
+            } else {
+              await this.sendMessage(m.chat, {
+                text: `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> ⚠️ *ADVERTENCIA #${warns}/3* ⚠️\n\n> 👤 @${m.sender.split('@')[0]}\n> 🔥 *Has alcanzado el límite de advertencias*\n> 📌 *El bot necesita ser administrador para expulsar*\n\n👑 *🜸 DEVL yONN 🜸*`,
+                mentions: [m.sender]
+              });
+            }
+          } else {
+            await this.sendMessage(m.chat, {
+              text: `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> ⚠️ *ADVERTENCIA #${warns}/3* ⚠️\n\n> 👤 @${m.sender.split('@')[0]}\n> 🔥 *Insulto detectado:* "${insultoEncontrado}"\n> 📌 *No insultes a los demás miembros*\n> 💀 *A la 3ra advertencia serás expulsado*\n\n👑 *🜸 DEVL yONN 🜸*`,
+              mentions: [m.sender]
+            });
+          }
+        }
       }
     }
-    
-    if (tieneNumeroProhibido && !isAdmin && !isRAdmin && !isOwner && !isROwner) {
-      // Eliminar mensaje
-      try {
-        await this.sendMessage(m.chat, { delete: m.key });
-      } catch(e) {}
-      
-      if (isBotAdmin) {
-        // Expulsar al usuario
-        try {
-          await this.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
-          await this.sendMessage(m.chat, {
-            text: `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🚫 *NÚMERO PROHIBIDO DETECTADO* 🚫\n\n> 👤 *Usuario:* @${m.sender.split('@')[0]}\n> 🔥 *Código peligroso:* ${codigoEncontrado}\n> ⚔️ *Expulsado automáticamente*\n\n> ⚠️ *Este código de país está vinculado a estafas internacionales*\n\n👑 *🜸 DEVL yONN 🜸*`,
-            mentions: [m.sender]
-          });
-        } catch(e) {}
-      } else {
-        await this.sendMessage(m.chat, {
-          text: `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> ⚠️ *NÚMERO PROHIBIDO DETECTADO* ⚠️\n\n> 👤 @${m.sender.split('@')[0]}\n> 🔥 *Código peligroso:* ${codigoEncontrado}\n> 📌 *El bot necesita ser administrador para expulsar*\n\n> ⚠️ *No contactes ese número, es fraude*\n\n👑 *🜸 DEVL yONN 🜸*`,
-          mentions: [m.sender]
-        });
-      }
-    }
-  }
-}
 
-// ========== SISTEMA DE AUTO-RESPUESTAS ==========
-if (m.text && !m.isBaileys && !m.isCommand) {
-  let textoLower = m.text.toLowerCase();
-  
-  // Auto-respuestas personalizables
-  const autoRespuestas = {
-    'hola': '👋 *Hola!* Bienvenido a BALDWIND IV',
-    'bot': '🤖 *BALDWIND IV* a tu servicio, creado por DevLyonn',
-    'gracias': '🙏 *De nada!* Estoy para ayudarte guerrero',
-    'te quiero': '💕 *Yo también te quiero!* Eres parte de la familia BALDWIND',
-    'te amo': '💕 *Yo también te amo!* Gracias por el cariño',
-    'buenos días': '☀️ *Buenos días!* Que tengas un excelente día lleno de victorias',
-    'buenas tardes': '🌤️ *Buenas tardes!* Sigue con fuerza en este día',
-    'buenas noches': '🌙 *Buenas noches!* Que descanses y recargues energías',
-    'como estas': '😄 *Estoy bien!* Listo para ayudarte en lo que necesites',
-    'como estás': '😄 *Estoy bien!* Listo para ayudarte en lo que necesites',
-    'quien eres': '🜸 *Soy BALDWIND IV*, un bot creado por *DevLyonn* para proteger y ayudar en este grupo',
-    'quien te creo': '👑 *Mi creador es DevLyonn*, el señor del código',
-    'que haces': '⚔️ *Esperando órdenes!* Puedes usar #menu para ver mis comandos',
-    'help': `📌 *Comandos disponibles:*\nUsa #menu para ver la lista completa`,
-    'admin': '👑 *Los administradores* son los encargados de mantener el orden en el grupo',
-    'reglas': '📜 *Reglas:*\n1. No insultar\n2. No spamear\n3. No enviar enlaces sin permiso',
-    'feliz cumpleaños': '🎂 *Feliz cumpleaños!* Que pases un día maravilloso 🎉',
-    'te extraño': '😢 *También te extraño!* Vuelve pronto al grupo',
-    'eres lindo': '😊 *Gracias!* Tú también eres muy amable',
-    'eres feo': '😠 *Eso no es bonito...* Mejor usa palabras amables',
-    'puto': '⚠️ *Cuidado con las palabras* Te puedo dar advertencia',
-    'puta': '⚠️ *Cuidado con las palabras* Te puedo dar advertencia',
-    'mierda': '⚠️ *Lenguaje inapropiado* Por favor cuida tus palabras',
-    'weon': '😅 *Tranquilo amigo* Sin insultos por favor'
-  };
-  
-  // Buscar coincidencia exacta o por palabra clave
-  let respondido = false;
-  for (let palabra in autoRespuestas) {
-    if (textoLower.includes(palabra)) {
-      await this.sendMessage(m.chat, { text: autoRespuestas[palabra] });
-      respondido = true;
-      break;
-    }
-  }
-  
-  // Respuesta aleatoria si dice "bot" o "Baldwind"
-  if (!respondido && (textoLower.includes('baldwind') || textoLower === 'bot')) {
-    const respuestasAleatorias = [
-      '🜸 *BALDWIND IV* presente ¿Necesitas algo?',
-      '⚔️ *Aquí estoy!* ¿En qué puedo ayudarte?',
-      '🛸 *Baldwind online* Listo para la batalla',
-      '👑 *DevLyonn* me creó para servirte'
-    ];
-    let random = respuestasAleatorias[Math.floor(Math.random() * respuestasAleatorias.length)];
-    await this.sendMessage(m.chat, { text: random });
-  }
-}
     // ========== PROCESAR PLUGINS ==========
     const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), '../plugins');
     for (let name in global.plugins) {
@@ -562,6 +404,7 @@ if (m.text && !m.isBaileys && !m.isCommand) {
       if (utente) {
         utente.exp += m.exp || 0;
         utente.monedas -= m.monedas || 0;
+        utente.lastMsg = Date.now(); // <--- GUARDA FECHA DEL ÚLTIMO MENSAJE
       }
     }
 
