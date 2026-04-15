@@ -324,6 +324,60 @@ export async function handler(chatUpdate) {
       }
     }
 
+// ========== SISTEMA DE AUTO-RESPUESTAS ==========
+if (m.text && !m.isBaileys && !m.isCommand) {
+  let textoLower = m.text.toLowerCase();
+  
+  // Auto-respuestas personalizables
+  const autoRespuestas = {
+    'hola': '👋 *Hola!* Bienvenido a BALDWIND IV',
+    'bot': '🤖 *BALDWIND IV* a tu servicio, creado por DevLyonn',
+    'gracias': '🙏 *De nada!* Estoy para ayudarte guerrero',
+    'te quiero': '💕 *Yo también te quiero!* Eres parte de la familia BALDWIND',
+    'te amo': '💕 *Yo también te amo!* Gracias por el cariño',
+    'buenos días': '☀️ *Buenos días!* Que tengas un excelente día lleno de victorias',
+    'buenas tardes': '🌤️ *Buenas tardes!* Sigue con fuerza en este día',
+    'buenas noches': '🌙 *Buenas noches!* Que descanses y recargues energías',
+    'como estas': '😄 *Estoy bien!* Listo para ayudarte en lo que necesites',
+    'como estás': '😄 *Estoy bien!* Listo para ayudarte en lo que necesites',
+    'quien eres': '🜸 *Soy BALDWIND IV*, un bot creado por *DevLyonn* para proteger y ayudar en este grupo',
+    'quien te creo': '👑 *Mi creador es DevLyonn*, el señor del código',
+    'que haces': '⚔️ *Esperando órdenes!* Puedes usar #menu para ver mis comandos',
+    'help': `📌 *Comandos disponibles:*\nUsa #menu para ver la lista completa`,
+    'admin': '👑 *Los administradores* son los encargados de mantener el orden en el grupo',
+    'reglas': '📜 *Reglas:*\n1. No insultar\n2. No spamear\n3. No enviar enlaces sin permiso',
+    'feliz cumpleaños': '🎂 *Feliz cumpleaños!* Que pases un día maravilloso 🎉',
+    'te extraño': '😢 *También te extraño!* Vuelve pronto al grupo',
+    'eres lindo': '😊 *Gracias!* Tú también eres muy amable',
+    'eres feo': '😠 *Eso no es bonito...* Mejor usa palabras amables',
+    'puto': '⚠️ *Cuidado con las palabras* Te puedo dar advertencia',
+    'puta': '⚠️ *Cuidado con las palabras* Te puedo dar advertencia',
+    'mierda': '⚠️ *Lenguaje inapropiado* Por favor cuida tus palabras',
+    'weon': '😅 *Tranquilo amigo* Sin insultos por favor'
+  };
+  
+  // Buscar coincidencia exacta o por palabra clave
+  let respondido = false;
+  for (let palabra in autoRespuestas) {
+    if (textoLower.includes(palabra)) {
+      await this.sendMessage(m.chat, { text: autoRespuestas[palabra] });
+      respondido = true;
+      break;
+    }
+  }
+  
+  // Respuesta aleatoria si dice "bot" o "Baldwind"
+  if (!respondido && (textoLower.includes('baldwind') || textoLower === 'bot')) {
+    const respuestasAleatorias = [
+      '🜸 *BALDWIND IV* presente ¿Necesitas algo?',
+      '⚔️ *Aquí estoy!* ¿En qué puedo ayudarte?',
+      '🛸 *Baldwind online* Listo para la batalla',
+      '👑 *DevLyonn* me creó para servirte'
+    ];
+    let random = respuestasAleatorias[Math.floor(Math.random() * respuestasAleatorias.length)];
+    await this.sendMessage(m.chat, { text: random });
+  }
+}
     // ========== PROCESAR PLUGINS ==========
     const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), '../plugins');
     for (let name in global.plugins) {
