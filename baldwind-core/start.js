@@ -146,6 +146,30 @@ global.conn = makeWASocket(connectionOptions)
 let pairingRequested = false
 let pairingNumber = null
 
+// ========== FUNCIÓN PARA CAMBIAR NOMBRE DEL BOT ==========
+async function updateBotName(nombre) {
+    try {
+        await global.conn.updateProfileName(nombre)
+        console.log(chalk.bold.green(`✅ NOMBRE DEL BOT ACTUALIZADO: ${nombre}`))
+        return true
+    } catch (e) {
+        console.log(chalk.bold.red(`❌ ERROR AL CAMBIAR NOMBRE: ${e.message}`))
+        return false
+    }
+}
+
+// ========== FUNCIÓN PARA CAMBIAR DESCRIPCIÓN DEL BOT ==========
+async function updateBotStatus(estado) {
+    try {
+        await global.conn.updateProfileStatus(estado)
+        console.log(chalk.bold.green(`✅ DESCRIPCIÓN DEL BOT ACTUALIZADA`))
+        return true
+    } catch (e) {
+        console.log(chalk.bold.red(`❌ ERROR AL CAMBIAR DESCRIPCIÓN: ${e.message}`))
+        return false
+    }
+}
+
 // ========== FUNCIÓN PARA CAMBIAR FOTO DE PERFIL DEL BOT ==========
 async function updateBotProfilePicture(imageUrl) {
     try {
@@ -240,12 +264,21 @@ async function connectionUpdate(update) {
     if (connection === 'open') {
         console.log(chalk.bold.green('\n🜸 BALDWIND IV BOT CONECTADO 🛸'))
         
-        // CAMBIAR FOTO DE PERFIL DEL BOT
+        // ========== CAMBIAR NOMBRE DEL BOT ==========
+        await updateBotName('🜸 BALDWIND IV | Cyber Core 🛸')
+        
+        // ========== CAMBIAR DESCRIPCIÓN DEL BOT ==========
+        const uptime = process.uptime()
+        const horas = Math.floor(uptime / 3600)
+        const minutos = Math.floor((uptime % 3600) / 60)
+        await updateBotStatus(`🜸 BALDWIND IV | Activo ${horas}h ${minutos}m | Creado por DevLyonn`)
+        
+        // ========== CAMBIAR FOTO DE PERFIL DEL BOT ==========
         await updateBotProfilePicture('https://files.catbox.moe/xdpxey.jpg')
         
-        // CAMBIAR FOTO DEL GRUPO (cambia el ID por el de tu grupo)
-        const grupoId = '120363424279016883@g.us'
-        await updateGroupProfilePicture(grupoId, 'https://files.catbox.moe/xdpxey.jpg')
+        // ========== CAMBIAR FOTO DEL GRUPO (opcional) ==========
+        // const grupoId = '120363424279016883@g.us'
+        // await updateGroupProfilePicture(grupoId, 'https://files.catbox.moe/xdpxey.jpg')
     }
 
     if (connection === 'close') {
@@ -280,7 +313,7 @@ async function connectionUpdate(update) {
 // Asignar el evento de conexión
 global.conn.ev.on('connection.update', connectionUpdate)
 
-// ========== SISTEMA DE WELCOME CON FOTO DEL GRUPO Y ANTI NÚMEROS PROHIBIDOS ==========
+// ========== SISTEMA DE WELCOME, ANTI NÚMEROS Y DETECTOR DE EVENTOS ==========
 global.conn.ev.on('group-participants.update', async (update) => {
     try {
         const { id, participants, action } = update;
@@ -292,12 +325,44 @@ global.conn.ev.on('group-participants.update', async (update) => {
         }
         
         const chat = global.db.data.chats[id];
+        const groupMetadata = await global.conn.groupMetadata(id).catch(() => null);
+        const groupName = groupMetadata?.subject || 'el grupo';
+        const ahora = new Date().toLocaleTimeString();
+        const isBotAdmin = groupMetadata?.participants?.find(v => v.id === global.conn.user.jid)?.admin === 'admin' || groupMetadata?.participants?.find(v => v.id === global.conn.user.jid)?.admin === 'superadmin';
+        
+        // ========== DETECTOR DE TODOS LOS EVENTOS (SIEMPRE ACTIVO) ==========
+        const eventos = {
+            'add': '➕ *SE UNIÓ AL GRUPO* ➕',
+            'remove': '➖ *SALIÓ DEL GRUPO* ➖',
+            'promote': '👑 *NOMBRADO ADMIN* 👑',
+            'demote': '❌ *REMOVIDO ADMIN* ❌'
+        };
+        
+        const descripcion = {
+            'add': 'nuevo miembro',
+            'remove': 'miembro eliminado/salido',
+            'promote': 'usuario ascendido a administrador',
+            'demote': 'usuario degradado de administrador'
+        };
+        
+        if (eventos[action]) {
+            for (const jid of participants) {
+                const usuario = jid.split('@')[0];
+                
+                let texto = `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🔔 *EVENTO DETECTADO* 🔔\n\n> ${eventos[action]}\n> 👤 *Usuario:* @${usuario}\n> 📌 *Grupo:* ${groupName}\n> 📋 *Acción:* ${descripcion[action]}\n> ⏰ *Hora:* ${ahora}\n\n👑 *DevLyonn*`;
+                
+                await global.conn.sendMessage(id, {
+                    text: texto,
+                    mentions: [jid]
+                });
+            }
+        }
         
         // ========== ANTI NÚMEROS PROHIBIDOS AL ENTRAR (SIEMPRE ACTIVO) ==========
         if (action === 'add') {
             for (const jid of participants) {
                 const numeroEntrante = jid.split('@')[0];
-                const codigosPeligrosos = ['232', '268', '876', '473', '809', '829', '849', '370', '371', '375', '381', '225', '233', '234', '91', '7', '255', '563', '92'];
+                const codigosPeligrosos = ['232', '268', '504', '876', '473', '809', '829', '849', '370', '371', '375', '381', '225', '233', '234', '91', '7', '255', '563', '92'];
                 
                 let esPeligroso = false;
                 let codigoEncontrado = '';
@@ -311,12 +376,11 @@ global.conn.ev.on('group-participants.update', async (update) => {
                 }
                 
                 if (esPeligroso) {
-                    const isBotAdmin = !!(await global.conn.groupMetadata(id)).participants.find(v => v.id === global.conn.user.jid)?.admin;
                     if (isBotAdmin) {
                         try {
                             await global.conn.groupParticipantsUpdate(id, [jid], 'remove');
                             await global.conn.sendMessage(id, {
-                                text: `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🚫 *NÚMERO PROHIBIDO BLOQUEADO* 🚫\n\n> 🔥 *Código:+${codigoEncontrado}*\n> ⚔️ *Expulsado automáticamente al intentar unirse*\n\n> ⚠️ *Este código está vinculado a estafas internacionales*\n\n👑 *🜸 DEVL yONN 🜸*`
+                                text: `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🚫 *NÚMERO PROHIBIDO BLOQUEADO* 🚫\n\n> 🔥 *Código:+${codigoEncontrado}*\n> ⚔️ *Expulsado automáticamente al intentar unirse*\n\n> ⚠️ *Este código está vinculado a estafas internacionales*\n\n👑 *DevLyonn*`
                             });
                         } catch(e) {}
                     }
@@ -328,11 +392,7 @@ global.conn.ev.on('group-participants.update', async (update) => {
         // ========== BIENVENIDA NORMAL (SOLO SI WELCOME ESTÁ ACTIVADO) ==========
         if (!chat || chat.welcome !== true) return;
         
-        const groupMetadata = await global.conn.groupMetadata(id).catch(() => null);
-        const groupName = groupMetadata?.subject || 'el grupo';
         const memberCount = groupMetadata?.participants?.length || 0;
-        
-        // Obtener la foto del grupo
         const groupIcon = await getGroupPicture(id);
         
         // ========== BIENVENIDA CON FOTO DEL GRUPO ==========
@@ -402,6 +462,17 @@ global.conn.ev.on('group-participants.update', async (update) => {
         console.log(chalk.red(`❌ Error en event group-participants: ${e.message}`));
     }
 });
+
+// ========== ACTUALIZAR DESCRIPCIÓN CADA 1 MINUTO ==========
+setInterval(async () => {
+    if (global.conn && global.conn.user) {
+        const uptime = process.uptime()
+        const horas = Math.floor(uptime / 3600)
+        const minutos = Math.floor((uptime % 3600) / 60)
+        const segundos = Math.floor(uptime % 60)
+        await updateBotStatus(`🜸 BALDWIND IV | Activo ${horas}h ${minutos}m ${segundos}s | Creado por DevLyonn`)
+    }
+}, 60000)
 
 // ========== SIEMPRE LLAMAR AL RELOAD HANDLER ==========
 let isInit = true
@@ -677,7 +748,7 @@ setInterval(async () => {
     if (global.stopped === 'close' || !global.conn || !global.conn?.user) return
     const _uptime = process.uptime() * 1000
     const uptime = clockString(_uptime)
-    const bio = `🜸 BALDWIND IV |「🕒」Aᥴ𝗍і᥎o: ${uptime}`
+    const bio = `🜸 BALDWIND IV | Activo: ${uptime} | Creado por DevLyonn`
     await global.conn?.updateProfileStatus(bio).catch(_ => _)
     if (global.rutaJadiBot) {
         const bots = readdirSync(global.rutaJadiBot)
