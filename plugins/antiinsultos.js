@@ -22,7 +22,7 @@ let handler = async (m, { conn, args, usedPrefix, isAdmin, isROwner, isOwner }) 
 };
 
 handler.help = ['antiinsultos'];
-handler.tags = ['group'];
+handler.tags = ['grupos'];
 handler.command = /^(antiinsultos|antiinsulto|antinsultos)$/i;
 handler.group = true;
 export default handler;
