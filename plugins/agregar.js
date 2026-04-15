@@ -1,41 +1,28 @@
-let handler = async (m, { conn, text, usedPrefix, command, isOwner, isROwner }) => {
-  if (!isOwner && !isROwner) return m.reply('❌ Solo DevLyonn puede usar esto');
-
-  let userJid = m.mentionedJid[0];
-  if (!userJid) return m.reply(`❌ Uso: ${usedPrefix + command} @usuario rango\n\nEjemplo: ${usedPrefix + command} @591123456789 🛡️ Guardián`);
-
-  let rango = text.replace(`@${userJid.split('@')[0]}`, '').trim();
-  if (!rango) rango = '🛡️ Asistente';
-
-  let number = userJid.split('@')[0];
-  let numberClean = number.replace(/[^0-9]/g, '');
+let handler = async (m, { conn }) => {
+  if (!global.owner || global.owner.length <= 1) {
+    return m.reply('📌 *No hay asistentes registrados*');
+  }
   
-  if (numberClean === '59177474230') return m.reply('❌ No puedes agregarte a ti mismo');
-
-  let yaExiste = false;
-  if (global.owner) {
-    for (let ow of global.owner) {
-      if (ow[0]?.replace(/[^0-9]/g, '') === numberClean) {
-        yaExiste = true;
-        break;
-      }
+  let text = `—͟͟͞͞   *🜸 ASISTENTES 🜸* —͟͟͞͞\n\n`;
+  let count = 1;
+  let mentions = [];
+  
+  for (let ow of global.owner) {
+    let number = ow[0];
+    let rango = ow[1] || '🛡️ Asistente';
+    if (number !== '59177474230') {
+      text += `> ${count}. @${number} → ${rango}\n`;
+      mentions.push(`${number}@s.whatsapp.net`); // FORMATO CORRECTO
+      count++;
     }
   }
   
-  if (yaExiste) return m.reply(`⚠️ @${number} ya es asistente`, { mentions: [userJid] });
-
-  if (!global.owner) global.owner = [];
-  global.owner.push([numberClean, rango, true]);
-  if (!global.mods) global.mods = [];
-  if (!global.prems) global.prems = [];
-  global.mods.push(numberClean);
-  global.prems.push(numberClean);
-
-  m.reply(`✅ *@${number} ahora es asistente*\n🏆 Rango: ${rango}`, { mentions: [userJid] });
+  text += `\n👑 *DevLyonn*`;
+  await conn.sendMessage(m.chat, { text, mentions });
 };
 
-handler.help = ['agregar @user <rango>'];
+handler.help = ['asistentes'];
 handler.tags = ['owner'];
-handler.command = /^(agregar|addcoowner|darowner)$/i;
+handler.command = /^(asistentes|verasistentes|listowner)$/i;
 handler.rowner = true;
 export default handler;
