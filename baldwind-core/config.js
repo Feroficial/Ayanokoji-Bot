@@ -16,7 +16,7 @@ global.botNumber = '59177474230';
 // ========== DETECCIÓN MÚLTIPLE DEL CREADOR ==========
 global.owner = [
   ['59177474230', '🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸', true],
-  ['59177474230', 'DEVLYONN', true],
+  ['51923657619', 'AYUDANTE PRINCIPAL', true],
   ['529611207992', 'SUB-PRINCIPAL', true],
   ['59177474230'],
   ['59177474230@s.whatsapp.net', 'DEVLYONN', true],
