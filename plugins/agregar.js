@@ -38,5 +38,7 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner, isROwner }) 
 };
 
 handler.command = /^(agregar|addcoowner|darowner)$/i;
+handler.help = ["agregar"];
+handler.tags = ["owner"];
 handler.rowner = true;
 export default handler;
