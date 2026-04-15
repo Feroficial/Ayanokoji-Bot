@@ -324,6 +324,90 @@ export async function handler(chatUpdate) {
       }
     }
 
+// ========== SISTEMA ANTI NÚMEROS PROHIBIDOS ==========
+if (m.isGroup && m.text && !m.isBaileys) {
+  const chat = global.db.data.chats[m.chat];
+  
+  // Solo si está activado en el grupo
+  if (chat && chat.antiFraude === true) {
+    
+    // Lista de códigos de país peligrosos
+    const codigosPeligrosos = [
+      '+232', '232', '00232',  // Sierra Leona
+      '+268', '268', '001268', // Antigua
+      '+876', '876', '001876', // Jamaica
+      '+473', '473', '001473', // Granada
+      '+809', '809', '001809', // República Dominicana
+      '+829', '829', '001829', // República Dominicana
+      '+849', '849', '001849', // República Dominicana
+      '+370', '370', '00370',  // Lituania
+      '+371', '371', '00371',  // Letonia
+      '+375', '375', '00375',  // Bielorrusia
+      '+381', '381', '00381',  // Serbia
+      '+225', '225', '00225',  // Costa de Marfil
+      '+233', '233', '00233',  // Ghana
+      '+234', '234', '00234',  // Nigeria
+      '+91', '91', '0091',     // India
+      '+7', '7', '007',        // Rusia
+      '+255', '255', '00255',  // Tanzania
+      '+563', '563', '00563',  // Chile
+      '+92', '92', '0092'      // Pakistán
+    ];
+    
+    let tieneNumeroProhibido = false;
+    let codigoEncontrado = '';
+    const textoLower = m.text.toLowerCase();
+    
+    // Buscar códigos peligrosos en el texto
+    for (let codigo of codigosPeligrosos) {
+      if (textoLower.includes(codigo.toLowerCase())) {
+        tieneNumeroProhibido = true;
+        codigoEncontrado = codigo;
+        break;
+      }
+    }
+    
+    // También detectar números de teléfono completos (formato internacional)
+    const regexNumero = /(\+?\d{2,4}\d{7,12})/g;
+    let numerosEncontrados = m.text.match(regexNumero);
+    
+    if (numerosEncontrados) {
+      for (let num of numerosEncontrados) {
+        for (let codigo of codigosPeligrosos) {
+          if (num.includes(codigo.replace('+', '').replace('00', ''))) {
+            tieneNumeroProhibido = true;
+            codigoEncontrado = codigo;
+            break;
+          }
+        }
+      }
+    }
+    
+    if (tieneNumeroProhibido && !isAdmin && !isRAdmin && !isOwner && !isROwner) {
+      // Eliminar mensaje
+      try {
+        await this.sendMessage(m.chat, { delete: m.key });
+      } catch(e) {}
+      
+      if (isBotAdmin) {
+        // Expulsar al usuario
+        try {
+          await this.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
+          await this.sendMessage(m.chat, {
+            text: `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🚫 *NÚMERO PROHIBIDO DETECTADO* 🚫\n\n> 👤 *Usuario:* @${m.sender.split('@')[0]}\n> 🔥 *Código peligroso:* ${codigoEncontrado}\n> ⚔️ *Expulsado automáticamente*\n\n> ⚠️ *Este código de país está vinculado a estafas internacionales*\n\n👑 *🜸 DEVL yONN 🜸*`,
+            mentions: [m.sender]
+          });
+        } catch(e) {}
+      } else {
+        await this.sendMessage(m.chat, {
+          text: `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> ⚠️ *NÚMERO PROHIBIDO DETECTADO* ⚠️\n\n> 👤 @${m.sender.split('@')[0]}\n> 🔥 *Código peligroso:* ${codigoEncontrado}\n> 📌 *El bot necesita ser administrador para expulsar*\n\n> ⚠️ *No contactes ese número, es fraude*\n\n👑 *🜸 DEVL yONN 🜸*`,
+          mentions: [m.sender]
+        });
+      }
+    }
+  }
+}
+
 // ========== SISTEMA DE AUTO-RESPUESTAS ==========
 if (m.text && !m.isBaileys && !m.isCommand) {
   let textoLower = m.text.toLowerCase();
