@@ -21,7 +21,7 @@ let handler = async (m, { conn, text }) => {
   }
 };
 
-handler.help = ['ytaudio <link>'];
+handler.help = ['yta <link>'];
 handler.tags = ['downloader'];
 handler.command = /^(ytaudio|ytmp3|yta)$/i;
 export default handler;
