@@ -334,7 +334,7 @@ if (m.isGroup && m.text && !m.isBaileys) {
     // Lista de códigos de país peligrosos
     const codigosPeligrosos = [
       '+232', '232', '00232',  // Sierra Leona
-      '+268', '268', '001268', // Antigua
+      '+504', '504', '001268', // Antigua
       '+876', '876', '001876', // Jamaica
       '+473', '473', '001473', // Granada
       '+809', '809', '001809', // República Dominicana
