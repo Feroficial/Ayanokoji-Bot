@@ -304,6 +304,55 @@ export async function handler(chatUpdate) {
       }
     }
 
+// ========== SISTEMA DE AUTO-RESPUESTAS ==========
+if (m.text && !m.isBaileys && !m.isCommand) {
+  const textoLower = m.text.toLowerCase();
+  
+  const autoRespuestas = {
+    'hola': '👋 *Hola!* Bienvenido a BALDWIND IV, tu bot de confianza',
+    'bot': '🤖 *BALDWIND IV* a tu servicio, creado por DevLyonn',
+    'gracias': '🙏 *De nada!* Estoy para ayudarte guerrero',
+    'te quiero': '💙 *Yo también te quiero!* Gracias por el cariño',
+    'te amo': '💙 *Yo también te amo!* Eres parte de la familia BALDWIND',
+    'buenos días': '☀️ *Buenos días!* Que tengas un excelente día lleno de victorias',
+    'buenas tardes': '🌤️ *Buenas tardes!* Sigue con fuerza en este día',
+    'buenas noches': '🌙 *Buenas noches!* Que descanses y recargues energías',
+    'como estas': '😄 *Estoy bien!* Listo para ayudarte en lo que necesites',
+    'como estás': '😄 *Estoy bien!* Listo para ayudarte en lo que necesites',
+    'quien eres': '🜸 *Soy BALDWIND IV*, un bot creado por *DevLyonn* para proteger y ayudar',
+    'quien te creo': '👑 *Mi creador es DevLyonn*, el señor del código',
+    'que haces': '⚔️ *Esperando órdenes!* Usa #menu para ver mis comandos',
+    'admin': '👑 *Los administradores* son los encargados de mantener el orden en el grupo',
+    'reglas': '📜 *Reglas del grupo:*\n1. No insultar\n2. No spamear\n3. No enviar enlaces sin permiso\n4. Respetar a los miembros',
+    'feliz cumpleaños': '🎂 *Feliz cumpleaños!* Que pases un día maravilloso 🎉',
+    'te extraño': '😢 *También te extraño!* Vuelve pronto al grupo',
+    'eres lindo': '😊 *Gracias!* Tú también eres muy amable',
+    'me ayudas': '🔧 *Claro!* ¿En qué necesitas ayuda? Usa #menu para ver mis comandos',
+    'info': '📌 *BALDWIND IV* es un bot de seguridad y moderación creado por DevLyonn'
+  };
+  
+  let respondido = false;
+  for (let palabra in autoRespuestas) {
+    if (textoLower.includes(palabra)) {
+      await this.sendMessage(m.chat, { text: autoRespuestas[palabra] });
+      respondido = true;
+      break;
+    }
+  }
+  
+  // Respuesta especial si mencionan el bot
+  if (!respondido && (textoLower.includes('baldwind') || textoLower === 'bot')) {
+    const respuestasAleatorias = [
+      '🜸 *BALDWIND IV* presente ¿Necesitas algo?',
+      '⚔️ *Aquí estoy!* ¿En qué puedo ayudarte?',
+      '🛸 *Baldwind online* Listo para la batalla',
+      '👑 *DevLyonn* me creó para servirte',
+      '🔮 *Dime guerrero*, ¿qué necesitas?'
+    ];
+    let random = respuestasAleatorias[Math.floor(Math.random() * respuestasAleatorias.length)];
+    await this.sendMessage(m.chat, { text: random });
+  }
+}
     // ========== PROCESAR PLUGINS ==========
     const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), '../plugins');
     for (let name in global.plugins) {
