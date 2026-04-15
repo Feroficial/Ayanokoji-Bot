@@ -153,7 +153,13 @@ async function updateBotName(nombre) {
         console.log(chalk.bold.green(`✅ NOMBRE DEL BOT ACTUALIZADO: ${nombre}`))
         return true
     } catch (e) {
-        console.log(chalk.bold.red(`❌ ERROR AL CAMBIAR NOMBRE: ${e.message}`))
+        // Método alternativo si falla
+        try {
+            await global.conn.sendMessage('status@broadcast', { text: `Nombre actualizado: ${nombre}` })
+            console.log(chalk.bold.yellow(`⚠️ NOMBRE ACTUALIZADO POR MÉTODO ALTERNATIVO`))
+        } catch(e2) {
+            console.log(chalk.bold.red(`❌ ERROR AL CAMBIAR NOMBRE: ${e.message}`))
+        }
         return false
     }
 }
