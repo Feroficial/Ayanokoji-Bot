@@ -18,6 +18,7 @@ global.owner = [
   ['59177474230', '🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸', true],
   ['51923657619', 'AYUDANTE PRINCIPAL', true],
   ['529611207992', 'SUB-PRINCIPAL', true],
+  ['584241819270', '⚔️ 𝐋𝐄𝐎_𝐎𝐅𝐂 ⚔️', true],
   ['59177474230'],
   ['59177474230@s.whatsapp.net', 'DEVLYONN', true],
   ['59177474230@c.us', 'DEVLYONN', true]
