@@ -2,11 +2,20 @@ let handler = async (m, { conn, text, usedPrefix, command, isAdmin, isROwner, is
   if (!m.isGroup) return m.reply('❌ Solo en grupos');
   if (!isAdmin && !isROwner && !isOwner) return m.reply('❌ Solo administradores');
 
-  // Verificar si el bot es admin
-  const grupo = await conn.groupMetadata(m.chat);
-  const botEsAdmin = grupo.participants.find(v => v.id === conn.user.jid)?.admin === 'admin';
+  // Verificar si el bot es admin usando un método más ligero
+  let isBotAdmin = false;
+  try {
+    // Usar el objeto del grupo que ya está en caché
+    const group = await conn.groupMetadata(m.chat).catch(() => null);
+    if (group) {
+      const botJid = conn.user.jid;
+      isBotAdmin = group.participants.some(p => p.id === botJid && (p.admin === 'admin' || p.admin === 'superadmin'));
+    }
+  } catch (e) {
+    console.log('Error verificando admin:', e.message);
+  }
   
-  if (!botEsAdmin) return m.reply('❌ *El bot necesita ser administrador*');
+  if (!isBotAdmin) return m.reply('❌ *El bot necesita ser administrador del grupo*');
 
   if (!text) {
     return m.reply(`—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞
@@ -18,7 +27,6 @@ let handler = async (m, { conn, text, usedPrefix, command, isAdmin, isROwner, is
 📌 *Ejemplos:*
 • ${usedPrefix + command} 30m → Cierra 30 minutos
 • ${usedPrefix + command} 2h → Cierra 2 horas
-• ${usedPrefix + command} 1d → Cierra 1 día
 
 👑 *DevLyonn*`);
   }
@@ -39,21 +47,19 @@ let handler = async (m, { conn, text, usedPrefix, command, isAdmin, isROwner, is
     segundos = horas * 3600;
     unidadTexto = `${horas} hora(s)`;
   }
-  else if (tiempo.includes('d')) {
-    let dias = parseInt(tiempo);
-    if (isNaN(dias)) return m.reply('❌ *Número inválido*');
-    segundos = dias * 86400;
-    unidadTexto = `${dias} día(s)`;
-  }
   else {
     let horas = parseInt(tiempo);
-    if (isNaN(horas)) return m.reply('❌ *Usa: 30m, 2h, 1d*');
+    if (isNaN(horas)) return m.reply('❌ *Usa: 30m, 2h*');
     segundos = horas * 3600;
     unidadTexto = `${horas} hora(s)`;
   }
 
   // Cerrar grupo
-  await conn.groupSettingUpdate(m.chat, 'announcement');
+  try {
+    await conn.groupSettingUpdate(m.chat, 'announcement');
+  } catch (e) {
+    return m.reply(`❌ *Error al cerrar el grupo*\n> ${e.message}`);
+  }
   
   await m.reply(`—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞
 
@@ -77,12 +83,14 @@ let handler = async (m, { conn, text, usedPrefix, command, isAdmin, isROwner, is
 > 🔓 *El grupo vuelve a la normalidad*
 
 👑 *DevLyonn*` });
-    } catch (e) {}
+    } catch (e) {
+      console.log('Error al reabrir:', e.message);
+    }
   }, segundos * 1000);
 };
 
 handler.help = ['cerrar <tiempo>'];
-handler.tags = ['group'];
-handler.command = /^(cerrar|lockgroup|cierra)$/i;
+handler.tags = ['admin'];
+handler.command = /^(cerrar|lock)$/i;
 handler.group = true;
 export default handler;
