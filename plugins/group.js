@@ -2,15 +2,19 @@ let handler = async (m, { conn, text, usedPrefix, command, isAdmin, isROwner, is
   if (!m.isGroup) return m.reply('❌ Solo en grupos');
   if (!isAdmin && !isROwner && !isOwner) return m.reply('❌ Solo administradores');
 
-  // Verificar si el bot es admin (método CORREGIDO)
+  // ========== VERIFICAR SI EL BOT ES ADMIN (CORREGIDO) ==========
   let isBotAdmin = false;
   try {
-    const groupMetadata = await conn.groupMetadata(m.chat);
-    const botJid = conn.user.jid;
-    const botParticipant = groupMetadata.participants.find(v => v.id === botJid);
-    isBotAdmin = botParticipant?.admin === 'admin' || botParticipant?.admin === 'superadmin';
+    const metadata = await conn.groupMetadata(m.chat);
+    const botNumber = conn.user.jid;
+    for (let participant of metadata.participants) {
+      if (participant.id === botNumber && (participant.admin === 'admin' || participant.admin === 'superadmin')) {
+        isBotAdmin = true;
+        break;
+      }
+    }
   } catch (e) {
-    console.log('Error verificando admin:', e);
+    console.log('Error:', e);
   }
   
   if (!isBotAdmin) return m.reply('❌ *El bot necesita ser administrador del grupo*');
@@ -90,14 +94,12 @@ let handler = async (m, { conn, text, usedPrefix, command, isAdmin, isROwner, is
 > 🔓 *El grupo vuelve a la normalidad*
 
 👑 *DevLyonn*` });
-    } catch (e) {
-      console.log('Error al reabrir:', e);
-    }
+    } catch (e) {}
   }, segundos * 1000);
 };
 
 handler.help = ['lockgroup <tiempo>'];
-handler.tags = ['group'];
+handler.tags = ['admin'];
 handler.command = /^(lockgroup|cerrar|abrirgrupo|grupo)$/i;
 handler.group = true;
 export default handler;
