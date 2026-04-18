@@ -97,7 +97,7 @@ let handler = async (m, { conn, text, usedPrefix, command, isAdmin, isROwner, is
 };
 
 handler.help = ['lockgroup <tiempo>'];
-handler.tags = ['admin'];
+handler.tags = ['group'];
 handler.command = /^(lockgroup|cerrar|abrirgrupo|grupo)$/i;
 handler.group = true;
 export default handler;
