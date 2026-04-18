@@ -2,51 +2,28 @@ let handler = async (m, { conn, text, usedPrefix, command, isAdmin, isROwner, is
   if (!m.isGroup) return m.reply('❌ Solo en grupos');
   if (!isAdmin && !isROwner && !isOwner) return m.reply('❌ Solo administradores');
 
-  // ========== VERIFICAR SI EL BOT ES ADMIN (CORREGIDO) ==========
-  let isBotAdmin = false;
-  try {
-    const metadata = await conn.groupMetadata(m.chat);
-    const botNumber = conn.user.jid;
-    for (let participant of metadata.participants) {
-      if (participant.id === botNumber && (participant.admin === 'admin' || participant.admin === 'superadmin')) {
-        isBotAdmin = true;
-        break;
-      }
-    }
-  } catch (e) {
-    console.log('Error:', e);
-  }
+  // Verificar si el bot es admin
+  const grupo = await conn.groupMetadata(m.chat);
+  const botEsAdmin = grupo.participants.find(v => v.id === conn.user.jid)?.admin === 'admin';
   
-  if (!isBotAdmin) return m.reply('❌ *El bot necesita ser administrador del grupo*');
+  if (!botEsAdmin) return m.reply('❌ *El bot necesita ser administrador*');
 
   if (!text) {
     return m.reply(`—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞
 
-> 🔒 *ABRIR/CERRAR GRUPO*
+> 🔒 *CERRAR GRUPO*
 
-📌 *Uso:*
+📌 *Uso:* ${usedPrefix + command} <tiempo>
+
+📌 *Ejemplos:*
 • ${usedPrefix + command} 30m → Cierra 30 minutos
 • ${usedPrefix + command} 2h → Cierra 2 horas
-• ${usedPrefix + command} 0 → Abre el grupo
+• ${usedPrefix + command} 1d → Cierra 1 día
 
 👑 *DevLyonn*`);
   }
 
   let tiempo = text.toLowerCase();
-  
-  // ABRIR GRUPO
-  if (tiempo === '0' || tiempo === 'abrir' || tiempo === 'open') {
-    await conn.groupSettingUpdate(m.chat, 'not_announcement');
-    return m.reply(`—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞
-
-> 🔓 *GRUPO ABIERTO* 🔓
-
-> 📌 *Todos los miembros pueden enviar mensajes*
-
-👑 *DevLyonn*`);
-  }
-
-  // CERRAR GRUPO
   let segundos = 0;
   let unidadTexto = '';
   
@@ -62,9 +39,15 @@ let handler = async (m, { conn, text, usedPrefix, command, isAdmin, isROwner, is
     segundos = horas * 3600;
     unidadTexto = `${horas} hora(s)`;
   }
+  else if (tiempo.includes('d')) {
+    let dias = parseInt(tiempo);
+    if (isNaN(dias)) return m.reply('❌ *Número inválido*');
+    segundos = dias * 86400;
+    unidadTexto = `${dias} día(s)`;
+  }
   else {
     let horas = parseInt(tiempo);
-    if (isNaN(horas)) return m.reply('❌ *Usa: 30m, 2h, 0*');
+    if (isNaN(horas)) return m.reply('❌ *Usa: 30m, 2h, 1d*');
     segundos = horas * 3600;
     unidadTexto = `${horas} hora(s)`;
   }
@@ -98,8 +81,8 @@ let handler = async (m, { conn, text, usedPrefix, command, isAdmin, isROwner, is
   }, segundos * 1000);
 };
 
-handler.help = ['lockgroup <tiempo>'];
-handler.tags = ['admin'];
-handler.command = /^(lockgroup|cerrar|abrirgrupo|grupo)$/i;
+handler.help = ['cerrar <tiempo>'];
+handler.tags = ['group'];
+handler.command = /^(cerrar|lockgroup|cierra)$/i;
 handler.group = true;
 export default handler;
