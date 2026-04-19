@@ -1,5 +1,10 @@
-let handler = async (m, { conn, text, usedPrefix, command, isOwner }) => {
-  if (!isOwner) return m.reply('❌ Solo el creador puede usar este comando');
+let handler = async (m, { conn, usedPrefix, command }) => {
+  let ownerNumber = '59177474230';
+  let senderNumber = m.sender.split('@')[0];
+  
+  if (senderNumber !== ownerNumber) {
+    return m.reply('❌ *ACCESO DENEGADO*\n\nSolo DevLyonn puede usar este comando');
+  }
 
   let chats = conn.chats;
   let grupos = [];
@@ -21,21 +26,19 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner }) => {
     return m.reply('📌 El bot no está en ningún grupo');
   }
   
-  if (command === 'salir' || (text && text.includes('salir'))) {
-    let grupoId = text.replace('salir', '').trim();
-    
-    if (!grupoId) {
-      let lista = '—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n📌 GRUPOS DISPONIBLES\n\n';
+  if (command === 'salir') {
+    if (!text) {
+      let lista = '—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n📌 GRUPOS\n\n';
       for (let i = 0; i < grupos.length; i++) {
-        lista += `${i + 1}. ${grupos[i].name}\n📍 ${grupos[i].id}\n👥 ${grupos[i].members} miembros\n\n`;
+        lista += `${i + 1}. ${grupos[i].name}\n📍 ${grupos[i].id}\n\n`;
       }
-      lista += `Para salir: ${usedPrefix}salir id_del_grupo\nEjemplo: ${usedPrefix}salir 123456789@g.us`;
+      lista += `Usa: ${usedPrefix}salir id_del_grupo`;
       return m.reply(lista);
     }
     
     try {
-      await conn.groupLeave(grupoId);
-      m.reply(`✅ El bot salió del grupo ${grupoId}`);
+      await conn.groupLeave(text);
+      m.reply(`✅ Bot salió del grupo ${text}`);
     } catch (e) {
       m.reply(`❌ Error: ${e.message}`);
     }
@@ -45,19 +48,30 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner }) => {
   let texto = '—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n';
   texto += `📊 GRUPOS CONECTADOS: ${grupos.length}\n\n`;
   
+  let botones = [];
+  
   for (let i = 0; i < grupos.length; i++) {
     texto += `${i + 1}. ${grupos[i].name}\n`;
     texto += `📍 ${grupos[i].id}\n`;
     texto += `👥 ${grupos[i].members} miembros\n\n`;
+    
+    botones.push({
+      buttonId: `${usedPrefix}salir ${grupos[i].id}`,
+      buttonText: { displayText: `❌ Salir de ${grupos[i].name}` },
+      type: 1
+    });
   }
   
-  texto += `Para salir de un grupo: ${usedPrefix}salir id_del_grupo\n`;
-  texto += `\n👑 DevLyonn`;
+  texto += `👑 DevLyonn`;
   
-  m.reply(texto);
+  await conn.sendMessage(m.chat, {
+    text: texto,
+    buttons: botones,
+    headerType: 1
+  });
 };
 
-handler.help = ['grupos', 'salir'];
-handler.tags = ['owner'];
+handler.help = ["grupos"]
 handler.command = /^(grupos|listagrupos|salir)$/i;
+handler.tags = ["grupo"]
 export default handler;
