@@ -101,7 +101,6 @@ const question = (texto) => new Promise((resolver) => rl.question(texto, resolve
 let opcion
 const credsExist = fs.existsSync(`./${global.sessions}/creds.json`)
 
-// ========== SIEMPRE PREGUNTAR ==========
 do {
     opcion = await question(
         chalk.bgYellow.black('⌬ BALDWIND IV - SELECCIONA MODO:\n') +
@@ -142,52 +141,39 @@ const connectionOptions = {
 
 global.conn = makeWASocket(connectionOptions)
 
-// ========== VARIABLES PARA CONTROLAR EL PAIRING CODE ==========
 let pairingRequested = false
 let pairingNumber = null
 
-// ========== FUNCIÓN PARA CAMBIAR NOMBRE DEL BOT ==========
 async function updateBotName(nombre) {
     try {
         await global.conn.updateProfileName(nombre)
         console.log(chalk.bold.green(`✅ NOMBRE DEL BOT ACTUALIZADO: ${nombre}`))
         return true
     } catch (e) {
-        // Método alternativo si falla
-        try {
-            await global.conn.sendMessage('status@broadcast', { text: `Nombre actualizado: ${nombre}` })
-            console.log(chalk.bold.yellow(`⚠️ NOMBRE ACTUALIZADO POR MÉTODO ALTERNATIVO`))
-        } catch(e2) {
-            console.log(chalk.bold.red(`❌ ERROR AL CAMBIAR NOMBRE: ${e.message}`))
-        }
+        console.log(chalk.bold.red(`❌ ERROR: ${e.message}`))
         return false
     }
 }
 
-// ========== FUNCIÓN PARA CAMBIAR DESCRIPCIÓN DEL BOT ==========
 async function updateBotStatus(estado) {
     try {
         await global.conn.updateProfileStatus(estado)
-        console.log(chalk.bold.green(`✅ DESCRIPCIÓN DEL BOT ACTUALIZADA`))
+        console.log(chalk.bold.green(`✅ DESCRIPCIÓN ACTUALIZADA`))
         return true
     } catch (e) {
-        console.log(chalk.bold.red(`❌ ERROR AL CAMBIAR DESCRIPCIÓN: ${e.message}`))
+        console.log(chalk.bold.red(`❌ ERROR: ${e.message}`))
         return false
     }
 }
 
-// ========== FUNCIÓN PARA CAMBIAR FOTO DE PERFIL DEL BOT ==========
 async function updateBotProfilePicture(imageUrl) {
     try {
         const imgRes = await fetch(imageUrl)
         if (imgRes.ok) {
             const imgBuffer = Buffer.from(await imgRes.arrayBuffer())
             await global.conn.updateProfilePicture(global.conn.user.jid, imgBuffer)
-            console.log(chalk.bold.green('✅ FOTO DE PERFIL DEL BOT ACTUALIZADA'))
+            console.log(chalk.bold.green('✅ FOTO ACTUALIZADA'))
             return true
-        } else {
-            console.log(chalk.bold.red('❌ ERROR AL DESCARGAR LA IMAGEN'))
-            return false
         }
     } catch (e) {
         console.log(chalk.bold.red(`❌ ERROR: ${e.message}`))
@@ -195,26 +181,6 @@ async function updateBotProfilePicture(imageUrl) {
     }
 }
 
-// ========== FUNCIÓN PARA CAMBIAR FOTO DE GRUPO ==========
-async function updateGroupProfilePicture(groupJid, imageUrl) {
-    try {
-        const imgRes = await fetch(imageUrl)
-        if (imgRes.ok) {
-            const imgBuffer = Buffer.from(await imgRes.arrayBuffer())
-            await global.conn.updateProfilePicture(groupJid, imgBuffer)
-            console.log(chalk.bold.green(`✅ FOTO DEL GRUPO ACTUALIZADA`))
-            return true
-        } else {
-            console.log(chalk.bold.red('❌ ERROR AL DESCARGAR LA IMAGEN'))
-            return false
-        }
-    } catch (e) {
-        console.log(chalk.bold.red(`❌ ERROR: ${e.message}`))
-        return false
-    }
-}
-
-// ========== FUNCIÓN PARA OBTENER FOTO DEL GRUPO ==========
 async function getGroupPicture(groupJid) {
     try {
         const url = await global.conn.profilePictureUrl(groupJid, 'image')
@@ -224,67 +190,61 @@ async function getGroupPicture(groupJid) {
     }
 }
 
-// ========== FUNCIÓN PARA PEDIR EL CÓDIGO ==========
 async function requestPairingCode() {
     if (pairingRequested) return
     pairingRequested = true
     
-    await new Promise(resolve => setTimeout(resolve, 3000))
-    
     try {
-        let userNumber = await question(chalk.bgBlack(chalk.bold.greenBright(`✞ EL USUARIO ingresa su número SIN + (ej: 59177474230):\n🜸➤ `)))
+        let userNumber = await question(chalk.bgBlack(chalk.bold.greenBright(`✞ INGRESA TU NÚMERO SIN +:\n🜸➤ `)))
         userNumber = userNumber.replace(/\D/g, '')
         pairingNumber = userNumber
         rl.close()
         
         console.log(chalk.yellow(`📱 Solicitando código para: ${userNumber}...`))
+        await new Promise(resolve => setTimeout(resolve, 2000))
         
         let codeBot = await global.conn.requestPairingCode(userNumber)
         let formattedCode = codeBot.match(/.{1,4}/g)?.join("-") || codeBot
         
         console.log(chalk.bold.white(chalk.bgMagenta(`🜸 CÓDIGO: ${formattedCode} 🜸`)))
-        console.log(chalk.cyan(`📌 El USUARIO ingresa este código en: WhatsApp > Dispositivos vinculados`))
+        console.log(chalk.cyan(`📌 Ingresa este código en: WhatsApp > Dispositivos vinculados`))
     } catch (e) {
-        console.log(chalk.red('❌ Error al solicitar código:', e.message))
+        console.log(chalk.red('❌ Error:', e.message))
         pairingRequested = false
     }
 }
 
-// ========== EVENTO DE CONEXIÓN ==========
 async function connectionUpdate(update) {
     const { connection, lastDisconnect, isNewLogin, qr } = update
     const reason = new Boom(lastDisconnect?.error)?.output?.statusCode
     global.stopped = connection
 
-    if (opcion === '2' && (connection === 'connecting' || qr) && !pairingRequested && !global.conn.authState.creds.registered) {
-        await requestPairingCode()
+    if (opcion === '2' && !pairingRequested && !global.conn.authState.creds.registered) {
+        setTimeout(() => {
+            if (!pairingRequested && !global.conn.authState.creds.registered) {
+                requestPairingCode()
+            }
+        }, 1000)
     }
 
     if (isNewLogin) global.conn.isInit = true
     if (!global.db.data) loadDatabase()
 
     if ((qr && qr !== '0') && opcion === '1') {
-        console.log(chalk.bold.yellow(`\n❐ ESCANEA EL CÓDIGO QR - EXPIRA EN 45 SEGUNDOS`))
+        console.log(chalk.bold.yellow(`\n❐ ESCANEA EL CÓDIGO QR`))
     }
 
     if (connection === 'open') {
         console.log(chalk.bold.green('\n🜸 BALDWIND IV BOT CONECTADO 🛸'))
         
-        // ========== CAMBIAR NOMBRE DEL BOT ==========
         await updateBotName('🜸 BALDWIND IV | Cyber Core 🛸')
         
-        // ========== CAMBIAR DESCRIPCIÓN DEL BOT ==========
         const uptime = process.uptime()
         const horas = Math.floor(uptime / 3600)
         const minutos = Math.floor((uptime % 3600) / 60)
         await updateBotStatus(`🜸 BALDWIND IV | Activo ${horas}h ${minutos}m | Creado por DevLyonn`)
         
-        // ========== CAMBIAR FOTO DE PERFIL DEL BOT ==========
         await updateBotProfilePicture('https://files.catbox.moe/xdpxey.jpg')
-        
-        // ========== CAMBIAR FOTO DEL GRUPO (opcional) ==========
-        // const grupoId = '120363424279016883@g.us'
-        // await updateGroupProfilePicture(grupoId, 'https://files.catbox.moe/xdpxey.jpg')
     }
 
     if (connection === 'close') {
@@ -305,7 +265,7 @@ async function connectionUpdate(update) {
                 console.log(chalk.bold.cyanBright(`\n☑ REINICIANDO SESIÓN...`))
                 break
             default:
-                console.log(chalk.bold.redBright(`\n⚠︎ DESCONEXIÓN DESCONOCIDA (${reason || 'Desconocido'})`))
+                console.log(chalk.bold.redBright(`\n⚠︎ DESCONEXIÓN DESCONOCIDA`))
                 break
         }
 
@@ -316,10 +276,9 @@ async function connectionUpdate(update) {
     }
 }
 
-// Asignar el evento de conexión
 global.conn.ev.on('connection.update', connectionUpdate)
 
-// ========== SISTEMA DE WELCOME, ANTI NÚMEROS Y DETECTOR DE EVENTOS ==========
+// ========== SISTEMA DE WELCOME Y EVENTOS ==========
 global.conn.ev.on('group-participants.update', async (update) => {
     try {
         const { id, participants, action } = update;
@@ -336,12 +295,11 @@ global.conn.ev.on('group-participants.update', async (update) => {
         const ahora = new Date().toLocaleTimeString();
         const isBotAdmin = groupMetadata?.participants?.find(v => v.id === global.conn.user.jid)?.admin === 'admin' || groupMetadata?.participants?.find(v => v.id === global.conn.user.jid)?.admin === 'superadmin';
         
-        // ========== DETECTOR DE TODOS LOS EVENTOS (SIEMPRE ACTIVO) ==========
         const eventos = {
-            'add': '➕ *SE UNIÓ AL GRUPO* ➕',
-            'remove': '➖ *SALIÓ DEL GRUPO* ➖',
-            'promote': '👑 *NOMBRADO ADMIN* 👑',
-            'demote': '❌ *REMOVIDO ADMIN* ❌'
+            'add': '➕ SE UNIÓ AL GRUPO ➕',
+            'remove': '➖ SALIÓ DEL GRUPO ➖',
+            'promote': '👑 NOMBRADO ADMIN 👑',
+            'demote': '❌ REMOVIDO ADMIN ❌'
         };
         
         const descripcion = {
@@ -354,25 +312,17 @@ global.conn.ev.on('group-participants.update', async (update) => {
         if (eventos[action]) {
             for (const jid of participants) {
                 const usuario = jid.split('@')[0];
-                
-                let texto = `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🔔 *EVENTO DETECTADO* 🔔\n\n> ${eventos[action]}\n> 👤 *Usuario:* @${usuario}\n> 📌 *Grupo:* ${groupName}\n> 📋 *Acción:* ${descripcion[action]}\n> ⏰ *Hora:* ${ahora}\n\n👑 *DevLyonn*`;
-                
-                await global.conn.sendMessage(id, {
-                    text: texto,
-                    mentions: [jid]
-                });
+                let texto = `—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🔔 EVENTO DETECTADO 🔔\n\n> ${eventos[action]}\n> 👤 Usuario: @${usuario}\n> 📌 Grupo: ${groupName}\n> 📋 Acción: ${descripcion[action]}\n> ⏰ Hora: ${ahora}\n\n👑 DevLyonn`;
+                await global.conn.sendMessage(id, { text: texto, mentions: [jid] });
             }
         }
         
-        // ========== ANTI NÚMEROS PROHIBIDOS AL ENTRAR (SIEMPRE ACTIVO) ==========
         if (action === 'add') {
             for (const jid of participants) {
                 const numeroEntrante = jid.split('@')[0];
                 const codigosPeligrosos = ['232', '268', '504', '876', '473', '809', '829', '849', '370', '371', '375', '381', '225', '233', '234', '91', '7', '255', '563', '92'];
-                
                 let esPeligroso = false;
                 let codigoEncontrado = '';
-                
                 for (let codigo of codigosPeligrosos) {
                     if (numeroEntrante.startsWith(codigo)) {
                         esPeligroso = true;
@@ -380,40 +330,29 @@ global.conn.ev.on('group-participants.update', async (update) => {
                         break;
                     }
                 }
-                
-                if (esPeligroso) {
-                    if (isBotAdmin) {
-                        try {
-                            await global.conn.groupParticipantsUpdate(id, [jid], 'remove');
-                            await global.conn.sendMessage(id, {
-                                text: `—͟͟͞͞   *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🚫 *NÚMERO PROHIBIDO BLOQUEADO* 🚫\n\n> 🔥 *Código:+${codigoEncontrado}*\n> ⚔️ *Expulsado automáticamente al intentar unirse*\n\n> ⚠️ *Este código está vinculado a estafas internacionales*\n\n👑 *DevLyonn*`
-                            });
-                        } catch(e) {}
-                    }
-                    continue;
+                if (esPeligroso && isBotAdmin) {
+                    try {
+                        await global.conn.groupParticipantsUpdate(id, [jid], 'remove');
+                        await global.conn.sendMessage(id, { text: `🚫 NÚMERO PROHIBIDO +${codigoEncontrado} bloqueado` });
+                    } catch(e) {}
                 }
             }
         }
         
-        // ========== BIENVENIDA NORMAL (SOLO SI WELCOME ESTÁ ACTIVADO) ==========
         if (!chat || chat.welcome !== true) return;
         
         const memberCount = groupMetadata?.participants?.length || 0;
         const groupIcon = await getGroupPicture(id);
         
-        // ========== BIENVENIDA CON FOTO DEL GRUPO ==========
         if (action === 'add') {
             for (const jid of participants) {
                 try {
-                    if (!global.db.data.users[jid]) {
-                        global.db.data.users[jid] = {};
-                    }
-                    
+                    if (!global.db.data.users[jid]) global.db.data.users[jid] = {};
                     let userData = global.db.data.users[jid];
                     let userLevel = userData.level || 1;
                     let userRole = userData.role || '⚔️ Escudero';
                     
-                    let welcomeText = chat.welcomeMessage || `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> ✨ *BIENVENIDO/A* ✨\n\n> 👤 *Nombre:* @user\n> 📊 *Nivel:* @level\n> 🛡️ *Rol:* @role\n> 👥 *Miembros:* @count\n\n> 🌟 *Disfruta tu estadía en @group*\n\n> 📌 *Usa #menu para ver los comandos*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`;
+                    let welcomeText = chat.welcomeMessage || `—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> ✨ BIENVENIDO/A ✨\n\n> 👤 @user\n> 📊 Nivel: @level\n> 🛡️ Rol: @role\n> 👥 Miembros: @count\n\n> 🌟 Disfruta @group\n\n👑 DevLyonn`;
                     
                     welcomeText = welcomeText
                         .replace(/@user/g, `@${jid.split('@')[0]}`)
@@ -422,54 +361,89 @@ global.conn.ev.on('group-participants.update', async (update) => {
                         .replace(/@count/g, memberCount)
                         .replace(/@group/g, groupName);
                     
-                    await global.conn.sendMessage(id, {
-                        image: { url: groupIcon },
-                        caption: welcomeText,
-                        mentions: [jid]
-                    });
+                    await global.conn.sendMessage(id, { image: { url: groupIcon }, caption: welcomeText, mentions: [jid] });
                     
                     if (chat.welcomeBonus !== false) {
                         userData.monedas = (userData.monedas || 0) + 50;
                         userData.exp = (userData.exp || 0) + 100;
-                        
-                        try {
-                            await global.conn.sendMessage(jid, {
-                                text: `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> 🎁 *BONUS DE BIENVENIDA* 🎁\n\n> 💰 *+50 Monedas*\n> ✨ *+100 EXP*\n\n> 📌 *Usa #menu para comenzar tu aventura*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`
-                            });
-                        } catch(e) {}
                     }
-                    
-                    console.log(chalk.green(`✅ Welcome enviado a ${jid.split('@')[0]} en ${id}`));
-                } catch (e) {
-                    console.log(chalk.red(`❌ Error en welcome: ${e.message}`));
+                } catch(e) {}
+            }
+        }
+        
+        if (action === 'remove') {
+            for (const jid of participants) {
+                try {
+                    const goodbyeText = `—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 👋 HASTA PRONTO 👋\n\n> 👤 @${jid.split('@')[0]} ha abandonado el grupo\n> 👥 Miembros restantes: ${memberCount}\n\n👑 DevLyonn`;
+                    await global.conn.sendMessage(id, { image: { url: groupIcon }, caption: goodbyeText, mentions: [jid] });
+                } catch(e) {}
+            }
+        }
+    } catch (e) {
+        console.log(chalk.red(`❌ Error: ${e.message}`));
+    }
+});
+
+// ========== CIERRE AUTOMÁTICO POR HORARIO ==========
+async function autoLockGroup() {
+    try {
+        const ahora = new Date();
+        const horaActual = ahora.getHours();
+        const minutosActual = ahora.getMinutes();
+        const horaActualCompleta = horaActual + (minutosActual / 60);
+        
+        const gruposAutomaticos = [];
+        
+        for (let id in global.db.data.chats) {
+            if (id.endsWith('@g.us')) {
+                const chat = global.db.data.chats[id];
+                if (chat.autoLock && chat.autoLock.active) {
+                    gruposAutomaticos.push({
+                        id: id,
+                        cierre: chat.autoLock.cierre || 22,
+                        apertura: chat.autoLock.apertura || 6
+                    });
                 }
             }
         }
         
-        // ========== DESPEDIDA CON FOTO DEL GRUPO ==========
-        if (action === 'remove') {
-            for (const jid of participants) {
-                try {
-                    const goodbyeText = `—͟͟͞͞   *🜸 ʙᴀʟᴅᴡɪɴᴅ ɪᴠ  🛸  ᴄʏʙᴇʀ ᴄᴏʀᴇ  🜸* »\n\n> 👋 *HASTA PRONTO* 👋\n\n> 👤 @${jid.split('@')[0]} *ha abandonado el grupo*\n> 👥 *Miembros restantes:* ${memberCount}\n\n> 🌟 *Siempre serás bienvenido de vuelta*\n\n👑 *🜸 𝘿𝙀𝙑𝙇𝙔𝙊𝙉𝙉 🜸*`;
+        for (let grupo of gruposAutomaticos) {
+            const debeEstarCerrado = (horaActualCompleta >= grupo.cierre || horaActualCompleta < grupo.apertura);
+            
+            try {
+                const metadata = await global.conn.groupMetadata(grupo.id);
+                const estaCerrado = metadata.announce === true;
+                const groupName = metadata.subject || 'el grupo';
+                
+                if (debeEstarCerrado && !estaCerrado) {
+                    await global.conn.groupSettingUpdate(grupo.id, 'announcement');
+                    console.log(chalk.yellow(`🔒 ${groupName} se cerró (${grupo.cierre}:00-${grupo.apertura}:00)`));
                     
-                    await global.conn.sendMessage(id, {
-                        image: { url: groupIcon },
-                        caption: goodbyeText,
-                        mentions: [jid]
+                    await global.conn.sendMessage(grupo.id, {
+                        text: `—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🔒 *GRUPO CERRADO AUTOMÁTICAMENTE* 🔒\n\n> ⏰ *Horario nocturno activado*\n> 🔐 *Cierra a las: ${grupo.cierre}:00*\n> 🔓 *Abre a las: ${grupo.apertura}:00*\n> 📌 *Solo administradores pueden enviar mensajes*\n\n👑 *DevLyonn*`
                     });
                     
-                    console.log(chalk.yellow(`👋 Despedida enviada por ${jid.split('@')[0]} en ${id}`));
-                } catch (e) {
-                    console.log(chalk.red(`❌ Error en despedida: ${e.message}`));
+                } else if (!debeEstarCerrado && estaCerrado) {
+                    await global.conn.groupSettingUpdate(grupo.id, 'not_announcement');
+                    console.log(chalk.green(`🔓 ${groupName} se abrió (${grupo.apertura}:00)`));
+                    
+                    await global.conn.sendMessage(grupo.id, {
+                        text: `—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🔓 *GRUPO ABIERTO AUTOMÁTICAMENTE* 🔓\n\n> ⏰ *Horario nocturno finalizado*\n> 🌅 *Ya son las ${grupo.apertura}:00 AM*\n> 📌 *Todos los miembros pueden enviar mensajes*\n\n👑 *DevLyonn*`
+                    });
                 }
+            } catch(e) {
+                console.log(chalk.red(`❌ Error con grupo ${grupo.id}: ${e.message}`));
             }
         }
-    } catch (e) {
-        console.log(chalk.red(`❌ Error en event group-participants: ${e.message}`));
+    } catch(e) {
+        console.log(chalk.red(`❌ Error en autoLock: ${e.message}`));
     }
-});
+}
 
-// ========== ACTUALIZAR DESCRIPCIÓN CADA 1 MINUTO ==========
+setInterval(autoLockGroup, 60000);
+setTimeout(autoLockGroup, 5000);
+
+// ========== ACTUALIZAR DESCRIPCIÓN ==========
 setInterval(async () => {
     if (global.conn && global.conn.user) {
         const uptime = process.uptime()
@@ -480,7 +454,38 @@ setInterval(async () => {
     }
 }, 60000)
 
-// ========== SIEMPRE LLAMAR AL RELOAD HANDLER ==========
+.catch(console.error)
+        if (Handler && (Handler.handler || Handler.default)) {
+            handler = Handler.default || Handler
+        }
+    } catch (e) {
+        console.error(e)
+    }
+    if (restatConn) {
+        const oldChats = global.conn.chats
+        try {
+            global.conn.ws.close()
+        } catch { }
+        global.conn.ev.removeAllListeners()
+        global.conn = makeWASocket(connectionOptions, { chats: oldChats })
+        isInit = true
+    }
+    if (!isInit) {
+        global.conn.ev.off('messages.upsert', global.conn.handler)
+        global.conn.ev.off('connection.update', global.conn.connectionUpdate)
+        global.conn.ev.off('creds.update', global.conn.credsUpdate)
+    }
+
+    global.conn.handler = (handler.handler || handler).bind(global.conn)
+    global.conn.connectionUpdate = connectionUpdate
+    global.conn.credsUpdate = saveCreds.bind(global.conn, true)
+
+    global.conn.ev.on('messages.upsert', async (m) => {
+        if (m.messages && m.messages[0] && m.messages[0].key && m.messages[0].key.remoteJid) {
+            const jid = m.messages[0].key.remoteJid
+            await global.conn.sendPresenceUpdate('composing', jid)
+
+         // ========== RELOAD HANDLER ==========
 let isInit = true
 let handler = await import('./handler.js')
 
@@ -536,47 +541,28 @@ global.conn.logger.info(` ✞ H E C H O\n`)
 if (!opts['test']) {
     if (global.db) setInterval(async () => {
         if (global.db.data) await global.db.write()
-        if (opts['autocleartmp'] && (global.support || {}).find) (tmp = [os.tmpdir(), 'tmp', `${jadi}`], tmp.forEach((filename) => cp.spawn('find', [filename, '-amin', '3', '-type', 'f', '-delete'])))
     }, 30 * 1000)
 }
 
 process.on('uncaughtException', (err) => {
-    if (err.code === 'ENAMETOOLONG') {
-        console.error(chalk.red.bold(`✘ ERROR (ENAMETOOLONG): ${err.message}`))
-    } else {
-        console.error(chalk.red.bold('✘ ERROR CRÍTICO CAPTURADO:'), err)
-    }
+    console.error(chalk.red.bold('✘ ERROR:', err))
 })
-process.on('unhandledRejection', (reason, promise) => {
-    console.error(chalk.red.bold('✘ RECHAZO NO MANEJADO:'), reason)
+process.on('unhandledRejection', (reason) => {
+    console.error(chalk.red.bold('✘ RECHAZO:', reason))
 })
 
 global.rutaJadiBot = join(__dirname, '../baldwind-core/baldwindJadiBot')
-
 if (global.blackJadibts) {
     if (!existsSync(global.rutaJadiBot)) {
         mkdirSync(global.rutaJadiBot, { recursive: true })
-        console.log(chalk.bold.cyan(`La carpeta: ${jadi} se creó correctamente.`))
-    } else {
-        console.log(chalk.bold.cyan(`La carpeta: ${jadi} ya está creada.`))
-    }
-
-    const readRutaJadiBot = readdirSync(global.rutaJadiBot)
-    if (readRutaJadiBot.length > 0) {
-        const creds = 'creds.json'
-        for (const gjbts of readRutaJadiBot) {
-            const botPath = join(global.rutaJadiBot, gjbts)
-            const readBotPath = readdirSync(botPath)
-            if (readBotPath.includes(creds)) {
-                blackJadiBot({ pathblackJadiBot: botPath, m: null, conn: global.conn, args: '', usedPrefix: '/', command: 'serbot' })
-            }
-        }
+        console.log(chalk.bold.cyan(`✅ Carpeta de sub-bots creada`))
     }
 }
 
 const pluginFolder = global.__dirname(join(__dirname, '../plugins/index'))
 const pluginFilter = (filename) => /\.js$/.test(filename)
 global.plugins = {}
+
 async function filesInit() {
     for (const filename of readdirSync(pluginFolder).filter(pluginFilter)) {
         try {
@@ -687,9 +673,7 @@ function purgeSessionSB() {
                 })
             }
         })
-    } catch (err) {
-        console.log(chalk.bold.red(`Error eliminando pre-keys de SB:\n${err}`))
-    }
+    } catch (err) {}
 }
 
 function purgeOldFiles() {
@@ -700,28 +684,17 @@ function purgeOldFiles() {
                 if (file !== 'creds.json') {
                     try {
                         unlinkSync(join(dir, file))
-                        console.log(chalk.bold.cyanBright(`\n╭» ❍ ARCHIVOS ❍\n│→ ${file} ELIMINADO\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))
                     } catch (e) { }
                 }
             })
-        } catch (err) {
-            console.log(chalk.bold.red(`\n╭» ❍ ERROR ❍\n│→ No se pudo eliminar archivos en ${dir}\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ✘\n` + err))
-        }
+        } catch (err) {}
     })
 }
 
 if (!opts['test']) {
     if (global.db) {
         setInterval(async () => {
-            try {
-                if (global.db.data) await global.db.write()
-                if (opts['autocleartmp'] && (global.support || {}).find) {
-                    const tmpDirs = [os.tmpdir(), join(process.cwd(), 'tmp'), `${jadi}`]
-                    tmpDirs.forEach(dir => cp.spawn('find', [dir, '-amin', '3', '-type', 'f', '-delete']))
-                }
-            } catch (e) {
-                console.error(e)
-            }
+            if (global.db.data) await global.db.write()
         }, 30000)
     }
 }
@@ -729,13 +702,11 @@ if (!opts['test']) {
 setInterval(async () => {
     if (global.stopped === 'close' || !global.conn || !global.conn.user) return
     await clearTmp()
-    console.log(chalk.bold.cyanBright(`\n╭» ❍ MULTIMEDIA ❍\n│→ ARCHIVOS DE LA CARPETA TMP ELIMINADOS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))
 }, 1000 * 60 * 4)
 
 setInterval(async () => {
     if (global.stopped === 'close' || !global.conn || !global.conn.user) return
     await purgeSession()
-    console.log(chalk.bold.cyanBright(`\n╭» ❍ ${global.sessions} ❍\n│→ SESIONES NO ESENCIALES ELIMINADAS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))
 }, 1000 * 60 * 10)
 
 setInterval(async () => {
@@ -756,17 +727,6 @@ setInterval(async () => {
     const uptime = clockString(_uptime)
     const bio = `🜸 BALDWIND IV | Activo: ${uptime} | Creado por DevLyonn`
     await global.conn?.updateProfileStatus(bio).catch(_ => _)
-    if (global.rutaJadiBot) {
-        const bots = readdirSync(global.rutaJadiBot)
-        for (const bot of bots) {
-            const credsPath = join(global.rutaJadiBot, bot, 'creds.json')
-            if (existsSync(credsPath)) {
-                try {
-                    await global.conn?.updateProfileStatus(bio).catch(_ => _)
-                } catch { }
-            }
-        }
-    }
 }, 60000)
 
 function clockString(ms) {
