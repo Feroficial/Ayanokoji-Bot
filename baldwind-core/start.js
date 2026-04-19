@@ -173,11 +173,9 @@ async function updateBotProfilePicture(imageUrl) {
             const imgBuffer = Buffer.from(await imgRes.arrayBuffer())
             await global.conn.updateProfilePicture(global.conn.user.jid, imgBuffer)
             console.log(chalk.bold.green('✅ FOTO ACTUALIZADA'))
-            return true
         }
     } catch (e) {
         console.log(chalk.bold.red(`❌ ERROR: ${e.message}`))
-        return false
     }
 }
 
@@ -236,14 +234,11 @@ async function connectionUpdate(update) {
 
     if (connection === 'open') {
         console.log(chalk.bold.green('\n🜸 BALDWIND IV BOT CONECTADO 🛸'))
-        
         await updateBotName('🜸 BALDWIND IV | Cyber Core 🛸')
-        
         const uptime = process.uptime()
         const horas = Math.floor(uptime / 3600)
         const minutos = Math.floor((uptime % 3600) / 60)
         await updateBotStatus(`🜸 BALDWIND IV | Activo ${horas}h ${minutos}m | Creado por DevLyonn`)
-        
         await updateBotProfilePicture('https://files.catbox.moe/xdpxey.jpg')
     }
 
@@ -278,112 +273,6 @@ async function connectionUpdate(update) {
 
 global.conn.ev.on('connection.update', connectionUpdate)
 
-// ========== SISTEMA DE WELCOME Y EVENTOS ==========
-global.conn.ev.on('group-participants.update', async (update) => {
-    try {
-        const { id, participants, action } = update;
-        
-        if (!global.db.data) await loadDatabase();
-        
-        if (!global.db.data.chats[id]) {
-            global.db.data.chats[id] = {};
-        }
-        
-        const chat = global.db.data.chats[id];
-        const groupMetadata = await global.conn.groupMetadata(id).catch(() => null);
-        const groupName = groupMetadata?.subject || 'el grupo';
-        const ahora = new Date().toLocaleTimeString();
-        const isBotAdmin = groupMetadata?.participants?.find(v => v.id === global.conn.user.jid)?.admin === 'admin' || groupMetadata?.participants?.find(v => v.id === global.conn.user.jid)?.admin === 'superadmin';
-        
-        const eventos = {
-            'add': '➕ SE UNIÓ AL GRUPO ➕',
-            'remove': '➖ SALIÓ DEL GRUPO ➖',
-            'promote': '👑 NOMBRADO ADMIN 👑',
-            'demote': '❌ REMOVIDO ADMIN ❌'
-        };
-        
-        const descripcion = {
-            'add': 'nuevo miembro',
-            'remove': 'miembro eliminado/salido',
-            'promote': 'usuario ascendido a administrador',
-            'demote': 'usuario degradado de administrador'
-        };
-        
-        if (eventos[action]) {
-            for (const jid of participants) {
-                const usuario = jid.split('@')[0];
-                let texto = `—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🔔 EVENTO DETECTADO 🔔\n\n> ${eventos[action]}\n> 👤 Usuario: @${usuario}\n> 📌 Grupo: ${groupName}\n> 📋 Acción: ${descripcion[action]}\n> ⏰ Hora: ${ahora}\n\n👑 DevLyonn`;
-                await global.conn.sendMessage(id, { text: texto, mentions: [jid] });
-            }
-        }
-        
-        if (action === 'add') {
-            for (const jid of participants) {
-                const numeroEntrante = jid.split('@')[0];
-                const codigosPeligrosos = ['232', '268', '504', '876', '473', '809', '829', '849', '370', '371', '375', '381', '225', '233', '234', '91', '7', '255', '563', '92'];
-                let esPeligroso = false;
-                let codigoEncontrado = '';
-                for (let codigo of codigosPeligrosos) {
-                    if (numeroEntrante.startsWith(codigo)) {
-                        esPeligroso = true;
-                        codigoEncontrado = codigo;
-                        break;
-                    }
-                }
-                if (esPeligroso && isBotAdmin) {
-                    try {
-                        await global.conn.groupParticipantsUpdate(id, [jid], 'remove');
-                        await global.conn.sendMessage(id, { text: `🚫 NÚMERO PROHIBIDO +${codigoEncontrado} bloqueado` });
-                    } catch(e) {}
-                }
-            }
-        }
-        
-        if (!chat || chat.welcome !== true) return;
-        
-        const memberCount = groupMetadata?.participants?.length || 0;
-        const groupIcon = await getGroupPicture(id);
-        
-        if (action === 'add') {
-            for (const jid of participants) {
-                try {
-                    if (!global.db.data.users[jid]) global.db.data.users[jid] = {};
-                    let userData = global.db.data.users[jid];
-                    let userLevel = userData.level || 1;
-                    let userRole = userData.role || '⚔️ Escudero';
-                    
-                    let welcomeText = chat.welcomeMessage || `—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> ✨ BIENVENIDO/A ✨\n\n> 👤 @user\n> 📊 Nivel: @level\n> 🛡️ Rol: @role\n> 👥 Miembros: @count\n\n> 🌟 Disfruta @group\n\n👑 DevLyonn`;
-                    
-                    welcomeText = welcomeText
-                        .replace(/@user/g, `@${jid.split('@')[0]}`)
-                        .replace(/@level/g, userLevel)
-                        .replace(/@role/g, userRole)
-                        .replace(/@count/g, memberCount)
-                        .replace(/@group/g, groupName);
-                    
-                    await global.conn.sendMessage(id, { image: { url: groupIcon }, caption: welcomeText, mentions: [jid] });
-                    
-                    if (chat.welcomeBonus !== false) {
-                        userData.monedas = (userData.monedas || 0) + 50;
-                        userData.exp = (userData.exp || 0) + 100;
-                    }
-                } catch(e) {}
-            }
-        }
-        
-        if (action === 'remove') {
-            for (const jid of participants) {
-                try {
-                    const goodbyeText = `—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 👋 HASTA PRONTO 👋\n\n> 👤 @${jid.split('@')[0]} ha abandonado el grupo\n> 👥 Miembros restantes: ${memberCount}\n\n👑 DevLyonn`;
-                    await global.conn.sendMessage(id, { image: { url: groupIcon }, caption: goodbyeText, mentions: [jid] });
-                } catch(e) {}
-            }
-        }
-    } catch (e) {
-        console.log(chalk.red(`❌ Error: ${e.message}`));
-    }
-});
-
 // ========== CIERRE AUTOMÁTICO POR HORARIO ==========
 async function autoLockGroup() {
     try {
@@ -392,49 +281,34 @@ async function autoLockGroup() {
         const minutosActual = ahora.getMinutes();
         const horaActualCompleta = horaActual + (minutosActual / 60);
         
-        const gruposAutomaticos = [];
-        
         for (let id in global.db.data.chats) {
             if (id && id.endsWith('@g.us')) {
                 const chat = global.db.data.chats[id];
                 if (chat && chat.autoLock && chat.autoLock.active === true) {
-                    gruposAutomaticos.push({
-                        id: id,
-                        cierre: chat.autoLock.cierre || 22,
-                        apertura: chat.autoLock.apertura || 6
-                    });
+                    const cierre = chat.autoLock.cierre || 22;
+                    const apertura = chat.autoLock.apertura || 6;
+                    const debeEstarCerrado = (horaActualCompleta >= cierre || horaActualCompleta < apertura);
+                    
+                    try {
+                        const metadata = await global.conn.groupMetadata(id);
+                        if (!metadata) continue;
+                        
+                        const estaCerrado = metadata.announce === true;
+                        const groupName = metadata.subject || 'el grupo';
+                        
+                        if (debeEstarCerrado && !estaCerrado) {
+                            await global.conn.groupSettingUpdate(id, 'announcement');
+                            console.log(chalk.yellow(`🔒 ${groupName} se cerró`));
+                            await global.conn.sendMessage(id, { text: `🔒 *GRUPO CERRADO*\n⏰ Cierra a las: ${cierre}:00\n🔓 Abre a las: ${apertura}:00` });
+                        } else if (!debeEstarCerrado && estaCerrado) {
+                            await global.conn.groupSettingUpdate(id, 'not_announcement');
+                            console.log(chalk.green(`🔓 ${groupName} se abrió`));
+                            await global.conn.sendMessage(id, { text: `🔓 *GRUPO ABIERTO*\n🌅 Ya son las ${apertura}:00 AM\n📌 Todos pueden enviar mensajes` });
+                        }
+                    } catch(e) {
+                        console.log(chalk.red(`❌ Error: ${e.message}`));
+                    }
                 }
-            }
-        }
-        
-        for (let grupo of gruposAutomaticos) {
-            const debeEstarCerrado = (horaActualCompleta >= grupo.cierre || horaActualCompleta < grupo.apertura);
-            
-            try {
-                const metadata = await global.conn.groupMetadata(grupo.id);
-                if (!metadata) continue;
-                
-                const estaCerrado = metadata.announce === true;
-                const groupName = metadata.subject || 'el grupo';
-                
-                if (debeEstarCerrado && !estaCerrado) {
-                    await global.conn.groupSettingUpdate(grupo.id, 'announcement');
-                    console.log(chalk.yellow(`🔒 ${groupName} se cerró`));
-                    
-                    await global.conn.sendMessage(grupo.id, {
-                        text: `—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🔒 *GRUPO CERRADO AUTOMÁTICAMENTE* 🔒\n\n> ⏰ *Horario nocturno activado*\n> 🔐 *Cierra a las: ${grupo.cierre}:00*\n> 🔓 *Abre a las: ${grupo.apertura}:00*\n> 📌 *Solo administradores pueden enviar mensajes*\n\n👑 *DevLyonn*`
-                    });
-                    
-                } else if (!debeEstarCerrado && estaCerrado) {
-                    await global.conn.groupSettingUpdate(grupo.id, 'not_announcement');
-                    console.log(chalk.green(`🔓 ${groupName} se abrió`));
-                    
-                    await global.conn.sendMessage(grupo.id, {
-                        text: `—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🔓 *GRUPO ABIERTO AUTOMÁTICAMENTE* 🔓\n\n> ⏰ *Horario nocturno finalizado*\n> 🌅 *Ya son las ${grupo.apertura}:00 AM*\n> 📌 *Todos los miembros pueden enviar mensajes*\n\n👑 *DevLyonn*`
-                    });
-                }
-            } catch(e) {
-                console.log(chalk.red(`❌ Error con grupo: ${e.message}`));
             }
         }
     } catch(e) {
@@ -456,38 +330,7 @@ setInterval(async () => {
     }
 }, 60000)
 
-.catch(console.error)
-        if (Handler && (Handler.handler || Handler.default)) {
-            handler = Handler.default || Handler
-        }
-    } catch (e) {
-        console.error(e)
-    }
-    if (restatConn) {
-        const oldChats = global.conn.chats
-        try {
-            global.conn.ws.close()
-        } catch { }
-        global.conn.ev.removeAllListeners()
-        global.conn = makeWASocket(connectionOptions, { chats: oldChats })
-        isInit = true
-    }
-    if (!isInit) {
-        global.conn.ev.off('messages.upsert', global.conn.handler)
-        global.conn.ev.off('connection.update', global.conn.connectionUpdate)
-        global.conn.ev.off('creds.update', global.conn.credsUpdate)
-    }
-
-    global.conn.handler = (handler.handler || handler).bind(global.conn)
-    global.conn.connectionUpdate = connectionUpdate
-    global.conn.credsUpdate = saveCreds.bind(global.conn, true)
-
-    global.conn.ev.on('messages.upsert', async (m) => {
-        if (m.messages && m.messages[0] && m.messages[0].key && m.messages[0].key.remoteJid) {
-            const jid = m.messages[0].key.remoteJid
-            await global.conn.sendPresenceUpdate('composing', jid)
-
-         // ========== RELOAD HANDLER ==========
+   // ========== RELOAD HANDLER ==========
 let isInit = true
 let handler = await import('./handler.js')
 
@@ -749,4 +592,4 @@ async function isValidPhoneNumber(number) {
     } catch {
         return false
     }
-}
+}               
