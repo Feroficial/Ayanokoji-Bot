@@ -395,9 +395,9 @@ async function autoLockGroup() {
         const gruposAutomaticos = [];
         
         for (let id in global.db.data.chats) {
-            if (id.endsWith('@g.us')) {
+            if (id && id.endsWith('@g.us')) {
                 const chat = global.db.data.chats[id];
-                if (chat.autoLock && chat.autoLock.active) {
+                if (chat && chat.autoLock && chat.autoLock.active === true) {
                     gruposAutomaticos.push({
                         id: id,
                         cierre: chat.autoLock.cierre || 22,
@@ -412,12 +412,14 @@ async function autoLockGroup() {
             
             try {
                 const metadata = await global.conn.groupMetadata(grupo.id);
+                if (!metadata) continue;
+                
                 const estaCerrado = metadata.announce === true;
                 const groupName = metadata.subject || 'el grupo';
                 
                 if (debeEstarCerrado && !estaCerrado) {
                     await global.conn.groupSettingUpdate(grupo.id, 'announcement');
-                    console.log(chalk.yellow(`🔒 ${groupName} se cerró (${grupo.cierre}:00-${grupo.apertura}:00)`));
+                    console.log(chalk.yellow(`🔒 ${groupName} se cerró`));
                     
                     await global.conn.sendMessage(grupo.id, {
                         text: `—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🔒 *GRUPO CERRADO AUTOMÁTICAMENTE* 🔒\n\n> ⏰ *Horario nocturno activado*\n> 🔐 *Cierra a las: ${grupo.cierre}:00*\n> 🔓 *Abre a las: ${grupo.apertura}:00*\n> 📌 *Solo administradores pueden enviar mensajes*\n\n👑 *DevLyonn*`
@@ -425,14 +427,14 @@ async function autoLockGroup() {
                     
                 } else if (!debeEstarCerrado && estaCerrado) {
                     await global.conn.groupSettingUpdate(grupo.id, 'not_announcement');
-                    console.log(chalk.green(`🔓 ${groupName} se abrió (${grupo.apertura}:00)`));
+                    console.log(chalk.green(`🔓 ${groupName} se abrió`));
                     
                     await global.conn.sendMessage(grupo.id, {
                         text: `—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 🔓 *GRUPO ABIERTO AUTOMÁTICAMENTE* 🔓\n\n> ⏰ *Horario nocturno finalizado*\n> 🌅 *Ya son las ${grupo.apertura}:00 AM*\n> 📌 *Todos los miembros pueden enviar mensajes*\n\n👑 *DevLyonn*`
                     });
                 }
             } catch(e) {
-                console.log(chalk.red(`❌ Error con grupo ${grupo.id}: ${e.message}`));
+                console.log(chalk.red(`❌ Error con grupo: ${e.message}`));
             }
         }
     } catch(e) {
