@@ -1,7 +1,5 @@
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1'
 import './config.js'
-import cluster from 'cluster'
-const { setupMaster, fork } = cluster
 import { watchFile, unwatchFile } from 'fs'
 import cfonts from 'cfonts'
 import { createRequire } from 'module'
@@ -33,7 +31,6 @@ import fetch from 'node-fetch'
 
 const { CONNECTING } = ws
 const { chain } = lodash
-const PORT = process.env.PORT || process.env.SERVER_PORT || 3000
 protoType()
 serialize()
 
@@ -86,21 +83,13 @@ global.loadDatabase = async function loadDatabase() {
 loadDatabase()
 
 const { state, saveState, saveCreds } = await useMultiFileAuthState(global.sessions)
-const msgRetryCounterMap = (MessageRetryMap) => { }
 const msgRetryCounterCache = new NodeCache()
 const { version } = await fetchLatestBaileysVersion()
-let phoneNumber = global.botNumber
-
-const methodCodeQR = process.argv.includes("qr")
-const methodCode = !!phoneNumber || process.argv.includes("code")
-const MethodMobile = process.argv.includes("mobile")
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = (texto) => new Promise((resolver) => rl.question(texto, resolver))
 
 let opcion
-const credsExist = fs.existsSync(`./${global.sessions}/creds.json`)
-
 do {
     opcion = await question(
         chalk.bgYellow.black('⌬ BALDWIND IV - SELECCIONA MODO:\n') +
@@ -120,7 +109,6 @@ console.debug = () => { }
 const connectionOptions = {
     logger: pino({ level: 'silent' }),
     printQRInTerminal: opcion === '1',
-    mobile: MethodMobile,
     browser: opcion === '1' ? [`${global.nameqr}`, 'Edge', '20.0.04'] : ['Windows', 'Chrome', 'Chrome 114.0.5735.198'],
     auth: {
         creds: state.creds,
@@ -134,7 +122,6 @@ const connectionOptions = {
         return msg?.message || ""
     },
     msgRetryCounterCache,
-    msgRetryCounterMap,
     defaultQueryTimeoutMs: undefined,
     version,
 }
@@ -142,29 +129,6 @@ const connectionOptions = {
 global.conn = makeWASocket(connectionOptions)
 
 let pairingRequested = false
-let pairingNumber = null
-
-async function updateBotName(nombre) {
-    try {
-        await global.conn.updateProfileName(nombre)
-        console.log(chalk.bold.green(`✅ NOMBRE DEL BOT ACTUALIZADO: ${nombre}`))
-        return true
-    } catch (e) {
-        console.log(chalk.bold.red(`❌ ERROR: ${e.message}`))
-        return false
-    }
-}
-
-async function updateBotStatus(estado) {
-    try {
-        await global.conn.updateProfileStatus(estado)
-        console.log(chalk.bold.green(`✅ DESCRIPCIÓN ACTUALIZADA`))
-        return true
-    } catch (e) {
-        console.log(chalk.bold.red(`❌ ERROR: ${e.message}`))
-        return false
-    }
-}
 
 async function updateBotProfilePicture(imageUrl) {
     try {
@@ -191,19 +155,14 @@ async function getGroupPicture(groupJid) {
 async function requestPairingCode() {
     if (pairingRequested) return
     pairingRequested = true
-    
     try {
         let userNumber = await question(chalk.bgBlack(chalk.bold.greenBright(`✞ INGRESA TU NÚMERO SIN +:\n🜸➤ `)))
         userNumber = userNumber.replace(/\D/g, '')
-        pairingNumber = userNumber
         rl.close()
-        
         console.log(chalk.yellow(`📱 Solicitando código para: ${userNumber}...`))
         await new Promise(resolve => setTimeout(resolve, 2000))
-        
         let codeBot = await global.conn.requestPairingCode(userNumber)
         let formattedCode = codeBot.match(/.{1,4}/g)?.join("-") || codeBot
-        
         console.log(chalk.bold.white(chalk.bgMagenta(`🜸 CÓDIGO: ${formattedCode} 🜸`)))
         console.log(chalk.cyan(`📌 Ingresa este código en: WhatsApp > Dispositivos vinculados`))
     } catch (e) {
@@ -234,103 +193,97 @@ async function connectionUpdate(update) {
 
     if (connection === 'open') {
         console.log(chalk.bold.green('\n🜸 BALDWIND IV BOT CONECTADO 🛸'))
-        await updateBotName('🜸 BALDWIND IV | Cyber Core 🛸')
-        const uptime = process.uptime()
-        const horas = Math.floor(uptime / 3600)
-        const minutos = Math.floor((uptime % 3600) / 60)
-        await updateBotStatus(`🜸 BALDWIND IV | Activo ${horas}h ${minutos}m | Creado por DevLyonn`)
         await updateBotProfilePicture('https://files.catbox.moe/xdpxey.jpg')
     }
 
     if (connection === 'close') {
-        switch (reason) {
-            case DisconnectReason.badSession:
-            case DisconnectReason.loggedOut:
-                console.log(chalk.bold.redBright(`\n⚠︎ SESIÓN INVÁLIDA, BORRA LA CARPETA ${global.sessions} Y REINICIA ⚠︎`))
-                break
-            case DisconnectReason.connectionClosed:
-            case DisconnectReason.connectionLost:
-            case DisconnectReason.timedOut:
-                console.log(chalk.bold.magentaBright(`\n⚠︎ CONEXIÓN PERDIDA, RECONECTANDO...`))
-                break
-            case DisconnectReason.connectionReplaced:
-                console.log(chalk.bold.yellowBright(`\n⚠︎ CONEXIÓN REEMPLAZADA`))
-                return
-            case DisconnectReason.restartRequired:
-                console.log(chalk.bold.cyanBright(`\n☑ REINICIANDO SESIÓN...`))
-                break
-            default:
-                console.log(chalk.bold.redBright(`\n⚠︎ DESCONEXIÓN DESCONOCIDA`))
-                break
+        if (reason === DisconnectReason.loggedOut) {
+            console.log(chalk.bold.redBright(`\n⚠︎ SESIÓN INVÁLIDA, BORRA LA CARPETA ${global.sessions} Y REINICIA ⚠︎`))
+        } else {
+            console.log(chalk.bold.magentaBright(`\n⚠︎ CONEXIÓN PERDIDA, RECONECTANDO...`))
         }
-
         if (global.conn?.ws?.socket === null) {
             await global.reloadHandler(true).catch(console.error)
-            global.timestamp.connect = new Date()
         }
     }
 }
 
 global.conn.ev.on('connection.update', connectionUpdate)
 
-// ========== CIERRE AUTOMÁTICO POR HORARIO ==========
-async function autoLockGroup() {
+// ========== SISTEMA DE WELCOME ==========
+global.conn.ev.on('group-participants.update', async (update) => {
     try {
-        const ahora = new Date();
-        const horaActual = ahora.getHours();
-        const minutosActual = ahora.getMinutes();
-        const horaActualCompleta = horaActual + (minutosActual / 60);
+        const { id, participants, action } = update;
         
-        for (let id in global.db.data.chats) {
-            if (id && id.endsWith('@g.us')) {
-                const chat = global.db.data.chats[id];
-                if (chat && chat.autoLock && chat.autoLock.active === true) {
-                    const cierre = chat.autoLock.cierre || 22;
-                    const apertura = chat.autoLock.apertura || 6;
-                    const debeEstarCerrado = (horaActualCompleta >= cierre || horaActualCompleta < apertura);
-                    
-                    try {
-                        const metadata = await global.conn.groupMetadata(id);
-                        if (!metadata) continue;
-                        
-                        const estaCerrado = metadata.announce === true;
-                        const groupName = metadata.subject || 'el grupo';
-                        
-                        if (debeEstarCerrado && !estaCerrado) {
-                            await global.conn.groupSettingUpdate(id, 'announcement');
-                            console.log(chalk.yellow(`🔒 ${groupName} se cerró`));
-                            await global.conn.sendMessage(id, { text: `🔒 *GRUPO CERRADO*\n⏰ Cierra a las: ${cierre}:00\n🔓 Abre a las: ${apertura}:00` });
-                        } else if (!debeEstarCerrado && estaCerrado) {
-                            await global.conn.groupSettingUpdate(id, 'not_announcement');
-                            console.log(chalk.green(`🔓 ${groupName} se abrió`));
-                            await global.conn.sendMessage(id, { text: `🔓 *GRUPO ABIERTO*\n🌅 Ya son las ${apertura}:00 AM\n📌 Todos pueden enviar mensajes` });
-                        }
-                    } catch(e) {
-                        console.log(chalk.red(`❌ Error: ${e.message}`));
+        if (!global.db.data) await loadDatabase();
+        
+        if (!global.db.data.chats[id]) {
+            global.db.data.chats[id] = {};
+        }
+        
+        const chat = global.db.data.chats[id];
+        if (!chat || chat.welcome !== true) return;
+        
+        const groupMetadata = await global.conn.groupMetadata(id).catch(() => null);
+        const groupName = groupMetadata?.subject || 'el grupo';
+        const memberCount = groupMetadata?.participants?.length || 0;
+        const groupIcon = await getGroupPicture(id);
+        
+        if (action === 'add') {
+            for (const jid of participants) {
+                try {
+                    if (!global.db.data.users[jid]) {
+                        global.db.data.users[jid] = {};
                     }
+                    
+                    let userData = global.db.data.users[jid];
+                    let userLevel = userData.level || 1;
+                    let userRole = userData.role || '⚔️ Escudero';
+                    
+                    let welcomeText = chat.welcomeMessage || `—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> ✨ BIENVENIDO/A ✨\n\n> 👤 @user\n> 📊 Nivel: @level\n> 🛡️ Rol: @role\n> 👥 Miembros: @count\n\n> 🌟 Disfruta @group\n\n👑 DevLyonn`;
+                    
+                    welcomeText = welcomeText
+                        .replace(/@user/g, `@${jid.split('@')[0]}`)
+                        .replace(/@level/g, userLevel)
+                        .replace(/@role/g, userRole)
+                        .replace(/@count/g, memberCount)
+                        .replace(/@group/g, groupName);
+                    
+                    await global.conn.sendMessage(id, {
+                        image: { url: groupIcon },
+                        caption: welcomeText,
+                        mentions: [jid]
+                    });
+                    
+                    if (chat.welcomeBonus !== false) {
+                        userData.monedas = (userData.monedas || 0) + 50;
+                        userData.exp = (userData.exp || 0) + 100;
+                    }
+                } catch(e) {
+                    console.log('Error en welcome:', e);
                 }
             }
         }
-    } catch(e) {
-        console.log(chalk.red(`❌ Error en autoLock: ${e.message}`));
+        
+        if (action === 'remove') {
+            for (const jid of participants) {
+                try {
+                    const goodbyeText = `—͟͟͞͞ *🜸 BALDWIND IV 🛸* —͟͟͞͞\n\n> 👋 HASTA PRONTO 👋\n\n> 👤 @${jid.split('@')[0]} ha abandonado el grupo\n> 👥 Miembros restantes: ${memberCount}\n\n👑 DevLyonn`;
+                    
+                    await global.conn.sendMessage(id, {
+                        image: { url: groupIcon },
+                        caption: goodbyeText,
+                        mentions: [jid]
+                    });
+                } catch(e) {}
+            }
+        }
+    } catch (e) {
+        console.log('Error en group-participants:', e);
     }
-}
+});
 
-setInterval(autoLockGroup, 60000);
-setTimeout(autoLockGroup, 5000);
-
-// ========== ACTUALIZAR DESCRIPCIÓN ==========
-setInterval(async () => {
-    if (global.conn && global.conn.user) {
-        const uptime = process.uptime()
-        const horas = Math.floor(uptime / 3600)
-        const minutos = Math.floor((uptime % 3600) / 60)
-        const segundos = Math.floor(uptime % 60)
-        await updateBotStatus(`🜸 BALDWIND IV | Activo ${horas}h ${minutos}m ${segundos}s | Creado por DevLyonn`)
-    }
-}, 60000)
-
-   // ========== RELOAD HANDLER ==========
+// ========== RELOAD HANDLER ==========
 let isInit = true
 let handler = await import('./handler.js')
 
@@ -357,7 +310,6 @@ global.reloadHandler = async function (restatConn) {
         global.conn.ev.off('connection.update', global.conn.connectionUpdate)
         global.conn.ev.off('creds.update', global.conn.credsUpdate)
     }
-
     global.conn.handler = (handler.handler || handler).bind(global.conn)
     global.conn.connectionUpdate = connectionUpdate
     global.conn.credsUpdate = saveCreds.bind(global.conn, true)
@@ -371,7 +323,6 @@ global.reloadHandler = async function (restatConn) {
             await global.conn.sendPresenceUpdate('paused', jid)
         }
     })
-
     global.conn.ev.on('connection.update', global.conn.connectionUpdate)
     global.conn.ev.on('creds.update', global.conn.credsUpdate)
 
@@ -380,7 +331,6 @@ global.reloadHandler = async function (restatConn) {
 }
 
 global.conn.isInit = false
-global.conn.well = false
 global.conn.logger.info(` ✞ H E C H O\n`)
 
 if (!opts['test']) {
@@ -396,14 +346,6 @@ process.on('unhandledRejection', (reason) => {
     console.error(chalk.red.bold('✘ RECHAZO:', reason))
 })
 
-global.rutaJadiBot = join(__dirname, '../baldwind-core/baldwindJadiBot')
-if (global.blackJadibts) {
-    if (!existsSync(global.rutaJadiBot)) {
-        mkdirSync(global.rutaJadiBot, { recursive: true })
-        console.log(chalk.bold.cyan(`✅ Carpeta de sub-bots creada`))
-    }
-}
-
 const pluginFolder = global.__dirname(join(__dirname, '../plugins/index'))
 const pluginFilter = (filename) => /\.js$/.test(filename)
 global.plugins = {}
@@ -415,12 +357,12 @@ async function filesInit() {
             const module = await import(file)
             global.plugins[filename] = module.default || module
         } catch (e) {
-            global.conn.logger.error(e)
+            console.error(e)
             delete global.plugins[filename]
         }
     }
 }
-filesInit().then((_) => Object.keys(global.plugins)).catch(console.error)
+filesInit().catch(console.error)
 
 global.reload = async (_ev, filename) => {
     if (pluginFilter(filename)) {
@@ -453,6 +395,20 @@ Object.freeze(global.reload)
 watch(pluginFolder, global.reload)
 await global.reloadHandler()
 
+function clearTmp() {
+    const tmpDir = join(process.cwd(), 'tmp')
+    if (!existsSync(tmpDir)) mkdirSync(tmpDir, { recursive: true })
+    const filenames = readdirSync(tmpDir)
+    filenames.forEach(file => {
+        try { unlinkSync(join(tmpDir, file)) } catch (e) {}
+    })
+}
+
+setInterval(async () => {
+    if (global.stopped === 'close' || !global.conn || !global.conn.user) return
+    await clearTmp()
+}, 1000 * 60 * 4)
+
 async function _quickTest() {
     const test = await Promise.all([
         spawn('ffmpeg'),
@@ -465,9 +421,7 @@ async function _quickTest() {
     ].map((p) => {
         return Promise.race([
             new Promise((resolve) => {
-                p.on('close', (code) => {
-                    resolve(code !== 127)
-                })
+                p.on('close', (code) => resolve(code !== 127))
             }),
             new Promise((resolve) => {
                 p.on('error', (_) => resolve(false))
@@ -475,121 +429,7 @@ async function _quickTest() {
         ])
     }))
     const [ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, find] = test
-    const s = global.support = { ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, find }
+    global.support = { ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, find }
     Object.freeze(global.support)
 }
-
-function clearTmp() {
-    const tmpDir = join(process.cwd(), 'tmp')
-    if (!existsSync(tmpDir)) mkdirSync(tmpDir, { recursive: true })
-    const filenames = readdirSync(tmpDir)
-    filenames.forEach(file => {
-        const filePath = join(tmpDir, file)
-        try {
-            unlinkSync(filePath)
-        } catch (e) { }
-    })
-}
-
-function purgeSession() {
-    let prekey = []
-    let directorio = readdirSync(`./${global.sessions}`)
-    let filesFolderPreKeys = directorio.filter(file => file.startsWith('pre-key-'))
-    prekey = [...prekey, ...filesFolderPreKeys]
-    filesFolderPreKeys.forEach(files => {
-        try {
-            unlinkSync(`./${global.sessions}/${files}`)
-        } catch (e) { }
-    })
-}
-
-function purgeSessionSB() {
-    try {
-        const listaDirectorios = readdirSync(global.rutaJadiBot)
-        listaDirectorios.forEach(directorio => {
-            if (statSync(join(global.rutaJadiBot, directorio)).isDirectory()) {
-                const DSBPreKeys = readdirSync(join(global.rutaJadiBot, directorio)).filter(fileInDir => fileInDir.startsWith('pre-key-'))
-                DSBPreKeys.forEach(fileInDir => {
-                    if (fileInDir !== 'creds.json') {
-                        try {
-                            unlinkSync(join(global.rutaJadiBot, directorio, fileInDir))
-                        } catch (e) { }
-                    }
-                })
-            }
-        })
-    } catch (err) {}
-}
-
-function purgeOldFiles() {
-    const directories = [`./${global.sessions}/`, global.rutaJadiBot]
-    directories.forEach(dir => {
-        try {
-            readdirSync(dir).forEach(file => {
-                if (file !== 'creds.json') {
-                    try {
-                        unlinkSync(join(dir, file))
-                    } catch (e) { }
-                }
-            })
-        } catch (err) {}
-    })
-}
-
-if (!opts['test']) {
-    if (global.db) {
-        setInterval(async () => {
-            if (global.db.data) await global.db.write()
-        }, 30000)
-    }
-}
-
-setInterval(async () => {
-    if (global.stopped === 'close' || !global.conn || !global.conn.user) return
-    await clearTmp()
-}, 1000 * 60 * 4)
-
-setInterval(async () => {
-    if (global.stopped === 'close' || !global.conn || !global.conn.user) return
-    await purgeSession()
-}, 1000 * 60 * 10)
-
-setInterval(async () => {
-    if (global.stopped === 'close' || !global.conn || !global.conn.user) return
-    await purgeSessionSB()
-}, 1000 * 60 * 10)
-
-setInterval(async () => {
-    if (global.stopped === 'close' || !global.conn || !global.conn.user) return
-    await purgeOldFiles()
-}, 1000 * 60 * 10)
-
-_quickTest().then(() => global.conn.logger.info(chalk.bold(`✞ H E C H O\n`.trim()))).catch(console.error)
-
-setInterval(async () => {
-    if (global.stopped === 'close' || !global.conn || !global.conn?.user) return
-    const _uptime = process.uptime() * 1000
-    const uptime = clockString(_uptime)
-    const bio = `🜸 BALDWIND IV | Activo: ${uptime} | Creado por DevLyonn`
-    await global.conn?.updateProfileStatus(bio).catch(_ => _)
-}, 60000)
-
-function clockString(ms) {
-    const d = isNaN(ms) ? '--' : Math.floor(ms / 86400000)
-    const h = isNaN(ms) ? '--' : Math.floor(ms / 3600000) % 24
-    const m = isNaN(ms) ? '--' : Math.floor(ms / 60000) % 60
-    const s = isNaN(ms) ? '--' : Math.floor(ms / 1000) % 60
-    return [d, 'd ', h, 'h ', m, 'm ', s, 's '].map((v) => v.toString().padStart(2, 0)).join('')
-}
-
-async function isValidPhoneNumber(number) {
-    try {
-        number = number.replace(/\s+/g, '')
-        if (number.startsWith('+521')) number = number.replace('+521', '+52')
-        else if (number.startsWith('+52') && number[4] === '1') number = number.replace('+52 1', '+52')
-        const parsedNumber = phoneUtil.parseAndKeepRawInput(number)
-        return phoneUtil.isValidNumber(parsedNumber)
-    } catch {
-        return false
-    }
-}               
+_quickTest().catch(console.error)
