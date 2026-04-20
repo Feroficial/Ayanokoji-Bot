@@ -25,7 +25,7 @@ let handler = async (m, { conn }) => {
     let emoji = info ? (info.rareza === 'EX' ? '👑' : info.rareza === 'SSR' ? '✨' : info.rareza === 'SR' ? '⭐' : '⬜') : '⬜'
     texto += `➤ ${emoji} ${nombre} x${cantidad}\n`
   }
-  texto += `\n➤ Usa #claim <nombre> para reclamar un personaje\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`
+  texto += `\n➤ Usa #claim para conseguir un personaje\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`
 
   m.reply(texto)
 }
