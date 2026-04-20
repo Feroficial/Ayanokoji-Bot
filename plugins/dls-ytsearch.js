@@ -31,7 +31,7 @@ let handler = async (m, { conn, text, usedPrefix }) => {
   m.reply(texto)
 }
 
-handler.help = ['ytsearch']
+handler.help = ['play']
 handler.tags = ['downloader']
-handler.command = /^(ytsearch|yts|buscaryt)$/i
+handler.command = /^(play|yts|buscar)$/i
 export default handler
