@@ -1,47 +1,43 @@
-let handler = async (m, { conn, text }) => {
-  await conn.sendMessage(m.chat, { react: { text: '🔖', key: m.key } })
-
-  if (!text) return m.reply(`*《 🐉  𝐂𝐋𝐀𝐈𝐌  🗡️ 》*\n\n➤ Uso: #claim <nombre>\n➤ Ejemplo: #claim Kiyotaka\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+let handler = async (m, { conn }) => {
+  await conn.sendMessage(m.chat, { react: { text: '🎲', key: m.key } })
 
   let user = global.db.data.users[m.sender]
   let fs = require('fs')
   let data = JSON.parse(fs.readFileSync('./gacha.json'))
-  let personajesMap = {}
-  for (let p of data.personajes) {
-    personajesMap[p.nombre.toLowerCase()] = p
-  }
+  let personajes = data.personajes
 
-  let encontrado = null
-  let nombreOriginal = null
+  let totalProb = 0
+  for (let p of personajes) totalProb += p.probabilidad
 
-  for (let [nombreCompleto, info] of Object.entries(personajesMap)) {
-    if (nombreCompleto.toLowerCase().includes(text.toLowerCase())) {
-      encontrado = info
-      nombreOriginal = nombreCompleto
+  let random = Math.random() * totalProb
+  let acumulado = 0
+  let obtenido = null
+
+  for (let p of personajes) {
+    acumulado += p.probabilidad
+    if (random < acumulado) {
+      obtenido = p
       break
     }
   }
 
-  if (!encontrado) {
-    return m.reply(`*《 🐉  𝐂𝐋𝐀𝐈𝐌  🗡️ 》*\n\n➤ Personaje no encontrado\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
-  }
+  if (!user.inventario) user.inventario = []
+  user.inventario.push(obtenido.nombre)
 
-  if (!user.inventario || !user.inventario.includes(nombreOriginal)) {
-    return m.reply(`*《 🐉  𝐂𝐋𝐀𝐈𝐌  🗡️ 》*\n\n➤ No tienes a ${nombreOriginal} en tu inventario\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
-  }
+  let emoji = obtenido.rareza === 'EX' ? '👑' : obtenido.rareza === 'SSR' ? '✨' : obtenido.rareza === 'SR' ? '⭐' : '⬜'
 
-  let emoji = encontrado.rareza === 'EX' ? '👑' : encontrado.rareza === 'SSR' ? '✨' : encontrado.rareza === 'SR' ? '⭐' : '⬜'
+  let texto = `*《 🐉  𝐆𝐀𝐂𝐇𝐀  🗡️ 》*
 
-  let texto = `*《 🐉  𝐂𝐋𝐀𝐈𝐌  🗡️ 》*
+${emoji} *¡Obtuviste!* ${obtenido.nombre}
+🎴 *Rareza:* ${obtenido.rareza}
+🎲 *Probabilidad:* ${obtenido.probabilidad}%
 
-${emoji} *¡Has reclamado a ${nombreOriginal}!*
-🎴 *Rareza:* ${encontrado.rareza}
-🎲 *Probabilidad:* ${encontrado.probabilidad}%
+➤ Usa #inventario para ver tus personajes
 
 *⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`
 
-  if (encontrado.imagen) {
-    await conn.sendMessage(m.chat, { image: { url: encontrado.imagen }, caption: texto })
+  if (obtenido.imagen) {
+    await conn.sendMessage(m.chat, { image: { url: obtenido.imagen }, caption: texto })
   } else {
     m.reply(texto)
   }
@@ -49,5 +45,5 @@ ${emoji} *¡Has reclamado a ${nombreOriginal}!*
 
 handler.help = ['claim']
 handler.tags = ['gacha']
-handler.command = /^(claim|reclamar)$/i
+handler.command = /^(claim|tirar|c)$/i
 export default handler
