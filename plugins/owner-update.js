@@ -5,23 +5,43 @@ let handler = async (m, { conn, usedPrefix, command, isOwner }) => {
 
   let { exec } = await import('child_process')
   
-  exec('git pull', async (error, stdout, stderr) => {
-    if (error) {
-      console.error(error)
-      return m.reply(`*《 🔱  𝐄𝐑𝐑𝐎𝐑  🏯 》*\n\n➤ ${error.message}`)
+  exec('git fetch origin', async (fetchError, fetchStdout, fetchStderr) => {
+    if (fetchError) {
+      return m.reply(`*《 🔱  𝐄𝐑𝐑𝐎𝐑  🏯 》*\n\n➤ Error al conectar con el repositorio\n➤ ${fetchError.message}`)
     }
-    
-    if (stdout.includes('Already up to date')) {
-      m.reply(`*《 🐉  𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐂𝐈𝐎𝐍  🗡️ 》*\n\n➤ Ya estás en la última versión\n➤ No hay cambios pendientes\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
-    } else if (stdout.includes('Updating')) {
-      m.reply(`*《 ⚔️  𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐂𝐈𝐎𝐍 𝐄𝐗𝐈𝐓𝐎𝐒𝐀  🛡️ 》*\n\n➤ Se han descargado los nuevos cambios\n➤ Reiniciando el bot para aplicar cambios...\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+
+    exec('git log HEAD..origin/main --oneline', async (logError, logStdout, logStderr) => {
+      if (logError) {
+        return m.reply(`*《 🔱  𝐄𝐑𝐑𝐎𝐑  🏯 》*\n\n➤ Error al verificar cambios\n➤ ${logError.message}`)
+      }
+
+      if (!logStdout.trim()) {
+        return m.reply(`*《 🐉  𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐂𝐈𝐎𝐍  🗡️ 》*\n\n➤ No hay cambios pendientes\n➤ Ya estás en la última versión\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+      }
+
+      let cambios = logStdout.trim().split('\n')
+      let listaCambios = cambios.slice(0, 10).map(c => `   🔖 ${c}`).join('\n')
       
-      setTimeout(() => {
-        process.exit(0)
-      }, 3000)
-    } else {
-      m.reply(`*《 🔱  𝐑𝐄𝐒𝐔𝐋𝐓𝐀𝐃𝐎  🏯 》*\n\n➤ ${stdout}\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
-    }
+      await m.reply(`*《 ⚔️  𝐂𝐀𝐌𝐁𝐈𝐎𝐒 𝐃𝐄𝐓𝐄𝐂𝐓𝐀𝐃𝐎𝐒  🛡️ 》*\n\n${listaCambios}\n\n➤ Actualizando el bot...`)
+
+      exec('git pull origin main', async (pullError, pullStdout, pullStderr) => {
+        if (pullError) {
+          return m.reply(`*《 🔱  𝐄𝐑𝐑𝐎𝐑  🏯 》*\n\n➤ Error al actualizar\n➤ ${pullError.message}`)
+        }
+
+        let resultado = pullStdout || pullStderr
+        
+        if (resultado.includes('Already up to date')) {
+          m.reply(`*《 🐉  𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐂𝐈𝐎𝐍  🗡️ 》*\n\n➤ No había cambios que aplicar\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+        } else {
+          m.reply(`*《 ⚔️  𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐂𝐈𝐎𝐍 𝐄𝐗𝐈𝐓𝐎𝐒𝐀  🛡️ 》*\n\n➤ Se han descargado los nuevos cambios\n➤ Reiniciando el bot para aplicar...\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+          
+          setTimeout(() => {
+            process.exit(0)
+          }, 3000)
+        }
+      })
+    })
   })
 }
 
