@@ -46,5 +46,5 @@ ${emoji} *¡Obtuviste!* ${obtenido.nombre}
 
 handler.help = ['claim']
 handler.tags = ['gacha']
-handler.command = /^(gacha|tirar|c)$/i
+handler.command = /^(claim|tirar|c)$/i
 export default handler
