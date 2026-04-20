@@ -1,8 +1,9 @@
+import fs from 'fs'
+
 let handler = async (m, { conn }) => {
   await conn.sendMessage(m.chat, { react: { text: '📦', key: m.key } })
 
   let user = global.db.data.users[m.sender]
-  let fs = require('fs')
   let data = JSON.parse(fs.readFileSync('./gacha.json'))
   let personajesMap = {}
   for (let p of data.personajes) {
