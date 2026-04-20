@@ -34,7 +34,7 @@ let handler = async (m, { conn, usedPrefix }) => {
   }
 
   let menuText = `
-*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*
+*《 🗡️ 𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*
 
 *➤  𝐔𝐬𝐮𝐚𝐫𝐢𝐨*  :  @${m.sender.split('@')[0]}
 *➤  𝐀𝐜𝐭𝐢𝐯𝐨*   :  ${uptime}
