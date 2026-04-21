@@ -45,7 +45,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 
 ${secciones.join('\n\n')}
 
-*➤  𝐂𝐫𝐞𝐚𝐝𝐨𝐫*  :  𝐋𝐲𝐨𝐧𝐧𝐎𝐅𝐂
+*➤. 𝐂𝐫𝐞𝐚𝐝𝐨𝐫*  : 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐋𝐲𝐨𝐧𝐧
 
 *⚔️ © 2026  𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*
 `.trim()
