@@ -1,7 +1,7 @@
 {
-  "name": "baldwind-iv",
+  "name": "kiyotaka-ayanokoji",
   "version": "7.7.7",
-  "description": "🜸 BALDWIND IV - Bot de WhatsApp con temática medieval/cyberpunk",
+  "description": "🎭 KIYOTAKA AYANOKOJI - Bot de WhatsApp del Aula de Élite",
   "main": "index.js",
   "type": "module",
 
@@ -21,21 +21,21 @@
     "eslint": "eslint .",
     "eslintfix": "eslint --fix ."
   },
-  "homepage": "https://github.com/Feroficial/Baldwind-Bot",
+  "homepage": "https://github.com/Feroficial/Kiyotaka-Ayanokoji-Bot",
   "author": {
     "name": "DEVLYONN"
   },
   "collaborators": {
     "col1": "DEVLYONN",
-    "col2": "BALDWIND IV",
-    "col3": "Cyber Core"
+    "col2": "KIYOTAKA AYANOKOJI",
+    "col3": "EL AULA DE ELITE"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Feroficial/Baldwind-Bot.git"
+    "url": "git+https://github.com/Feroficial/Kiyotaka-Ayanokoji-Bot.git"
   },
   "bugs": {
-    "url": "https://github.com/Feroficial/Baldwind-Bot/issues"
+    "url": "https://github.com/Feroficial/Kiyotaka-Ayanokoji-Bot/issues"
   },
   "license": "GPL-3.0-or-later",
   "dependencies": {
@@ -108,5 +108,5 @@
     "wa-sticker-formatter": "^4.3.2",
     "moment-timezone": "^0.5.37"
   },
-  "_note": "🜸 BALDWIND IV - Compatible con todas las plataformas para bots de WhatsApp"
+  "_note": "🎭 KIYOTAKA AYANOKOJI - El aula de élite ahora está en WhatsApp"
 }
