@@ -91,7 +91,7 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner }) => {
 
 handler.help = ['update <opción>']
 handler.tags = ['owner']
-handler.command = /^(update|actualizar)$/i
+handler.command = /^(update|actualizar|up)$/i
 handler.rowner = true
 
 export default handler
