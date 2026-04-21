@@ -41,7 +41,7 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner }) => {
       let resultado = stdout || stderr || 'Sin cambios'
       await m.reply(`*《 🎭  𝐔𝐏𝐃𝐀𝐓𝐄  🗡️ 》*\n\n➤ *Resultado:*\n\`\`\`${resultado.slice(0, 1500)}\`\`\`\n\n*"Actualización completada"*`)
       if (resultado.includes('Updating') || resultado.includes('Already up to date')) {
-        await m.reply(`*《 🎭  𝐔𝐏𝐃𝐀𝐓𝐄  🗡️ 》*\n\n✅ *Actualización exitosa*\n🔄 *Recomiendo reiniciar el bot*`)
+        await m.reply(`*《 🎭  𝐔𝐏𝐃𝐀𝐓𝐄  🗡️ 》*\n\n✅ *Actualización exitosa*\n🔖 *Ayanokoji listo*`)
       }
     }
     else if (opcion === '2' || opcion === 'forzado') {
