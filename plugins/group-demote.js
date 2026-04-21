@@ -1,24 +1,18 @@
-const handler = async (m, { conn, usedPrefix }) => {
+const handler = async (m, { conn }) => {
   if (!m.mentionedJid[0] && !m.quoted) {
-    let texto = `*《 🎭  𝐃𝐄𝐌𝐎𝐓𝐄  🗡️ 》*\n\n➤ *Uso:* ${usedPrefix}demote @usuario\n➤ *Ejemplo:* ${usedPrefix}demote @usuario\n\n*"Menciona o responde al mensaje del usuario que deseas degradar."*\n\n*"El poder puede desaparecer en cualquier momento"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`;
-    return m.reply(texto);
+    let text = `*Mention or reply to the user you want to demote from admin.*`
+    return m.reply(text, m.chat, { mentions: conn.parseMention(text) })
   }
 
-  let user = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted.sender;
-  
-  try {
-    await conn.groupParticipantsUpdate(m.chat, [user], 'demote');
-    m.reply(`*《 🎭  𝐃𝐄𝐌𝐎𝐓𝐄  🗡️ 》*\n\n➤ *Usuario:* @${user.split('@')[0]}\n➤ *Acción:* ❌ REMOVIDO ADMINISTRADOR\n\n*"El poder ha sido arrebatado, la jerarquía cambia"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`, { mentions: [user] });
-  } catch (e) {
-    m.reply(`*《 🎭  𝐃𝐄𝐌𝐎𝐓𝐄  🗡️ 》*\n\n➤ *Error:* ${e.message}\n\n*"El sistema ha fallado, pero el aula continúa"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`);
-  }
-};
+  let user = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted.sender
+  await conn.groupParticipantsUpdate(m.chat, [user], 'demote')
+  m.reply(`*✅ El usuario a sido degrado.*`)
+}
 
-handler.help = ['demote'];
-handler.tags = ['group'];
-handler.command = ['demote', 'degradar'];
-handler.group = true;
-handler.admin = true;
-handler.botAdmin = true;
+handler.help = ['demote']
+handler.tags = ['group']
+handler.command = ['demote']
+handler.group = true
+handler.admin = true
 
-export default handler;
+export default handler
