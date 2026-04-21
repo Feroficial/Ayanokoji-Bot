@@ -18,7 +18,7 @@ handler.help = ['${name}']
 handler.tags = ['group']
 handler.command = /^${name}$/i
 handler.group = false
-export default handler
+export default true
 `
 
   let pluginPath = path.join(process.cwd(), 'plugins', pluginName)
