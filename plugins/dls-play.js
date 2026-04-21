@@ -1,9 +1,11 @@
 import fetch from 'node-fetch'
 
 let handler = async (m, { conn, text }) => {
-  if (!text) return m.reply(`*《 🐉  𝐘𝐓 𝐌𝐏𝟑  🗡️ 》*\n\n➤ Uso: #play <canción o link>\n➤ Ejemplo: #play Bad Bunny\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+  if (!text) return m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *Uso:* #play <canción o link>\n➤ *Ejemplo:* #play Bad Bunny\n\n*"El aula de élite no espera a nadie"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
 
   await conn.sendMessage(m.chat, { react: { text: '🔍', key: m.key } })
+
+  let mensajeEspera = await m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *Analizando el campo de batalla...*\n➤ *Buscando:* ${text}\n\n*"El conocimiento es poder, pero la estrategia lo es todo"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
 
   let videoUrl = ''
   let videoId = ''
@@ -18,49 +20,58 @@ let handler = async (m, { conn, text }) => {
     videoId = match[2]
     videoUrl = `https://www.youtube.com/watch?v=${videoId}`
   } else {
-    let searchUrl = `https://dv-yer-api.online/ytsearch?q=${encodeURIComponent(text)}&limit=1&apikey=dvyer233962325851`
+    let searchUrl = `https://api.agatz.xyz/api/youtube?query=${encodeURIComponent(text)}`
     let searchRes = await fetch(searchUrl)
     let searchData = await searchRes.json()
 
-    if (!searchData.ok || searchData.count === 0) {
+    if (!searchData.data || searchData.data.length === 0) {
       await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
-      return m.reply(`*《 🐉  𝐘𝐓 𝐌𝐏𝟑  🗡️ 》*\n\n➤ No se encontraron resultados para "${text}"\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+      return m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *No se encontraron resultados para:* "${text}"\n➤ *Intenta con otro nombre*\n\n*"Hasta el mejor estratega falla a veces"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
     }
 
-    let primerResultado = searchData.results[0]
-    videoId = primerResultado.video_id
+    let primerResultado = searchData.data[0]
+    videoId = primerResultado.videoId
     videoUrl = `https://www.youtube.com/watch?v=${videoId}`
     titulo = primerResultado.title
-    creador = primerResultado.channel_name || 'Desconocido'
+    creador = primerResultado.author || 'Desconocido'
   }
 
   await conn.sendMessage(m.chat, { react: { text: '⏳', key: m.key } })
 
-  let apiUrl = `https://dv-yer-api.online/ytmp3?mode=link&url=${encodeURIComponent(videoUrl)}&apikey=dvyer233962325851`
+  await conn.sendMessage(m.chat, {
+    text: `*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *Localizando el objetivo...*\n➤ *música encontrado:* ${titulo || 'Procesando...'}\n➤ *Creador:* ${creador || 'Desconocido'}\n\n*"La preparación es la clave de la victoria"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`,
+    edit: mensajeEspera.key
+  })
+
+  let apiUrl = `https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoUrl)}`
   let res = await fetch(apiUrl)
   let data = await res.json()
 
-  if (!data.ok || !data.download_url || data.download_url.includes('/download/stream/')) {
+  if (!data.status || !data.data || !data.data.link) {
     await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
-    return m.reply(`*《 🐉  𝐘𝐓 𝐌𝐏𝟑  🗡️ 》*\n\n➤ Error: La API no generó un enlace válido\n➤ Intenta con otro video o más tarde\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+    return m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *Error al descargar el audio*\n➤ *El enemigo ha sido escurridizo*\n➤ *Intenta con otro audio*\n\n*"No todas las batallas se ganan, pero se aprende de ellas"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
   }
 
   let thumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-  let tituloFinal = data.title || titulo
-  let creadorFinal = data.creator || creador
-
-  let texto = `*《 🐉  𝐘𝐓 𝐌𝐏𝟑  🗡️ 》*\n\n🎵 *${tituloFinal}*\n👤 *Creador:* ${creadorFinal}\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`
+  let tituloFinal = data.data.title || titulo
+  let duracion = data.data.duration || 'Desconocida'
+  let tamaño = data.data.size || 'Desconocido'
 
   await conn.sendMessage(m.chat, { react: { text: '📥', key: m.key } })
 
   await conn.sendMessage(m.chat, {
-    audio: { url: data.download_url },
+    text: `*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *Descargando audio...*\n➤ *Título:* ${tituloFinal}\n➤ *Duración:* ${duracion}\n➤ *Tamaño:* ${tamaño}\n\n*"La paciencia es el arma del sabio"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`,
+    edit: mensajeEspera.key
+  })
+
+  await conn.sendMessage(m.chat, {
+    audio: { url: data.data.link },
     mimetype: 'audio/mpeg',
     fileName: `${tituloFinal}.mp3`,
     contextInfo: {
       externalAdReply: {
         title: tituloFinal,
-        body: creadorFinal,
+        body: creador,
         thumbnailUrl: thumbnail,
         sourceUrl: videoUrl,
         mediaType: 1,
@@ -70,6 +81,11 @@ let handler = async (m, { conn, text }) => {
   })
 
   await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
+
+  await conn.sendMessage(m.chat, {
+    text: `*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *¡Misión cumplida!*\n➤ *Audio enviado exitosamente*\n\n*"El aula de élite siempre está un paso adelante"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`,
+    edit: mensajeEspera.key
+  })
 }
 
 handler.help = ['play']
