@@ -214,47 +214,47 @@ global.conn.ev.on('connection.update', connectionUpdate)
 global.conn.ev.on('group-participants.update', async (update) => {
     try {
         const { id, participants, action } = update;
-
+        
         if (!global.db.data) await loadDatabase();
-
+        
         if (!global.db.data.chats[id]) {
             global.db.data.chats[id] = {};
         }
-
+        
         const chat = global.db.data.chats[id];
         if (!chat || chat.welcome !== true) return;
-
+        
         const groupMetadata = await global.conn.groupMetadata(id).catch(() => null);
         const groupName = groupMetadata?.subject || 'el grupo';
         const memberCount = groupMetadata?.participants?.length || 0;
         const groupIcon = await getGroupPicture(id);
-
+        
         if (action === 'add') {
             for (const jid of participants) {
                 try {
                     if (!global.db.data.users[jid]) {
                         global.db.data.users[jid] = {};
                     }
-
+                    
                     let userData = global.db.data.users[jid];
                     let userLevel = userData.level || 1;
                     let userRole = userData.role || '⚔️ Escudero';
-
+                    
                     let welcomeText = chat.welcomeMessage || `—͟͟͞͞ *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n\n> ✨ BIENVENIDO/A AL AULA DE ÉLITE ✨\n\n> 👤 @user\n> 📊 Nivel: @level\n> 🛡️ Rol: @role\n> 👥 Miembros: @count\n\n> 🌟 Disfruta @group\n\n👑 DevLyonn`;
-
+                    
                     welcomeText = welcomeText
                         .replace(/@user/g, `@${jid.split('@')[0]}`)
                         .replace(/@level/g, userLevel)
                         .replace(/@role/g, userRole)
                         .replace(/@count/g, memberCount)
                         .replace(/@group/g, groupName);
-
+                    
                     await global.conn.sendMessage(id, {
                         image: { url: groupIcon },
                         caption: welcomeText,
                         mentions: [jid]
                     });
-
+                    
                     if (chat.welcomeBonus !== false) {
                         userData.monedas = (userData.monedas || 0) + 50;
                         userData.exp = (userData.exp || 0) + 100;
@@ -264,12 +264,12 @@ global.conn.ev.on('group-participants.update', async (update) => {
                 }
             }
         }
-
+        
         if (action === 'remove') {
             for (const jid of participants) {
                 try {
                     const goodbyeText = `—͟͟͞͞ *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n\n> 👋 HASTA PRONTO 👋\n\n> 👤 @${jid.split('@')[0]} ha abandonado el grupo\n> 👥 Miembros restantes: ${memberCount}\n\n👑 DevLyonn`;
-
+                    
                     await global.conn.sendMessage(id, {
                         image: { url: groupIcon },
                         caption: goodbyeText,
@@ -282,122 +282,6 @@ global.conn.ev.on('group-participants.update', async (update) => {
         console.log('Error en group-participants:', e);
     }
 });
-
-// ========== DETECTORES DE EVENTOS DEL GRUPO CON MENCIÓN ==========
-
-async function getGroupPictureDetector(groupJid) {
-  try {
-    const url = await global.conn.profilePictureUrl(groupJid, "image");
-    return url;
-  } catch {
-    return null;
-  }
-}
-
-global.conn.ev.on("group-participants.update", async (update) => {
-  const { id, participants, action } = update;
-  const grupo = await global.conn.groupMetadata(id).catch(() => null);
-  const nombreGrupo = grupo?.subject || "el grupo";
-  const foto = await getGroupPictureDetector(id);
-  
-  if (action === "promote") {
-    for (let jid of participants) {
-      let texto = `> ❀ @${jid.split("@")[0]} *Ahora es administrador del grupo.*\n> ✦ Acción hecha por:\n> » @${global.conn.user.jid.split("@")[0]}`;
-      if (foto) {
-        await global.conn.sendMessage(id, { image: { url: foto }, caption: texto, mentions: [jid, global.conn.user.jid] });
-      } else {
-        await global.conn.sendMessage(id, { text: texto, mentions: [jid, global.conn.user.jid] });
-      }
-    }
-  }
-  
-  if (action === "demote") {
-    for (let jid of participants) {
-      let texto = `> ❀ @${jid.split("@")[0]} *Deja de ser administrador del grupo.*\n> ✦ Acción hecha por:\n> » @${global.conn.user.jid.split("@")[0]}`;
-      if (foto) {
-        await global.conn.sendMessage(id, { image: { url: foto }, caption: texto, mentions: [jid, global.conn.user.jid] });
-      } else {
-        await global.conn.sendMessage(id, { text: texto, mentions: [jid, global.conn.user.jid] });
-      }
-    }
-  }
-  
-  if (action === "add") {
-    for (let jid of participants) {
-      let texto = `> ❀ @${jid.split("@")[0]} *Se unió al grupo.*\n> ✦ Acción hecha por:\n> » @${global.conn.user.jid.split("@")[0]}`;
-      if (foto) {
-        await global.conn.sendMessage(id, { image: { url: foto }, caption: texto, mentions: [jid, global.conn.user.jid] });
-      } else {
-        await global.conn.sendMessage(id, { text: texto, mentions: [jid, global.conn.user.jid] });
-      }
-    }
-  }
-  
-  if (action === "remove") {
-    for (let jid of participants) {
-      let texto = `> ❀ @${jid.split("@")[0]} *Salió del grupo.*\n> ✦ Acción hecha por:\n> » @${global.conn.user.jid.split("@")[0]}`;
-      if (foto) {
-        await global.conn.sendMessage(id, { image: { url: foto }, caption: texto, mentions: [jid, global.conn.user.jid] });
-      } else {
-        await global.conn.sendMessage(id, { text: texto, mentions: [jid, global.conn.user.jid] });
-      }
-    }
-  }
-});
-
-global.conn.ev.on("groups.update", async (updates) => {
-  for (let update of updates) {
-    const { id, subject, desc, announce } = update;
-    const grupo = await global.conn.groupMetadata(id).catch(() => null);
-    const nombreGrupo = grupo?.subject || "el grupo";
-    const foto = await getGroupPictureDetector(id);
-    
-    if (subject) {
-      let texto = `> ❀ *Nombre del grupo cambiado.*\n> 🆕 *Nuevo nombre:* ${subject}\n> ✦ Acción hecha por:\n> » @${global.conn.user.jid.split("@")[0]}`;
-      if (foto) {
-        await global.conn.sendMessage(id, { image: { url: foto }, caption: texto, mentions: [global.conn.user.jid] });
-      } else {
-        await global.conn.sendMessage(id, { text: texto, mentions: [global.conn.user.jid] });
-      }
-    }
-    
-    if (desc) {
-      let texto = `> ❀ *Descripción del grupo cambiada.*\n> ✦ Acción hecha por:\n> » @${global.conn.user.jid.split("@")[0]}`;
-      if (foto) {
-        await global.conn.sendMessage(id, { image: { url: foto }, caption: texto, mentions: [global.conn.user.jid] });
-      } else {
-        await global.conn.sendMessage(id, { text: texto, mentions: [global.conn.user.jid] });
-      }
-    }
-    
-    if (announce !== undefined) {
-      let estado = announce ? "🔒 CERRADO" : "🔓 ABIERTO";
-      let texto = `> ❀ *Modo del grupo cambiado a ${estado}.*\n> ✦ Acción hecha por:\n> » @${global.conn.user.jid.split("@")[0]}`;
-      if (foto) {
-        await global.conn.sendMessage(id, { image: { url: foto }, caption: texto, mentions: [global.conn.user.jid] });
-      } else {
-        await global.conn.sendMessage(id, { text: texto, mentions: [global.conn.user.jid] });
-      }
-    }
-  }
-});
-
-global.conn.ev.on("group-picture.update", async (update) => {
-  const { jid, img } = update;
-  const grupo = await global.conn.groupMetadata(jid).catch(() => null);
-  const nombreGrupo = grupo?.subject || "el grupo";
-  const fotoNueva = img || await getGroupPictureDetector(jid);
-  
-  let texto = `> ❀ *Foto del grupo cambiada.*\n> ✦ Acción hecha por:\n> » @${global.conn.user.jid.split("@")[0]}`;
-  
-  if (fotoNueva) {
-    await global.conn.sendMessage(jid, { image: { url: fotoNueva }, caption: texto, mentions: [global.conn.user.jid] });
-  } else {
-    await global.conn.sendMessage(jid, { text: texto, mentions: [global.conn.user.jid] });
-  }
-});
-
-console.log("✅ DETECTORES DE GRUPO ACTIVADOS");
 
 // ========== RELOAD HANDLER ==========
 let isInit = true
