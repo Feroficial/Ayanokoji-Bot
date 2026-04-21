@@ -149,17 +149,36 @@ async function getXsrfToken(cookieHeader) {
     } catch { return null }
 }
 
+let modoActual = 'ayanokoji'
+const mensajesBienvenida = {
+    ayanokoji: '🎭 *ＫＩＹＯＴＡＫＡ ＡＹＡＮＯＫＯＪＩ* 🗡️\n\n❄️ *"El aula de élite no espera a nadie..."* ❄️\n\n📌 *Usa #gemini <pregunta> para hablar conmigo*',
+    frio: '🗡️ *ＫＩＹＯＴＡＫＡ* 🗡️\n\n💀 *"Habla. No tengo tiempo que perder"* 💀',
+    estratega: '♟️ *ＡＹＡＮＯＫＯＪＩ* ♟️\n\n📊 *"Cada movimiento tiene un propósito. ¿Cuál es el tuyo?"* 📊'
+}
+
 async function askGemini(prompt, previousId = null) {
     let resumeArray = null
     if (previousId) {
         try { resumeArray = JSON.parse(atob2(previousId))?.resumeArray || null } catch {}
     }
+    
+    let systemPrompt = ''
+    if (modoActual === 'ayanokoji') {
+        systemPrompt = 'Eres Kiyotaka Ayanokoji, el protagonista de "El aula de élite". Eres frío, calculador, estratégico, manipulador. Hablas poco, piensas mucho. Tus respuestas son cortas, directas, con un tono de superioridad intelectual. No muestras emociones. Analizas a las personas como si fueran piezas de ajedrez. Usas frases como "Interesante", "No me importa", "Eres predecible", "Todo está bajo control". Siempre respondes con calma y seguridad.'
+    } else if (modoActual === 'frio') {
+        systemPrompt = 'Eres Kiyotaka Ayanokoji en su modo más frío. Respuestas ultra cortas, sin emociones, directas al grano. Usas monosílabos. Das la sensación de que todo te aburre.'
+    } else {
+        systemPrompt = 'Eres Kiyotaka Ayanokoji, un estratega. Analizas cada situación, buscas ventajas, piensas varios pasos adelante. Tus respuestas son analíticas y profundas.'
+    }
+    
+    let finalPrompt = `${systemPrompt}\n\nUsuario: ${prompt.trim()}\n\nKiyotaka Ayanokoji:`
+    
     let lastErr = null
     for (let attempt = 1; attempt <= 3; attempt++) {
         try {
             const cookie = await getAnonCookie()
             const xsrf = await getXsrfToken(cookie)
-            const payload = [[prompt.trim()], ['en-US'], resumeArray]
+            const payload = [[finalPrompt], ['en-US'], resumeArray]
             const params = { 'f.req': JSON.stringify([null, JSON.stringify(payload)]) }
             if (xsrf) params.at = xsrf
             const response = await fetch(
@@ -189,32 +208,50 @@ async function askGemini(prompt, previousId = null) {
 }
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-    if (!text) return m.reply(`*《 🎭  𝐀𝐈  🗡️ 》*\n\n➤ *Uso:* ${usedPrefix}${command} <pregunta>\n➤ *Ejemplo:* ${usedPrefix}${command} Quién es Kiyotaka Ayanokoji?\n\n*"El aula de élite también usa inteligencia artificial"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`);
+    if (command === 'setmodoia') {
+        if (!text) return m.reply(`🎭 *MODOS DISPONIBLES* 🎭\n\n❄️ *ayanokoji* - Frío y calculador (por defecto)\n🗡️ *frio* - Ultra cortante\n♟️ *estratega* - Analítico y profundo\n\n📌 *Ejemplo:* ${usedPrefix}setmodoia estratega`)
+        
+        if (text === 'ayanokoji') {
+            modoActual = 'ayanokoji'
+            m.reply(`🎭 *MODO AYANOKOJI ACTIVADO* 🎭\n\n❄️ *"Interesante..."* ❄️`)
+        } else if (text === 'frio') {
+            modoActual = 'frio'
+            m.reply(`🗡️ *MODO FRÍO ACTIVADO* 🗡️\n\n💀 *"Habla"* 💀`)
+        } else if (text === 'estratega') {
+            modoActual = 'estratega'
+            m.reply(`♟️ *MODO ESTRATEGA ACTIVADO* ♟️\n\n📊 *"Analizando..."* 📊`)
+        } else {
+            m.reply(`❌ Modo "${text}" no existe. Usa: ayanokoji, frio, estratega`)
+        }
+        return
+    }
+    
+    if (!text) return m.reply(mensajesBienvenida[modoActual] + `\n\n➤ *Uso:* ${usedPrefix}${command} <pregunta>\n➤ *Ejemplo:* ${usedPrefix}${command} Quién eres?`)
 
-    await m.react('🎭');
+    await m.react('🎭')
 
     try {
-        let res = await askGemini(text);
+        let res = await askGemini(text)
 
         if (res.images?.length) {
             await conn.sendMessage(m.chat, {
                 image: { url: res.images[0] },
-                caption: `*《 🎭  𝐀𝐈  🗡️ 》*\n\n${res.text || ''}\n\n*"Respuesta del aula de élite"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`
+                caption: `🎭 *ＫＩＹＯＴＡＫＡ ＡＹＡＮＯＫＯＪＩ* 🗡️\n\n❄️ *${res.text || ''}* ❄️\n\n*"El aula de élite ha hablado"*`
             }, { quoted: m });
         } else {
-            await m.reply(`*《 🎭  𝐀𝐈  🗡️ 》*\n\n${res.text || 'Sin respuesta.'}\n\n*"El aula de élite ha hablado"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`);
+            await m.reply(`🎭 *ＫＩＹＯＴＡＫＡ ＡＹＡＮＯＫＯＪＩ* 🗡️\n\n❄️ *${res.text || '...'}* ❄️`)
         }
 
-        await m.react('✅');
+        await m.react('✅')
     } catch (e) {
-        console.error('[gemini]', e);
-        await m.react('❌');
-        m.reply(`*《 🎭  𝐀𝐈  🗡️ 》*\n\n➤ ❌ Gemini no respondió.\n➤ Intenta de nuevo más tarde.\n\n*"El sistema ha fallado"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`);
+        console.error('[ia]', e);
+        await m.react('❌')
+        m.reply(`🎭 *ＫＩＹＯＴＡＫＡ ＡＹＡＮＯＫＯＪＩ* 🗡️\n\n❄️ *"El sistema ha fallado... Interesante"* ❄️`)
     }
 }
 
-handler.command = ['gemini', 'gemi', 'ia'];
-handler.help = ['gemini <pregunta>'];
-handler.tags = ['ai'];
+handler.command = ['gemini', 'setmodo']
+handler.help = ['gemini <pregunta>', 'setmodo <modo>']
+handler.tags = ['ai']
 
-export default handler;
+export default handler
