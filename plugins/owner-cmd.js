@@ -7,14 +7,14 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner }) => {
 
   let pluginName = name.endsWith('.js') ? name : name + '.js'
   
-  let template = `let handler = async (m, { conn }) => {
+  let template = `let handler = async (m, { conn, isAdmin, isOwner, isROwner, args, text, usedPrefix, command }) => {
   ${code}
 }
 
 handler.help = ['${name}']
 handler.tags = ['custom']
 handler.command = /^${name}$/i
-
+handler.group = false
 export default handler
 `
 
