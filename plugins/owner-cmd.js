@@ -15,7 +15,7 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner }) => {
 }
 
 handler.help = ['${name}']
-handler.tags = ['custom']
+handler.tags = ['group']
 handler.command = /^${name}$/i
 handler.group = false
 export default handler
