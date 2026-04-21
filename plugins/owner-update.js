@@ -18,7 +18,7 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner }) => {
   if (!text) {
    return m.reply(`
   ♪ ••• ♪    🔖 𝐔𝐏𝐃𝐀𝐓𝐄 𝐒𝐘𝐒𝐓𝐄𝐌 🔖 ♪ ••• ♪  
-♪
+
 ┌───『 🔖 𝐂𝐎𝐌𝐀𝐍𝐃𝐎𝐒 𝐃𝐈𝐒𝐏𝐎𝐍𝐈𝐁𝐋𝐄𝐒 🔖 ───┐
 │
 │  🔖 *${usedPrefix + command} pull*   ──  𝐃𝐞𝐬𝐜𝐚𝐫𝐠𝐚𝐫 𝐜𝐚𝐦𝐛𝐢𝐨𝐬
