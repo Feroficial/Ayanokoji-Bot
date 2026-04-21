@@ -6,19 +6,19 @@ import { existsSync, writeFileSync } from 'fs'
 import cfonts from 'cfonts'
 import chalk from 'chalk'
 
-console.log(chalk.bold.hex('#00FFFF')('\n✞─ Iniciando BALDWIND IV ─✞'))
+console.log(chalk.bold.hex('#00FFFF')('\n✞─ Iniciando KIYOTAKA AYANOKOJI ─✞'))
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const require = createRequire(__dirname)
 require(join(__dirname, './package.json'))
 
-async function iniciarBaldwind() {
+async function iniciarBot() {
   console.clear()
-  console.log(chalk.bold.cyanBright('\n⟦ ⌬ BALDWIND IV V.777 ⟧'))
-  console.log(chalk.gray('⌬ Iniciando sistema...'))
+  console.log(chalk.bold.cyanBright('\n⟦ 🎭 KIYOTAKA AYANOKOJI V.777 ⟧'))
+  console.log(chalk.gray('🎬 Iniciando sistema...'))
   await new Promise(res => setTimeout(res, 600))
 
-  cfonts.say('BALDWIND IV', {
+  cfonts.say('KIYOTAKA', {
     font: 'block',
     align: 'center',
     colors: ['#00FFFF', '#FF00FF', '#FFD700'],
@@ -31,7 +31,7 @@ async function iniciarBaldwind() {
 █░░║║║╠─║─║─║║║║║╠─░░█
 █░░╚╩╝╚╝╚╝╚╝╚╝╩─╩╚╝░░█
 █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█
-        [ ACCESO CONCEDIDO ]
+        [ EL AULA DE ELITE ]
   `))
 
   await new Promise(res => setTimeout(res, 800))
@@ -47,7 +47,7 @@ let isRunning = false
 function start(file) {
   if (isRunning) return
   isRunning = true
-  let args = [join(__dirname, 'baldwind-core', file), ...process.argv.slice(2)]
+  let args = [join(__dirname, 'kiyotaka-ayanokoji', file), ...process.argv.slice(2)]
   setupMaster({ exec: args[0], args: args.slice(1) })
   let p = fork()
   p.on('exit', (_, code) => {
@@ -58,7 +58,7 @@ function start(file) {
 
 const archivoArranque = './.arranque-ok'
 if (!existsSync(archivoArranque)) {
-  await iniciarBaldwind()
+  await iniciarBot()
   writeFileSync(archivoArranque, 'DEVLYONN_FINAL')
 }
 
