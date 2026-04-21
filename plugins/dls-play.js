@@ -1,94 +1,199 @@
-import fetch from 'node-fetch'
+import yts from "yt-search"
+import fetch from "node-fetch"
 
-let handler = async (m, { conn, text }) => {
+const handler = async (m, { conn, text }) => {
   if (!text) return m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *Uso:* #play <canción o link>\n➤ *Ejemplo:* #play Bad Bunny\n\n*"El aula de élite no espera a nadie"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
 
-  await conn.sendMessage(m.chat, { react: { text: '🔍', key: m.key } })
+  await m.react('🔍')
 
-  let mensajeEspera = await m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *Analizando el campo de batalla...*\n➤ *Buscando:* ${text}\n\n*"El conocimiento es poder, pero la estrategia lo es todo"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+  try {
+    let url = text.trim()
+    let title = "Desconocido"
+    let authorName = "Desconocido"
+    let durationTimestamp = "Desconocida"
+    let views = 0
+    let thumbnail = ""
 
-  let videoUrl = ''
-  let videoId = ''
-  let titulo = ''
-  let creador = ''
+    const isUrl = /^https?:\/\/\S+/i.test(url)
 
-  let urlRegex = /(youtu\.be\/|youtube\.com\/watch\?v=)([a-zA-Z0-9_-]+)/i
-  let esLink = urlRegex.test(text)
+    if (isUrl) {
+      if (!isYouTubeUrl(url)) {
+        return m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *El enlace no es válido de YouTube*\n\n*"El enemigo ha usado un señuelo"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+      }
 
-  if (esLink) {
-    let match = text.match(urlRegex)
-    videoId = match[2]
-    videoUrl = `https://www.youtube.com/watch?v=${videoId}`
-  } else {
-    let searchUrl = `https://api.agatz.xyz/api/youtube?query=${encodeURIComponent(text)}`
-    let searchRes = await fetch(searchUrl)
-    let searchData = await searchRes.json()
+      const videoId = extractVideoId(url)
+      if (!videoId) {
+        return m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *No pude extraer el ID del video*\n\n*"El código ha sido manipulado"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+      }
 
-    if (!searchData.data || searchData.data.length === 0) {
-      await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
-      return m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *No se encontraron resultados para:* "${text}"\n➤ *Intenta con otro nombre*\n\n*"Hasta el mejor estratega falla a veces"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+      const res = await yts({ videoId })
+
+      if (!res) {
+        return m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *No pude obtener información del video*\n\n*"La información es poder, pero a veces se oculta"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+      }
+
+      title = res.title || title
+      authorName = res.author?.name || authorName
+      durationTimestamp = res.timestamp || durationTimestamp
+      views = res.views || views
+      thumbnail = res.thumbnail || thumbnail
+      url = res.url || url
+    } else {
+      await m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *Analizando el campo de batalla...*\n➤ *Buscando:* ${text}\n\n*"El conocimiento es poder, pero la estrategia lo es todo"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+
+      const res = await yts(url)
+
+      if (!res?.videos?.length) {
+        return m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *No encontré resultados para:* "${text}"\n\n*"Hasta el mejor estratega falla a veces"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+      }
+
+      const video = res.videos[0]
+      title = video.title || title
+      authorName = video.author?.name || authorName
+      durationTimestamp = video.timestamp || durationTimestamp
+      views = video.views || views
+      url = video.url || url
+      thumbnail = video.thumbnail || thumbnail
     }
 
-    let primerResultado = searchData.data[0]
-    videoId = primerResultado.videoId
-    videoUrl = `https://www.youtube.com/watch?v=${videoId}`
-    titulo = primerResultado.title
-    creador = primerResultado.author || 'Desconocido'
-  }
+    const vistas = formatViews(views)
 
-  await conn.sendMessage(m.chat, { react: { text: '⏳', key: m.key } })
+    const fallbackThumbRes = await fetch("https://i.ibb.co/83pbxQN/5eecaebbc7c3.jpg")
+    const fallbackThumb = Buffer.from(await fallbackThumbRes.arrayBuffer())
 
-  await conn.sendMessage(m.chat, {
-    text: `*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *Localizando el objetivo...*\n➤ *música encontrado:* ${titulo || 'Procesando...'}\n➤ *Creador:* ${creador || 'Desconocido'}\n\n*"La preparación es la clave de la victoria"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`,
-    edit: mensajeEspera.key
-  })
-
-  let apiUrl = `https://api.agatz.xyz/api/ytmp3?url=${encodeURIComponent(videoUrl)}`
-  let res = await fetch(apiUrl)
-  let data = await res.json()
-
-  if (!data.status || !data.data || !data.data.link) {
-    await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
-    return m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *Error al descargar el audio*\n➤ *El enemigo ha sido escurridizo*\n➤ *Intenta con otro audio*\n\n*"No todas las batallas se ganan, pero se aprende de ellas"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
-  }
-
-  let thumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-  let tituloFinal = data.data.title || titulo
-  let duracion = data.data.duration || 'Desconocida'
-  let tamaño = data.data.size || 'Desconocido'
-
-  await conn.sendMessage(m.chat, { react: { text: '📥', key: m.key } })
-
-  await conn.sendMessage(m.chat, {
-    text: `*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *Descargando audio...*\n➤ *Título:* ${tituloFinal}\n➤ *Duración:* ${duracion}\n➤ *Tamaño:* ${tamaño}\n\n*"La paciencia es el arma del sabio"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`,
-    edit: mensajeEspera.key
-  })
-
-  await conn.sendMessage(m.chat, {
-    audio: { url: data.data.link },
-    mimetype: 'audio/mpeg',
-    fileName: `${tituloFinal}.mp3`,
-    contextInfo: {
-      externalAdReply: {
-        title: tituloFinal,
-        body: creador,
-        thumbnailUrl: thumbnail,
-        sourceUrl: videoUrl,
-        mediaType: 1,
-        renderLargerThumbnail: true
+    const fkontak = {
+      key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        locationMessage: {
+          name: `『 ${title} 』`,
+          jpegThumbnail: fallbackThumb
+        }
       }
     }
-  })
 
-  await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
+    const caption = `
+*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*
 
-  await conn.sendMessage(m.chat, {
-    text: `*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *¡Misión cumplida!*\n➤ *Audio enviado exitosamente*\n\n*"El aula de élite siempre está un paso adelante"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`,
-    edit: mensajeEspera.key
-  })
+➤ *Localizando el objetivo...*
+
+🎼 *Título:* ${title}
+📺 *Creador:* ${authorName}
+👁️ *Vistas:* ${vistas}
+⏳ *Duración:* ${durationTimestamp}
+
+*"La preparación es la clave de la victoria"*
+*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*
+`
+
+    let thumb = fallbackThumb
+
+    if (thumbnail) {
+      try {
+        thumb = (await conn.getFile(thumbnail)).data
+      } catch {
+        thumb = fallbackThumb
+      }
+    }
+
+    await conn.sendMessage(
+      m.chat,
+      {
+        image: thumb,
+        caption
+      },
+      { quoted: fkontak }
+    )
+
+    await downloadMedia(conn, m, url, fkontak)
+    await m.react('✅')
+  } catch (e) {
+    console.error(e)
+    await m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *Error:* ${e.message}\n\n*"El sistema ha sido comprometido"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+    await m.react('❌')
+  }
 }
 
-handler.help = ['play']
-handler.tags = ['downloader']
-handler.command = /^(play|yta|audio)$/i
+const downloadMedia = async (conn, m, url, quotedMsg) => {
+  try {
+    const sent = await conn.sendMessage(
+      m.chat,
+      { text: `*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *Descargando audio...*\n\n*"La paciencia es el arma del sabio"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*` },
+      { quoted: m }
+    )
+
+    const apiUrl = `https://api-gohan.onrender.com/download/ytaudio?url=${encodeURIComponent(url)}`
+    const r = await fetch(apiUrl)
+
+    if (!r.ok) {
+      return m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *Error HTTP ${r.status} al obtener el audio*\n\n*"El enemigo ha bloqueado el ataque"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+    }
+
+    const data = await r.json()
+
+    if (!data?.status || !data?.result?.download_url) {
+      return m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *No se pudo obtener el audio*\n\n*"El código ha sido corrompido"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+    }
+
+    const fileUrl = data.result.download_url
+    const fileTitle = cleanName(data.result.title || "audio")
+
+    await conn.sendMessage(
+      m.chat,
+      {
+        audio: { url: fileUrl },
+        mimetype: "audio/mpeg",
+        fileName: `${fileTitle}.mp3`,
+        ptt: false
+      },
+      { quoted: quotedMsg }
+    )
+
+    try {
+      await conn.sendMessage(
+        m.chat,
+        {
+          text: `*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *¡Misión cumplida!*\n➤ *Audio enviado exitosamente*\n\n🎼 *Título:* ${fileTitle}\n\n*"El aula de élite siempre está un paso adelante"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`,
+          edit: sent.key
+        }
+      )
+    } catch {
+      await m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *¡Misión cumplida!*\n➤ *Audio enviado exitosamente*\n\n🎼 *Título:* ${fileTitle}\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+    }
+  } catch (e) {
+    console.error(e)
+    await m.reply(`*《 🐉  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🗡️ 》*\n\n➤ *Error:* ${e.message}\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+    await m.react('💀')
+  }
+}
+
+const cleanName = (name) =>
+  String(name).replace(/[^\w\s._-]/gi, "").substring(0, 50)
+
+const formatViews = (views) => {
+  const n = Number(views)
+  if (!n || Number.isNaN(n)) return "No disponible"
+  if (n >= 1e9) return `${(n / 1e9).toFixed(1)}B`
+  if (n >= 1e6) return `${(n / 1e6).toFixed(1)}M`
+  if (n >= 1e3) return `${(n / 1e3).toFixed(1)}K`
+  return n.toString()
+}
+
+const isYouTubeUrl = (url) => {
+  return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(url)
+}
+
+const extractVideoId = (url) => {
+  const match =
+    url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})(?:[?&/]|\b)/) ||
+    url.match(/youtu\.be\/([0-9A-Za-z_-]{11})/)
+  return match?.[1] || null
+}
+
+handler.command = ["play", "yt", "ytsearch", "yta", "audio"]
+handler.tags = ["downloader"]
+
 export default handler
