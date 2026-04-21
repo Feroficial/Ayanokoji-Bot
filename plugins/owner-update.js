@@ -111,7 +111,7 @@ ${stdout.split('\n').map(l => `│  ${l}`).join('\n')}
 
 handler.help = ['update <opción>']
 handler.tags = ['owner']
-handler.command = /^(update|actualizar)$/i
+handler.command = /^(update|actualizar|up)$/i
 handler.rowner = true
 
 export default handler
