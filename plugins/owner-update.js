@@ -16,9 +16,8 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner }) => {
   await m.react('🔖')
 
   if (!text) {
-    return m.reply(`╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
-┃        🔖 𝐔𝐏𝐃𝐀𝐓𝐄 𝐒𝐘𝐒𝐓𝐄𝐌 🔖         ┃
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
+    return m.reply(`
+        🔖 𝐔𝐏𝐃𝐀𝐓𝐄 𝐒𝐘𝐒𝐓𝐄𝐌 🔖         
 
 ┌───『 🔖 𝐂𝐎𝐌𝐀𝐍𝐃𝐎𝐒 𝐃𝐈𝐒𝐏𝐎𝐍𝐈𝐁𝐋𝐄𝐒 🔖 ───┐
 │
