@@ -3,13 +3,18 @@ let handler = async (m, { conn, usedPrefix, command, isAdmin, isOwner, isROwner 
   if (!isAdmin && !isOwner && !isROwner) return m.reply('❌ Solo administradores');
 
   let user = m.mentionedJid?.[0];
-  if (!user) return m.reply(`*《 🎭  𝐏𝐑𝐎𝐌𝐎𝐓𝐄  🗡️ 》*\n\n➤ *Uso:* ${usedPrefix + command} @usuario\n➤ *Ejemplo:* ${usedPrefix + command} @usuario\n\n*"El aula de élite reconoce el poder de sus guerreros"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`);
+  if (!user) return m.reply(`*《 🎭  𝐏𝐑𝐎𝐌𝐎𝐓𝐄  🗡️ 》*\n\n➤ *Uso:* ${usedPrefix + command} @usuario\n➤ *Ejemplo:* ${usedPrefix + command} @usuario`);
 
   try {
-    await conn.groupParticipantsUpdate(m.chat, [user], 'promote');
-    m.reply(`*《 🎭  𝐏𝐑𝐎𝐌𝐎𝐓𝐄  🗡️ 》*\n\n➤ *Usuario:* @${user.split('@')[0]}\n➤ *Acción:* 👑 NOMBRADO ADMINISTRADOR\n\n*"Un nuevo líder emerge en el aula de élite"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`, { mentions: [user] });
+    let res = await conn.groupParticipantsUpdate(m.chat, [user], 'promote');
+    if (res) {
+      await m.reply(`*《 🎭  𝐏𝐑𝐎𝐌𝐎𝐓𝐄  🗡️ 》*\n\n➤ *Usuario:* @${user.split('@')[0]}\n➤ *Acción:* 👑 NOMBRADO ADMINISTRADOR\n\n*"Un nuevo líder emerge en el aula de élite"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`, { mentions: [user] });
+    } else {
+      await m.reply(`❌ No se pudo promover al usuario`);
+    }
   } catch (e) {
-    m.reply(`❌ Error: ${e.message}`);
+    console.error(e);
+    await m.reply(`❌ Error: ${e.message}`);
   }
 };
 
