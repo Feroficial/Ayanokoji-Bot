@@ -12,7 +12,6 @@ const { proto } = (await import('@whiskeysockets/baileys')).default;
 const isNumber = x => typeof x === 'number' && !isNaN(x);
 const delay = ms => isNumber(ms) && new Promise(resolve => setTimeout(() => resolve(), ms));
 
-// ========== RECARGA AUTOMÁTICA DE DATABASE ==========
 setInterval(async () => {
   if (global.db && global.loadDatabase) {
     try {
@@ -47,7 +46,6 @@ export async function handler(chatUpdate) {
     m.exp = 0;
     m.monedas = false;
 
-    // ========== INICIALIZAR DATOS DEL USUARIO ==========
     try {
       if (!global.db.data.users[m.sender]) {
         global.db.data.users[m.sender] = {};
@@ -189,17 +187,17 @@ export async function handler(chatUpdate) {
     // ========== SISTEMA ANTILINK ==========
     if (m.isGroup && m.text && !m.isBaileys) {
       const chat = global.db.data.chats[m.chat];
-      
+
       if (chat && chat.antiLink === true) {
         const linksProhibidos = [
           'chat.whatsapp.com', 'whatsapp.com/channel', 'instagram.com', 'facebook.com',
           'twitter.com', 'tiktok.com', 'youtube.com', 'youtu.be', 'wa.me',
           't.me', 'discord.gg', 'linktr.ee', 'https://', 'http://'
         ]
-        
+
         let tieneLink = false;
         let linkEncontrado = '';
-        
+
         for (let link of linksProhibidos) {
           if (m.text.toLowerCase().includes(link)) {
             tieneLink = true;
@@ -207,23 +205,23 @@ export async function handler(chatUpdate) {
             break;
           }
         }
-        
+
         const urlRegex = /(https?:\/\/[^\s]+)/gi;
         if (urlRegex.test(m.text) && !tieneLink) {
           tieneLink = true;
           linkEncontrado = 'enlace';
         }
-        
+
         if (tieneLink && !isAdmin && !isRAdmin && !isOwner && !isROwner) {
           try {
             await this.sendMessage(m.chat, { delete: m.key });
           } catch (e) {}
-          
+
           if (isBotAdmin) {
             try {
               await this.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
             } catch (e) {}
-            
+
             await this.sendMessage(m.chat, {
               text: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n> 🚫 *ANTILINK ACTIVADO* 🚫\n\n> 👤 Usuario: @${m.sender.split('@')[0]}\n> 🔗 Enlace detectado: ${linkEncontrado}\n> ⚔️ Expulsado automáticamente\n\n👑 *🜸 DEVLYONN 🜸*`,
               mentions: [m.sender]
@@ -241,7 +239,7 @@ export async function handler(chatUpdate) {
     // ========== SISTEMA ANTI INSULTOS ==========
     if (m.isGroup && m.text && !m.isBaileys && !isAdmin && !isRAdmin && !isOwner && !isROwner) {
       const chat = global.db.data.chats[m.chat];
-      
+
       if (chat && chat.antiInsultos === true) {
         const insultos = [
           'puto', 'puta', 'pendejo', 'pendeja', 'mierda', 'verga', 'coño', 'carajo',
@@ -253,11 +251,11 @@ export async function handler(chatUpdate) {
           'cerdo', 'cerda', 'zopenco', 'zoquete', 'menso', 'mensa', 'pendejada',
           'cagon', 'cagón', 'cagona', 'culiao', 'culiado', 'weon', 'weona'
         ];
-        
+
         let esInsulto = false;
         let insultoEncontrado = '';
         const textoLower = m.text.toLowerCase();
-        
+
         for (let insulto of insultos) {
           if (textoLower.includes(insulto)) {
             esInsulto = true;
@@ -265,24 +263,24 @@ export async function handler(chatUpdate) {
             break;
           }
         }
-        
+
         if (esInsulto) {
           let userWarn = global.db.data.users[m.sender];
           userWarn.warn = (userWarn.warn || 0) + 1;
           let warns = userWarn.warn;
           userWarn.warnReason = insultoEncontrado;
-          
+
           try {
             await this.sendMessage(m.chat, { delete: m.key });
           } catch(e) {}
-          
+
           if (warns >= 3) {
             if (isBotAdmin) {
               try {
                 await this.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
                 userWarn.warn = 0;
                 userWarn.warnReason = '';
-                
+
                 await this.sendMessage(m.chat, {
                   text: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n\n> 🚫 *USUARIO EXPULSADO* 🚫\n\n> 👤 *Usuario:* @${m.sender.split('@')[0]}\n> ⚠️ *Motivo:* 3 advertencias por insultos\n> 📌 *Ha sido expulsado del grupo*\n\n👑 *🜸 DEVLYONN 🜸*`,
                   mentions: [m.sender]
@@ -307,7 +305,7 @@ export async function handler(chatUpdate) {
     // ========== SISTEMA DE AUTO-RESPUESTAS ==========
     if (m.text && !m.isBaileys && !m.isCommand) {
       const textoLower = m.text.toLowerCase();
-      
+
       const autoRespuestas = {
         'hola': '👋 *Hola!* Bienvenido a KIYOTAKA AYANOKOJI',
         'bot': '🤖 *KIYOTAKA AYANOKOJI* a tu servicio, creado por DevLyonn',
@@ -330,7 +328,7 @@ export async function handler(chatUpdate) {
         'me ayudas': '🔧 *Claro!* Usa #menu para ver mis comandos',
         'info': '📌 *KIYOTAKA AYANOKOJI* es un bot de seguridad y moderación'
       };
-      
+
       let respondido = false;
       for (let palabra in autoRespuestas) {
         if (textoLower.includes(palabra)) {
@@ -339,7 +337,7 @@ export async function handler(chatUpdate) {
           break;
         }
       }
-      
+
       if (!respondido && (textoLower.includes('kiyotaka') || textoLower.includes('ayanokoji'))) {
         const respuestasAleatorias = [
           '🎭 *KIYOTAKA AYANOKOJI* presente ¿Necesitas algo?',
@@ -351,7 +349,7 @@ export async function handler(chatUpdate) {
         await this.sendMessage(m.chat, { text: random });
       }
     }
-    
+
     // ========== PROCESAR PLUGINS ==========
     const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), '../plugins');
     for (let name in global.plugins) {
@@ -363,7 +361,7 @@ export async function handler(chatUpdate) {
       if (!opts['restrict'] && plugin.tags?.includes('admin')) continue;
 
       const str2Regex = str => str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
-      let _prefix = plugin.customPrefix || this.prefix || global.prefix;
+      let _prefix = plugin.customPrefix || this.prefix || "";
       let match = (_prefix instanceof RegExp ? [[_prefix.exec(m.text), _prefix]] :
         Array.isArray(_prefix) ? _prefix.map(p => [p instanceof RegExp ? p.exec(m.text) : new RegExp(str2Regex(p)).exec(m.text), p instanceof RegExp ? p : new RegExp(str2Regex(p))]) :
         [[new RegExp(str2Regex(_prefix)).exec(m.text), new RegExp(str2Regex(_prefix))]]
@@ -397,10 +395,11 @@ export async function handler(chatUpdate) {
           return;
         }
 
+        
         let adminMode = global.db.data.chats[m.chat].modoadmin;
         let mini = `${plugin.botAdmin || plugin.admin || plugin.group || plugin || noPrefix}`;
         if (adminMode && !isOwner && !isROwner && m.isGroup && !isAdmin && mini) return;
-        
+
         if (plugin.rowner && !isROwner) { fail('rowner', m, this); continue; }
         if (plugin.owner && !isOwner) { fail('owner', m, this); continue; }
         if (plugin.mods && !isMods) { fail('mods', m, this); continue; }
@@ -418,6 +417,7 @@ export async function handler(chatUpdate) {
           this.reply(m.chat, `❮✦❯ Se agotaron tus ${global.monedas || 'monedas'}`, m);
           continue;
         }
+
         if (plugin.level > _user.level) {
           this.reply(m.chat, `❮✦❯ Se requiere el nivel: *${plugin.level}*\n\n• Tu nivel actual es: *${_user.level}*`, m);
           continue;
@@ -471,7 +471,6 @@ export async function handler(chatUpdate) {
   }
 }
 
-// ========== MENSAJES DE ERROR ==========
 global.dfail = (type, m, conn, usedPrefix) => {
   const msg = {
     rowner: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n> 🛑 *ACCESO RESTRINGIDO*\n\n> 👑 Solo el *Creador Supremo* puede ejecutar este comando.\n\n👑 *🜸 DEVLYONN 🜸*`,
