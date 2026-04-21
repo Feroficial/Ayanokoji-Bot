@@ -361,7 +361,7 @@ export async function handler(chatUpdate) {
       if (!opts['restrict'] && plugin.tags?.includes('admin')) continue;
 
       const str2Regex = str => str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
-      let _prefix = plugin.customPrefix || this.prefix || "";
+      let _prefix = plugin.customPrefix || this.prefix || global.prefix;
       let match = (_prefix instanceof RegExp ? [[_prefix.exec(m.text), _prefix]] :
         Array.isArray(_prefix) ? _prefix.map(p => [p instanceof RegExp ? p.exec(m.text) : new RegExp(str2Regex(p)).exec(m.text), p instanceof RegExp ? p : new RegExp(str2Regex(p))]) :
         [[new RegExp(str2Regex(_prefix)).exec(m.text), new RegExp(str2Regex(_prefix))]]
