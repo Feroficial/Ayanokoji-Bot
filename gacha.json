@@ -1,11 +1,14 @@
 {
   "personajes": [
-    { "nombre": "👑 Kiyotaka Ayanokoji", "rareza": "EX", "probabilidad": 0.5, "imagen": "https://files.catbox.moe/noltlf.jpg" },
+    { "nombre": "🐉 Kiyotaka Ayanokoji", "rareza": "EX", "probabilidad": 0.5, "imagen": "https://files.catbox.moe/noltlf.jpg" },
     { "nombre": "💪 Rokusuke Koenji", "rareza": "SSR", "probabilidad": 2, "imagen": "https://files.catbox.moe/smjnx6.jpeg" },
     { "nombre": "🎭 Arisu Sakayanagi", "rareza": "SSR", "probabilidad": 2, "imagen": "https://files.catbox.moe/w310lo.jpg" },
     { "nombre": "🔥 Sae Chabashira", "rareza": "SR", "probabilidad": 5, "imagen": "https://files.catbox.moe/b0uqhz.jpeg" },
     { "nombre": "👤 Honami Ichinose", "rareza": "SR", "probabilidad": 5, "imagen": "https://files.catbox.moe/0nfthc.png" },
     { "nombre": "📚 Kikyo Kushida", "rareza": "R", "probabilidad": 10, "imagen": "https://files.catbox.moe/i8x656.jpg" },
-    { "nombre": "👊 Mana Horikita", "rareza": "R", "probabilidad": 10, "imagen": "https://files.catbox.moe/mow48h.jpeg" }
+    { "nombre": "👊 Mana Horikita", "rareza": "R", "probabilidad": 10, "imagen": "https://files.catbox.moe/mow48h.jpeg" },
+    { "nombre": "🎯 Mio Ibuki", "rareza": "SR", "probabilidad": 5, "imagen": "https://files.catbox.moe/b15ryj.jpeg" },
+    { "nombre": "🧠 Yosuke Hirata", "rareza": "SR", "probabilidad": 5, "imagen": "https://files.catbox.moe/ip37jz.jpg" },
+    { "nombre": "🔪 Takuya Yagami", "rareza": "SSR", "probabilidad": 2, "imagen": "https://files.catbox.moe/ub3h36.jpg" }
   ]
 }
