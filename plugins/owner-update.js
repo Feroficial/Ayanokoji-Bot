@@ -45,6 +45,6 @@ let handler = async (m, { conn, usedPrefix, command, isOwner }) => {
 
 handler.help = ['update']
 handler.tags = ['owner']
-handler.command = /^(update|actualizar)$/i
+handler.command = /^(update|actualizar|up)$/i
 
 export default handler
