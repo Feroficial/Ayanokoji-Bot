@@ -148,7 +148,7 @@ async function getGroupPicture(groupJid) {
         const url = await global.conn.profilePictureUrl(groupJid, 'image')
         return url
     } catch (e) {
-        return 'https://files.catbox.moe/xdpxey.jpg'
+        return 'https://files.catbox.moe/ld5wqg.jpg'
     }
 }
 
@@ -193,7 +193,7 @@ async function connectionUpdate(update) {
 
     if (connection === 'open') {
         console.log(chalk.bold.green('\n🎭 KIYOTAKA AYANOKOJI BOT CONECTADO 🗡️'))
-        await updateBotProfilePicture('https://files.catbox.moe/xdpxey.jpg')
+        await updateBotProfilePicture('https://files.catbox.moe/ld5wqg.jpg')
     }
 
     if (connection === 'close') {
