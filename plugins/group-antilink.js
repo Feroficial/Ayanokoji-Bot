@@ -1,4 +1,4 @@
-let handler = async (m, { conn, text, usedPrefix, command, isAdmin, isROwner, isOwner }) => {
+let handler = async (m, { conn, args, usedPrefix, command, isAdmin, isROwner, isOwner }) => {
   if (!m.isGroup) return m.reply('❌ Solo en grupos');
   if (!isAdmin && !isROwner && !isOwner) return m.reply('❌ Solo administradores');
 
