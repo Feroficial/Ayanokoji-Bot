@@ -218,7 +218,7 @@ const extractVideoId = (url) => {
 };
 
 handler.command = ["ytmp3doc", "ytmp4doc"];
-handler.tags = ["download"];
+handler.tags = ["downloader"];
 handler.help = ['ytmp3doc', 'ytmp4doc'];
 handler.register = false;
 
