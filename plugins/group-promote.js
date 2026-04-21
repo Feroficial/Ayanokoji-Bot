@@ -6,7 +6,7 @@ let handler = async (m, { conn, text, usedPrefix, command, isAdmin, isOwner, isR
   if (!user) return m.reply(`❌ Uso: ${usedPrefix + command} @usuario`);
 
   try {
-    await conn.groupMakeAdmin(m.chat, [user]);
+    await conn.groupParticipantsUpdate(m.chat, [user], 'promote');
     m.reply(`✅ *@${user.split('@')[0]} ahora es administrador*`, { mentions: [user] });
   } catch (e) {
     m.reply(`❌ Error: ${e.message}`);
