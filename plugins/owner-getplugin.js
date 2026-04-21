@@ -16,7 +16,7 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner }) => {
       texto += `🔖 ${file.replace('.js', '')}\n`
     }
     
-    texto += `\n📌 *Uso:* ${usedPrefix + command} <nombre>\n📌 *Ejemplo:* ${usedPrefix + command} menu\n\n*"Selecciona un plugin para ver su código"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`
+    texto += `\n📌 *Uso:* ${usedPrefix + command} <nombre>\n📌 *Ejemplo:* ${usedPrefix + command} main-menu\n\n*"Selecciona un plugin para ver su código"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`
     
     return m.reply(texto)
   }
