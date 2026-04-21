@@ -8,7 +8,7 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner }) => {
   let parts = text.split('|')
   let name = parts[0]
   let code = parts[1]
-  let categoria = parts[2] || 'custom'
+  let categoria = parts[2] || 'rpg'
 
   if (!name || !code) return m.reply('❌ Formato incorrecto. Usa: nombre|código|categoría')
 
