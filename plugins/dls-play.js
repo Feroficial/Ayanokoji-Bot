@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 
 let handler = async (m, { conn, text }) => {
-  if (!text) return m.reply(`*《 🐉  𝐘𝐓 𝐌𝐏𝟑  🗡️ 》*\n\n➤ Uso: #ytmp3 <canción o link>\n➤ Ejemplo: #ytmp3 Bad Bunny\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+  if (!text) return m.reply(`*《 🐉  𝐘𝐓 𝐌𝐏𝟑  🗡️ 》*\n\n➤ Uso: #play <canción o link>\n➤ Ejemplo: #play Bad Bunny\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
 
   await conn.sendMessage(m.chat, { react: { text: '🔍', key: m.key } })
 
@@ -16,7 +16,7 @@ let handler = async (m, { conn, text }) => {
   if (esLink) {
     let match = text.match(urlRegex)
     videoId = match[2]
-    videoUrl = text
+    videoUrl = `https://www.youtube.com/watch?v=${videoId}`
   } else {
     let searchUrl = `https://dv-yer-api.online/ytsearch?q=${encodeURIComponent(text)}&limit=1&apikey=dvyer233962325851`
     let searchRes = await fetch(searchUrl)
@@ -40,9 +40,9 @@ let handler = async (m, { conn, text }) => {
   let res = await fetch(apiUrl)
   let data = await res.json()
 
-  if (!data.ok) {
+  if (!data.ok || !data.download_url || data.download_url.includes('/download/stream/')) {
     await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
-    return m.reply(`*《 🐉  𝐘𝐓 𝐌𝐏𝟑  🗡️ 》*\n\n➤ Error al descargar el audio\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+    return m.reply(`*《 🐉  𝐘𝐓 𝐌𝐏𝟑  🗡️ 》*\n\n➤ Error: La API no generó un enlace válido\n➤ Intenta con otro video o más tarde\n\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
   }
 
   let thumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
