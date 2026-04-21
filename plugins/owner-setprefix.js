@@ -1,3 +1,6 @@
+import fs from 'fs'
+import path from 'path'
+
 let handler = async (m, { conn, text, usedPrefix, command, isOwner }) => {
   if (!isOwner) return m.reply('❌ Solo el creador puede usar este comando')
   
@@ -10,11 +13,7 @@ let handler = async (m, { conn, text, usedPrefix, command, isOwner }) => {
   
   global.prefix = nuevoPrefijo
   
-  // Guardar en config.js permanentemente
-  const fs = require('fs')
-  const path = require('path')
-  const configPath = path.join(process.cwd(), 'kiyotaka-ayanokoji', 'config.js')
-  
+  let configPath = path.join(process.cwd(), 'kiyotaka-ayanokoji', 'config.js')
   let configContent = fs.readFileSync(configPath, 'utf8')
   
   if (configContent.includes('global.prefix =')) {
