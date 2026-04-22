@@ -1,25 +1,23 @@
 let handler = async (m, { conn }) => {
   let user = global.db.data.users[m.sender]
-  if (!user) user = { coin: 100 }
-  if (user.coin === undefined) user.coin = 100
+  if (!user) user = { saes: 100 }
+  if (user.saes === undefined) user.saes = 100
 
   let now = Date.now()
-  let cooldown = 180000 // 3 minutos
+  let cooldown = 180000
 
   if (user.lastwork && now - user.lastwork < cooldown) {
     let time = Math.ceil((cooldown - (now - user.lastwork)) / 1000)
     let minutes = Math.floor(time / 60)
     let seconds = time % 60
     return m.reply(`
-╭━━━━━━━━━━━━━━━━━━━━╮
-┃ ⏳ 𝐄𝐒𝐏𝐄𝐑𝐀 𝐔𝐍 𝐌𝐎𝐌𝐄𝐍𝐓𝐎 ⏳
-╰━━━━━━━━━━━━━━━━━━━━╯
+> *•───⧼⧼⧼ 𝙴𝚂𝙿𝙴𝚁𝙰 ⧽⧽⧽───•*
 
-◈ *Descansa un poco*
-◈ *Vuelve en ${minutes}m ${seconds}s*
+> ⏳ *Espera ${minutes}m ${seconds}s para trabajar*
 
-*"El trabajo excesivo agota la mente"*
-━━━━━━━━━━━━━━━━━━━━━━`)
+> *"El trabajo excesivo agota la mente"*
+> *•───────────────•*
+`)
   }
 
   let trabajos = [
@@ -34,51 +32,41 @@ let handler = async (m, { conn }) => {
     { nombre: "Constructor", ganancia: 16, perdida: 5, mensaje: "🏗️ Terminaste una obra" },
     { nombre: "Pescador", ganancia: 8, perdida: 2, mensaje: "🎣 Pesca del día" },
     { nombre: "Granjero", ganancia: 10, perdida: 3, mensaje: "🌾 Cosecha exitosa" },
-    { nombre: "Panadero", ganancia: 7, perdida: 2, mensaje: "🥖 Vendiste todo el pan" },
-    { nombre: "Mecánico", ganancia: 14, perdida: 4, mensaje: "🔧 Reparaste un auto" },
-    { nombre: "Electricista", ganancia: 13, perdida: 4, mensaje: "⚡ Arreglaste un corto" },
-    { nombre: "Pintor", ganancia: 11, perdida: 3, mensaje: "🎨 Terminaste un mural" },
-    { nombre: "Escritor", ganancia: 9, perdida: 3, mensaje: "✍️ Terminaste un capítulo" },
-    { nombre: "Músico", ganancia: 12, perdida: 4, mensaje: "🎸 Tocaste en un concierto" },
-    { nombre: "Fotógrafo", ganancia: 10, perdida: 3, mensaje: "📸 Vendiste varias fotos" },
-    { nombre: "Diseñador", ganancia: 15, perdida: 5, mensaje: "🎨 Terminaste un diseño" },
-    { nombre: "Traductor", ganancia: 8, perdida: 2, mensaje: "📖 Tradujiste un documento" }
+    { nombre: "Panadero", ganancia: 7, perdida: 2, mensaje: "🥖 Vendiste todo el pan" }
   ]
 
   let trabajo = trabajos[Math.floor(Math.random() * trabajos.length)]
-  let esExitoso = Math.random() > 0.3 // 70% éxito, 30% fracaso
+  let esExitoso = Math.random() > 0.3
 
   if (esExitoso) {
-    user.coin += trabajo.ganancia
+    user.saes += trabajo.ganancia
     m.reply(`
-╭━━━━━━━━━━━━━━━━━━━━╮
-┃ ✅ 𝐓𝐑𝐀𝐁𝐀𝐉𝐎 𝐄𝐗𝐈𝐓𝐎𝐒𝐎 ✅
-╰━━━━━━━━━━━━━━━━━━━━╯
+> *•───⧼⧼⧼ 𝚃𝚁𝙰𝙱𝙰𝙹𝙾 𝙴𝚇𝙸𝚃𝙾𝚂𝙾 ⧽⧽⧽───•*
 
-◈ *Trabajo:* ${trabajo.nombre}
-◈ *Resultado:* ${trabajo.mensaje}
-◈ *Ganancia:* +${trabajo.ganancia} 🪙
+> ✅ *${trabajo.mensaje}*
 
-◈ *Total:* ${user.coin} 🪙
+> *• 𝐓𝐫𝐚𝐛𝐚𝐣𝐨:* ${trabajo.nombre}
+> *• 𝐆𝐚𝐧𝐚𝐧𝐜𝐢𝐚:* +${trabajo.ganancia} 🪙
+> *• 𝐒𝐚𝐞𝐬:* ${user.saes} 🪙
 
-*"El esfuerzo tiene recompensa"*
-━━━━━━━━━━━━━━━━━━━━━━`)
+> *"El esfuerzo tiene recompensa"*
+> *•───────────────•*
+`)
   } else {
-    user.coin -= trabajo.perdida
-    if (user.coin < 0) user.coin = 0
+    user.saes -= trabajo.perdida
+    if (user.saes < 0) user.saes = 0
     m.reply(`
-╭━━━━━━━━━━━━━━━━━━━━╮
-┃ ❌ 𝐓𝐑𝐀𝐁𝐀𝐉𝐎 𝐅𝐀𝐋𝐋𝐈𝐃𝐎 ❌
-╰━━━━━━━━━━━━━━━━━━━━╯
+> *•───⧼⧼⧼ 𝚃𝚁𝙰𝙱𝙰𝙹𝙾 𝙵𝙰𝙻𝙻𝙸𝙳𝙾 ⧽⧽⧽───•*
 
-◈ *Trabajo:* ${trabajo.nombre}
-◈ *Problema:* Algo salió mal
-◈ *Perdida:* -${trabajo.perdida} 🪙
+> ❌ *Algo salió mal en tu trabajo*
 
-◈ *Total:* ${user.coin} 🪙
+> *• 𝐓𝐫𝐚𝐛𝐚𝐣𝐨:* ${trabajo.nombre}
+> *• 𝐏𝐞𝐫𝐝𝐢𝐝𝐚:* -${trabajo.perdida} 🪙
+> *• 𝐒𝐚𝐞𝐬:* ${user.saes} 🪙
 
-*"Hasta el mejor estratega falla"*
-━━━━━━━━━━━━━━━━━━━━━━`)
+> *"Hasta el mejor estratega falla"*
+> *•───────────────•*
+`)
   }
 
   user.lastwork = now
@@ -87,5 +75,4 @@ let handler = async (m, { conn }) => {
 handler.help = ["work"]
 handler.tags = ["rpg"]
 handler.command = ["work", "trabajar", "w"]
-
 export default handler
