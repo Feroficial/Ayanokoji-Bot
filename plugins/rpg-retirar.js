@@ -1,46 +1,31 @@
-let handler = async (m, { conn, text, usedPrefix, command }) => {
+let handler = async (m, { conn }) => {
   let user = global.db.data.users[m.sender]
-  if (!user) user = { coin: 100, bank: 0 }
-  if (user.coin === undefined) user.coin = 100
-  if (user.bank === undefined) user.bank = 0
+  if (!user) user = { diamond: 0, saes: 100 }
+  if (user.diamond === undefined) user.diamond = 0
+  if (user.saes === undefined) user.saes = 100
 
-  if (!text) {
-    return m.reply(`
-╭━━━━━━━━━━━━━━━━━━━━╮
-┃ 💸 𝐑𝐄𝐓𝐈𝐑𝐀𝐑 💸
-╰━━━━━━━━━━━━━━━━━━━━╯
-
-◈ *Uso:* ${usedPrefix}retirar <cantidad>
-◈ *Ejemplo:* ${usedPrefix}retirar 500
-◈ *Banco:* ${user.bank} 🪙
-
-*"Retira tus monedas del banco"*
-━━━━━━━━━━━━━━━━━━━━━━`)
-  }
-
-  let cantidad = parseInt(text)
-  if (isNaN(cantidad)) return m.reply(`❌ *Cantidad inválida*`)
-  if (cantidad < 1) return m.reply(`❌ *Mínimo 1 🪙*`)
-  if (cantidad > user.bank) return m.reply(`❌ *No tienes suficientes monedas en el banco*\n◈ Banco: ${user.bank} 🪙`)
-
-  user.bank -= cantidad
-  user.coin += cantidad
+  let name = await conn.getName(m.sender)
 
   m.reply(`
-╭━━━━━━━━━━━━━━━━━━━━╮
-┃ ✅ 𝐑𝐄𝐓𝐈𝐑𝐎 𝐄𝐗𝐈𝐓𝐎𝐒𝐎 ✅
-╰━━━━━━━━━━━━━━━━━━━━╯
+*•───⧼⧼⧼ 𝙱𝙰𝙻𝙰𝙽𝙲𝙴 ⧽⧽⧽───•*
 
-◈ *Retirado:* +${cantidad} 🪙
-◈ *Monedas:* ${user.coin} 🪙
-◈ *Banco:* ${user.bank} 🪙
+@${m.sender.split('@')[0]} Tiene:
 
-*"Tu dinero está listo para usar"*
-━━━━━━━━━━━━━━━━━━━━━━`)
+*• 𝐃𝐢𝐚𝐦𝐚𝐧𝐭𝐞:* _${user.diamond} 💎_
+*• 𝐒𝐚𝐞𝐬:* _${user.saes} 🪙_
+> Afuera del Banco 
+
+*•───⧼⧼⧼ 𝙱𝙰𝙽𝙲𝙾 ⧽⧽⧽───•*
+
+*🏦 𝐃𝐢𝐧𝐞𝐫𝐨 :* _${user.bank || 0} 💎_
+> Adentro del Banco 🏦 
+
+•───────────────•
+`, { mentions: [m.sender] })
 }
 
-handler.help = ["retirar <cantidad>"]
+handler.help = ["balance"]
 handler.tags = ["rpg"]
-handler.command = ["retirar", "withdraw"]
+handler.command = ["balance", "bal", "saldo"]
 
 export default handler
