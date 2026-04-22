@@ -21,7 +21,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 > *• ${usedPrefix}balance* - Ver balance
 
 > *•───────────────•*
-`, { mentions: [m.sender] })
+`)
   }
 
   let cantidad = parseInt(text)
@@ -43,7 +43,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
 > *"Tu dinero está seguro en el banco"*
 > *•───────────────•*
-`, { mentions: [m.sender] })
+`)
 }
 
 handler.help = ["bank <cantidad>"]
