@@ -5,7 +5,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   if (user.bank === undefined) user.bank = 0
 
   if (!text) {
-    return m.reply(`
+    let texto = `
 > *•───⧼⧼⧼ 𝚁𝙴𝚃𝙸𝚁𝙰𝚁 ⧽⧽⧽───•*
 
 > @${m.sender.split('@')[0]}
@@ -21,7 +21,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 > *• ${usedPrefix}balance* - Ver balance
 
 > *•───────────────•*
-`, { mentions: [m.sender] })
+`
+    return conn.sendMessage(m.chat, { text: texto, mentions: [m.sender] })
   }
 
   let cantidad = parseInt(text)
@@ -32,7 +33,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   user.bank -= cantidad
   user.saes += cantidad
 
-  m.reply(`
+  let texto = `
 > *•───⧼⧼⧼ 𝚁𝙴𝚃𝙸𝚁𝙾 ⧽⧽⧽───•*
 
 > ✅ *Retiro exitoso*
@@ -43,7 +44,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
 > *"Tu dinero está listo para usar"*
 > *•───────────────•*
-`, { mentions: [m.sender] })
+`
+  conn.sendMessage(m.chat, { text: texto, mentions: [m.sender] })
 }
 
 handler.help = ["retirar <cantidad>"]
