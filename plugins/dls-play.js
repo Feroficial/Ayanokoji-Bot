@@ -3,36 +3,36 @@ import fetch from "node-fetch"
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
   let user = global.db.data.users[m.sender]
-  if (!user) user = { coin: 100, exp: 0, level: 1 }
-  if (user.coin === undefined) user.coin = 100
+  if (!user) user = { saes: 100 }
+  if (user.saes === undefined) user.saes = 100
 
   if (!text) return m.reply(`
-╭━━━━━━━━━━━━━━━━━━━━╮
-┃ 🎭 𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈 🗡️
-╰━━━━━━━━━━━━━━━━━━━━╯
+> *•───⧼⧼⧼ 𝙿𝙻𝙰𝚈 ⧽⧽⧽───•*
 
-◈ *Uso:* ${usedPrefix + command} <canción>
-◈ *Ejemplo:* ${usedPrefix + command} Bad Bunny
-◈ *Costo:* 5 🪙
+> *• Uso:* ${usedPrefix + command} <canción>
+> *• Ejemplo:* ${usedPrefix + command} Bad Bunny
+> *• Costo:* 5 🪙 (Saes)
 
-*"El aula de élite no espera a nadie"*
-━━━━━━━━━━━━━━━━━━━━━━`)
+> *"El aula de élite no espera a nadie"*
+> *•───────────────•*
+`)
 
   const costo = 5
-  if (user.coin < costo) {
+  if (user.saes < costo) {
     return m.reply(`
-╭━━━━━━━━━━━━━━━━━━━━╮
-┃ 💸 𝐒𝐈𝐍 𝐌𝐎𝐍𝐄𝐃𝐀𝐒 💸
-╰━━━━━━━━━━━━━━━━━━━━╯
+> *•───⧼⧼⧼ 𝚂𝙸𝙽 𝚂𝙰𝙴𝚂 ⧽⧽⧽───•*
 
-◈ *Necesitas:* ${costo} 🪙
-◈ *Tienes:* ${user.coin} 🪙
+> ❌ *No tienes suficientes Saes*
 
-*Gana monedas con:*
-◈ #daily - Recompensa diaria
-◈ #minar - Minar monedas
-◈ #trabajar - Trabajar
-━━━━━━━━━━━━━━━━━━━━━━`)
+> *• Necesitas:* ${costo} 🪙
+> *• Tienes:* ${user.saes} 🪙
+
+> *Gana Saes con:*
+> *• #daily* - Recompensa diaria
+> *• #minar* - Minar Saes
+> *• #work* - Trabajar
+> *•───────────────•*
+`)
   }
 
   await m.react('🔍')
@@ -48,22 +48,11 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     const isUrl = /^https?:\/\/\S+/i.test(url)
 
     if (isUrl) {
-      if (!isYouTubeUrl(url)) {
-        return m.reply(`
-╭━━━━━━━━━━━━━━━━━━━━╮
-┃ ❌ 𝐄𝐍𝐋𝐀𝐂𝐄 𝐈𝐍𝐕𝐀𝐋𝐈𝐃𝐎 ❌
-╰━━━━━━━━━━━━━━━━━━━━╯
-
-◈ *Usa un enlace de YouTube válido*
-━━━━━━━━━━━━━━━━━━━━━━`)
-      }
-
+      if (!isYouTubeUrl(url)) return m.reply(`> ❌ *Enlace inválido*`)
       const videoId = extractVideoId(url)
-      if (!videoId) return m.reply(`❌ No se pudo extraer el ID`)
-
+      if (!videoId) return m.reply(`> ❌ *No se pudo extraer el ID*`)
       const res = await yts({ videoId })
-      if (!res) return m.reply(`❌ Información no disponible`)
-
+      if (!res) return m.reply(`> ❌ *Información no disponible*`)
       title = res.title || title
       authorName = res.author?.name || authorName
       durationTimestamp = res.timestamp || durationTimestamp
@@ -72,16 +61,13 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       url = res.url || url
     } else {
       await m.reply(`
-╭━━━━━━━━━━━━━━━━━━━━╮
-┃ 🔍 𝐁𝐔𝐒𝐂𝐀𝐍𝐃𝐎 🔍
-╰━━━━━━━━━━━━━━━━━━━━╯
+> *•───⧼⧼⧼ 𝙱𝚄𝚂𝙲𝙰𝙽𝙳𝙾 ⧽⧽⧽───•*
 
-◈ *${text}*
-━━━━━━━━━━━━━━━━━━━━━━`)
-
+> *• ${text}*
+> *•───────────────•*
+`)
       const res = await yts(url)
-      if (!res?.videos?.length) return m.reply(`❌ No se encontraron resultados`)
-
+      if (!res?.videos?.length) return m.reply(`> ❌ *No se encontraron resultados*`)
       const video = res.videos[0]
       title = video.title || title
       authorName = video.author?.name || authorName
@@ -95,18 +81,14 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     const fallbackThumb = await getFallbackThumb()
 
     const caption = `
-╭━━━━━━━━━━━━━━━━━━━━╮
-┃ 🎯 𝐎𝐁𝐉𝐄𝐓𝐈𝐕𝐎 𝐋𝐎𝐂𝐀𝐋𝐈𝐙𝐀𝐃𝐎 🎯
-╰━━━━━━━━━━━━━━━━━━━━╯
+> *•───⧼⧼⧼ 𝙾𝙱𝙹𝙴𝚃𝙸𝚅𝙾 𝙻𝙾𝙲𝙰𝙻𝙸𝚉𝙰𝙳𝙾 ⧽⧽⧽───•*
 
-◈ *Título:* ${title}
-◈ *Creador:* ${authorName}
-◈ *Vistas:* ${vistas}
-◈ *Duración:* ${durationTimestamp}
-
-━━━━━━━━━━━━━━━━━━━━━━
-*"La preparación es la clave"*
-━━━━━━━━━━━━━━━━━━━━━━`
+> *• Título:* ${title}
+> *• Creador:* ${authorName}
+> *• Vistas:* ${vistas}
+> *• Duración:* ${durationTimestamp}
+> *•───────────────•*
+`
 
     let thumb = fallbackThumb
     if (thumbnail) {
@@ -118,35 +100,35 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     await conn.sendMessage(m.chat, { image: thumb, caption }, { quoted: m })
     await downloadMedia(conn, m, url)
     
-    user.coin -= costo
+    user.saes -= costo
     await m.react('✅')
     await m.reply(`
-╭━━━━━━━━━━━━━━━━━━━━╮
-┃ ✅ 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀𝐃𝐀 ✅
-╰━━━━━━━━━━━━━━━━━━━━╯
+> *•───⧼⧼⧼ 𝙳𝙴𝚂𝙲𝙰𝚁𝙶𝙰 𝙲𝙾𝙼𝙿𝙻𝙴𝚃𝙰 ⧽⧽⧽───•*
 
-◈ *-${costo} 🪙*
-◈ *Monedas restantes:* ${user.coin} 🪙
+> ✅ *Audio enviado*
 
-*"El aula de élite cobra por sus servicios"*
-━━━━━━━━━━━━━━━━━━━━━━`)
+> *• -${costo} 🪙*
+> *• Saes restantes:* ${user.saes} 🪙
+
+> *"El aula de élite cobra por sus servicios"*
+> *•───────────────•*
+`)
     
   } catch (e) {
     console.error(e)
     await m.react('❌')
-    await m.reply(`❌ Error: ${e.message}`)
+    await m.reply(`> ❌ *Error:* ${e.message}`)
   }
 }
 
 const downloadMedia = async (conn, m, url) => {
   try {
     await m.reply(`
-╭━━━━━━━━━━━━━━━━━━━━╮
-┃ 📥 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀𝐍𝐃𝐎 📥
-╰━━━━━━━━━━━━━━━━━━━━╯
+> *•───⧼⧼⧼ 𝙳𝙴𝚂𝙲𝙰𝚁𝙶𝙰𝙽𝙳𝙾 ⧽⧽⧽───•*
 
-◈ *Procesando audio...*
-━━━━━━━━━━━━━━━━━━━━━━`)
+> *• Procesando audio...*
+> *•───────────────•*
+`)
 
     const apiUrl = `https://api-gohan.onrender.com/download/ytaudio?url=${encodeURIComponent(url)}`
     const r = await fetch(apiUrl)
@@ -165,16 +147,15 @@ const downloadMedia = async (conn, m, url) => {
     }, { quoted: m })
 
     await m.reply(`
-╭━━━━━━━━━━━━━━━━━━━━╮
-┃ 🎵 𝐀𝐔𝐃𝐈𝐎 𝐄𝐍𝐕𝐈𝐀𝐃𝐎 🎵
-╰━━━━━━━━━━━━━━━━━━━━╯
+> *•───⧼⧼⧼ 𝙰𝚄𝙳𝙸𝙾 𝙴𝙽𝚅𝙸𝙰𝙳𝙾 ⧽⧽⧽───•*
 
-◈ *${fileTitle}*
-━━━━━━━━━━━━━━━━━━━━━━`)
+> 🎵 *${fileTitle}*
+> *•───────────────•*
+`)
     
   } catch (e) {
     console.error(e)
-    await m.reply(`❌ Error al descargar: ${e.message}`)
+    await m.reply(`> ❌ *Error al descargar:* ${e.message}`)
   }
 }
 
@@ -208,5 +189,4 @@ const extractVideoId = (url) => {
 handler.help = ["play"]
 handler.tags = ["downloader"]
 handler.command = ["play", "yt", "yta", "audio"]
-
 export default handler
