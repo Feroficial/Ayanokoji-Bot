@@ -14,11 +14,13 @@ let handler = async (m, { conn }) => {
   
   let respuesta = `> *•───⧼⧼⧼ 𝙰𝙽𝙸𝙼𝙴 𝚂𝙰𝙳 ⧽⧽⧽───•*\n\n> *😔 @${m.sender.split('@')[0]} está triste...*\n\n> *"Hasta el aula de élite tiene momentos de oscuridad"*\n\n> *•───────────────•*`
   
+  // Enviar como GIF (la forma correcta en Baileys)
   await conn.sendMessage(m.chat, {
     video: buffer,
     gifPlayback: true,
     caption: respuesta,
-    mentions: [m.sender]
+    mentions: [m.sender],
+    mimetype: 'video/mp4'
   })
 }
 
