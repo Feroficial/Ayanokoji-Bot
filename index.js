@@ -6,7 +6,7 @@ import { existsSync, writeFileSync } from 'fs'
 import cfonts from 'cfonts'
 import chalk from 'chalk'
 
-console.log(chalk.bold.hex('#00FFFF')('\n✞─ Iniciando KIYOTAKA AYANOKOJI ─✞'))
+console.log(chalk.bold.hex('#FF69B4')('\n🌸─ Iniciando Ania Bot ─🌸'))
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const require = createRequire(__dirname)
@@ -14,31 +14,31 @@ require(join(__dirname, './package.json'))
 
 async function iniciarBot() {
   console.clear()
-  console.log(chalk.bold.cyanBright('\n⟦ 🎭 KIYOTAKA AYANOKOJI V.777 ⟧'))
-  console.log(chalk.gray('🎬 Iniciando sistema...'))
+  console.log(chalk.bold.hex('#FF69B4')('\n⟦ 🌸 ANIA BOT V.1.0 🌸 ⟧'))
+  console.log(chalk.gray('🎀 Iniciando sistema...'))
   await new Promise(res => setTimeout(res, 600))
 
-  cfonts.say('KIYOTAKA', {
+  cfonts.say('ANIA', {
     font: 'block',
     align: 'center',
-    colors: ['#00FFFF', '#FF00FF', '#FFD700'],
+    colors: ['#FF69B4', '#FFB6C1', '#FF1493'],
     letterSpacing: 1
   })
 
-  console.log(chalk.bold.hex('#00FFFF')(`
+  console.log(chalk.bold.hex('#FF69B4')(`
 █▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█
 █░░╦─╦╔╗╦─╔╗╔╗╔╦╗╔╗░░█
 █░░║║║╠─║─║─║║║║║╠─░░█
 █░░╚╩╝╚╝╚╝╚╝╚╝╩─╩╚╝░░█
 █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█
-        [ EL AULA DE ELITE ]
+        [ ANIA BOT - KAWAI VERSION ]
   `))
 
   await new Promise(res => setTimeout(res, 800))
 
-  console.log(chalk.bold.hex('#FF00FF')('\n⌬═════════════════════⌬'))
-  console.log(chalk.bold.white('      SISTEMA CREADO POR: ') + chalk.bold.hex('#FFD700')('🜸 DEVLYONN 🜸'))
-  console.log(chalk.bold.hex('#FF00FF')('⌬═══════════════════════⌬\n'))
+  console.log(chalk.bold.hex('#FF69B4')('\n⌬═════════════════════⌬'))
+  console.log(chalk.bold.white('      BOT CREADO POR: ') + chalk.bold.hex('#FFB6C1')('🌸 DANNY YULIETH 🌸'))
+  console.log(chalk.bold.hex('#FF69B4')('⌬═══════════════════════⌬\n'))
 
   await new Promise(res => setTimeout(res, 1200))
 }
@@ -59,7 +59,7 @@ function start(file) {
 const archivoArranque = './.arranque-ok'
 if (!existsSync(archivoArranque)) {
   await iniciarBot()
-  writeFileSync(archivoArranque, 'DEVLYONN_FINAL')
+  writeFileSync(archivoArranque, 'DANNY_YULIETH_FINAL')
 }
 
 start('start.js')
