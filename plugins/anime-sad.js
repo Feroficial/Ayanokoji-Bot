@@ -1,7 +1,6 @@
-let handler = async (m, { conn, usedPrefix, command }) => {
-  let user = m.sender
-  let name = await conn.getName(user)
-  
+import fetch from 'node-fetch'
+
+let handler = async (m, { conn }) => {
   let gifs = [
     "https://files.catbox.moe/5cm82n.gif",
     "https://files.catbox.moe/t79ulr.gif",
@@ -9,6 +8,10 @@ let handler = async (m, { conn, usedPrefix, command }) => {
   ]
   
   let randomGif = gifs[Math.floor(Math.random() * gifs.length)]
+  
+  // Descargar el GIF
+  let res = await fetch(randomGif)
+  let buffer = await res.buffer()
   
   let respuesta = `
 > *•───⧼⧼⧼ 𝙰𝙽𝙸𝙼𝙴 𝚂𝙰𝙳 ⧽⧽⧽───•*
@@ -21,10 +24,10 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 `
 
   await conn.sendMessage(m.chat, {
-    video: { url: randomGif },
+    video: buffer,
     gifPlayback: true,
     caption: respuesta,
-    mentions: [user]
+    mentions: [m.sender]
   })
 }
 
