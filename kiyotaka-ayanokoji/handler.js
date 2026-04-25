@@ -65,8 +65,8 @@ export async function handler(chatUpdate) {
         defense: isNumber(user.defense) ? user.defense : 3,
         crit: isNumber(user.crit) ? user.crit : 5,
         evasion: isNumber(user.evasion) ? user.evasion : 5,
-        weapon: user.weapon || '🗡️ Espada de Madera',
-        armor: user.armor || '🛡️ Armadura de Cuero',
+        weapon: user.weapon || '🐾 Varita de Osito',
+        armor: user.armor || '🎀 Armadura de Conejita',
         inventory: user.inventory || [],
         registered: 'registered' in user ? user.registered : false,
         premium: 'premium' in user ? user.premium : false,
@@ -90,7 +90,7 @@ export async function handler(chatUpdate) {
         name: user.name || m.pushName || 'Anónimo',
         age: isNumber(user.age) ? user.age : -1,
         regTime: isNumber(user.regTime) ? user.regTime : -1,
-        role: user.role || '⚔️ Escudero',
+        role: user.role || '🌸 Aprendiz de Dulzura',
         country: user.country || '',
         afinidad: user.afinidad || '',
         nivelMagico: isNumber(user.nivelMagico) ? user.nivelMagico : 1,
@@ -223,12 +223,12 @@ export async function handler(chatUpdate) {
             } catch (e) {}
 
             await this.sendMessage(m.chat, {
-              text: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n> 🚫 *ANTILINK ACTIVADO* 🚫\n\n> 👤 Usuario: @${m.sender.split('@')[0]}\n> 🔗 Enlace detectado: ${linkEncontrado}\n> ⚔️ Expulsado automáticamente\n\n👑 *🜸 DEVLYONN 🜸*`,
+              text: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 💗 *A N T I L I N K* 💗\n\n> 🌸 @${m.sender.split('@')[0]}\n> 🔗 *Enlace detectado*: ${linkEncontrado}\n> 🧸 *Los enlaces están prohibidos aquí*\n\n🌸 *Danny Yulieth* 🌸`,
               mentions: [m.sender]
             });
           } else {
             await this.sendMessage(m.chat, {
-              text: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n> ⚠️ *ANTILINK ACTIVADO* ⚠️\n\n> 👤 @${m.sender.split('@')[0]}\n> 🔗 Enlace detectado: ${linkEncontrado}\n> 📌 El bot necesita ser administrador\n\n👑 *🜸 DEVLYONN 🜸*`,
+              text: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 💗 *A N T I L I N K* 💗\n\n> 🌸 @${m.sender.split('@')[0]}\n> 🔗 *Enlace detectado*: ${linkEncontrado}\n> ⚠️ *El bot necesita ser admin*\n\n🌸 *Danny Yulieth* 🌸`,
               mentions: [m.sender]
             });
           }
@@ -282,19 +282,19 @@ export async function handler(chatUpdate) {
                 userWarn.warnReason = '';
 
                 await this.sendMessage(m.chat, {
-                  text: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n\n> 🚫 *USUARIO EXPULSADO* 🚫\n\n> 👤 *Usuario:* @${m.sender.split('@')[0]}\n> ⚠️ *Motivo:* 3 advertencias por insultos\n> 📌 *Ha sido expulsado del grupo*\n\n👑 *🜸 DEVLYONN 🜸*`,
+                  text: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🚫 *USUARIO EXPULSADO* 🚫\n\n> 👤 @${m.sender.split('@')[0]}\n> ⚠️ *3 advertencias por no ser amable*\n> 💗 *Recuerda ser dulce y respetuoso*\n\n🌸 *Danny Yulieth* 🌸`,
                   mentions: [m.sender]
                 });
               } catch(e) {}
             } else {
               await this.sendMessage(m.chat, {
-                text: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n\n> ⚠️ *ADVERTENCIA #${warns}/3* ⚠️\n\n> 👤 @${m.sender.split('@')[0]}\n> 🔥 *Has alcanzado el límite de advertencias*\n> 📌 *El bot necesita ser administrador para expulsar*\n\n👑 *🜸 DEVLYONN 🜸*`,
+                text: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> ⚠️ *ADVERTENCIA #${warns}/3* ⚠️\n\n> 👤 @${m.sender.split('@')[0]}\n> 🌸 *Has llegado al límite de advertencias*\n> 💗 *El bot necesita ser admin para expulsar*\n\n🌸 *Danny Yulieth* 🌸`,
                 mentions: [m.sender]
               });
             }
           } else {
             await this.sendMessage(m.chat, {
-              text: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n\n> ⚠️ *ADVERTENCIA #${warns}/3* ⚠️\n\n> 👤 @${m.sender.split('@')[0]}\n> 🔥 *Insulto detectado:* "${insultoEncontrado}"\n> 📌 *No insultes a los demás miembros*\n> 💀 *A la 3ra advertencia serás expulsado*\n\n👑 *🜸 DEVLYONN 🜸*`,
+              text: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> ⚠️ *ADVERTENCIA #${warns}/3* ⚠️\n\n> 👤 @${m.sender.split('@')[0]}\n> 🔥 *Palabrita no tan linda*: "${insultoEncontrado}"\n> 💗 *Usa palabras dulces, por favor*\n> 🧸 *3 advertencias y te retiras*\n\n🌸 *Danny Yulieth* 🌸`,
               mentions: [m.sender]
             });
           }
@@ -302,53 +302,8 @@ export async function handler(chatUpdate) {
       }
     }
 
-    // ========== SISTEMA DE AUTO-RESPUESTAS ==========
-    if (m.text && !m.isBaileys && !m.isCommand) {
-      const textoLower = m.text.toLowerCase();
-
-      const autoRespuestas = {
-        'hola': '👋 *Hola!* Bienvenido a KIYOTAKA AYANOKOJI',
-        'bot': '🤖 *KIYOTAKA AYANOKOJI* a tu servicio, creado por DevLyonn',
-        'gracias': '🙏 *De nada!* Estoy para ayudarte',
-        'te quiero': '💙 *Yo también te quiero!* Gracias por el cariño',
-        'te amo': '💙 *Yo también te amo!* Eres parte de la familia',
-        'buenos días': '☀️ *Buenos días!* Que tengas un excelente día',
-        'buenas tardes': '🌤️ *Buenas tardes!* Sigue con fuerza',
-        'buenas noches': '🌙 *Buenas noches!* Que descanses',
-        'como estas': '😄 *Estoy bien!* Listo para ayudarte',
-        'como estás': '😄 *Estoy bien!* Listo para ayudarte',
-        'quien eres': '🎭 *Soy KIYOTAKA AYANOKOJI*, un bot creado por *DevLyonn*',
-        'quien te creo': '👑 *Mi creador es DevLyonn*, el señor del código',
-        'que haces': '⚔️ *Esperando órdenes!* Usa #menu para ver mis comandos',
-        'admin': '👑 *Los administradores* son los encargados del orden',
-        'reglas': '📜 *Reglas del grupo:*\n1. No insultar\n2. No spamear\n3. No enviar enlaces sin permiso',
-        'feliz cumpleaños': '🎂 *Feliz cumpleaños!* 🎉',
-        'te extraño': '😢 *También te extraño!* Vuelve pronto',
-        'eres lindo': '😊 *Gracias!* Tú también eres muy amable',
-        'me ayudas': '🔧 *Claro!* Usa #menu para ver mis comandos',
-        'info': '📌 *KIYOTAKA AYANOKOJI* es un bot de seguridad y moderación'
-      };
-
-      let respondido = false;
-      for (let palabra in autoRespuestas) {
-        if (textoLower.includes(palabra)) {
-          await this.sendMessage(m.chat, { text: autoRespuestas[palabra] });
-          respondido = true;
-          break;
-        }
-      }
-
-      if (!respondido && (textoLower.includes('kiyotaka') || textoLower.includes('ayanokoji'))) {
-        const respuestasAleatorias = [
-          '🎭 *KIYOTAKA AYANOKOJI* presente ¿Necesitas algo?',
-          '⚔️ *Aquí estoy!* ¿En qué puedo ayudarte?',
-          '🗡️ *El aula de élite está lista*',
-          '👑 *DevLyonn* me creó para servirte'
-        ];
-        let random = respuestasAleatorias[Math.floor(Math.random() * respuestasAleatorias.length)];
-        await this.sendMessage(m.chat, { text: random });
-      }
-    }
+    // ========== AUTO-RESPUESTAS ELIMINADAS ==========
+    // (No hay respuestas automáticas de "hola", "gracias", etc.)
 
     // ========== PROCESAR PLUGINS ==========
     const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), '../plugins');
@@ -391,12 +346,12 @@ export async function handler(chatUpdate) {
         let user = global.db.data.users[m.sender];
         if (!['grupo-unbanchat.js', 'owner-exec.js', 'owner-exec2.js'].includes(name) && chat?.isBanned && !isROwner) return;
         if (m.text && user.banned && !isROwner) { 
-          m.reply(`—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n> ❌ *ESTÁS BANEADO*\n\n> 📌 Motivo: ${user.bannedReason || 'Sin especificar'}\n\n👑 *🜸 DEVLYONN 🜸*`);
+          m.reply(`˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> ❌ *ESTÁS BANEAD@* ❌\n\n> 📌 Motivo: ${user.bannedReason || 'Sin especificar'}\n\n🌸 *Danny Yulieth* 🌸`);
           return;
         }
 
         
-        let adminMode = global.db.data.chats[m.chat].modoadmin;
+          let adminMode = global.db.data.chats[m.chat].modoadmin;
         let mini = `${plugin.botAdmin || plugin.admin || plugin.group || plugin || noPrefix}`;
         if (adminMode && !isOwner && !isROwner && m.isGroup && !isAdmin && mini) return;
 
@@ -414,12 +369,12 @@ export async function handler(chatUpdate) {
         let xp = 'exp' in plugin ? parseInt(plugin.exp) : 10;
         m.exp += xp;
         if (!isPrems && plugin.monedas && _user.monedas < plugin.monedas) {
-          this.reply(m.chat, `❮✦❯ Se agotaron tus ${global.monedas || 'monedas'}`, m);
+          this.reply(m.chat, `🌸 *No tienes suficientes moneditas* 🌸\n> Necesitas ${plugin.monedas} para usar esto`, m);
           continue;
         }
 
         if (plugin.level > _user.level) {
-          this.reply(m.chat, `❮✦❯ Se requiere el nivel: *${plugin.level}*\n\n• Tu nivel actual es: *${_user.level}*`, m);
+          this.reply(m.chat, `🌸 *Nivel insuficiente* 🌸\n> Necesitas nivel *${plugin.level}*\n> Tu nivel actual: *${_user.level}*`, m);
           continue;
         }
 
@@ -434,7 +389,7 @@ export async function handler(chatUpdate) {
           m.reply(text);
         } finally {
           if (typeof plugin.after === 'function') await plugin.after.call(this, m, extra).catch(console.error);
-          if (m.monedas) this.reply(m.chat, `❮✦❯ Utilizaste ${+m.monedas} ${global.monedas || 'monedas'}`, m);
+          if (m.monedas) this.reply(m.chat, `🌸 *Usaste ${+m.monedas} moneditas* 🌸`, m);
         }
         break;
       }
@@ -473,15 +428,15 @@ export async function handler(chatUpdate) {
 
 global.dfail = (type, m, conn, usedPrefix) => {
   const msg = {
-    rowner: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n> 🛑 *ACCESO RESTRINGIDO*\n\n> 👑 Solo el *Creador Supremo* puede ejecutar este comando.\n\n👑 *🜸 DEVLYONN 🜸*`,
-    owner: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n> ⚙️🔒 *MÓDULO BLOQUEADO*\n\n> 📌 Solo el *Dueño del Bot* puede usar este comando.\n\n👑 *🜸 DEVLYONN 🜸*`,
-    premium: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n> 💎 *REQUIERE PREMIUM*\n\n> 📌 Este comando es exclusivo para usuarios *Premium*.\n\n👑 *🜸 DEVLYONN 🜸*`,
-    private: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n> 🔒 *SOLO CHAT PRIVADO*\n\n> 📌 Este comando solo funciona en chats privados.\n\n👑 *🜸 DEVLYONN 🜸*`,
-    group: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n> 👥 *SOLO GRUPOS*\n\n> 📌 Este comando solo funciona en grupos.\n\n👑 *🜸 DEVLYONN 🜸*`,
-    admin: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n> 🛡️ *FUNCIÓN RESTRINGIDA*\n\n> 📌 Solo los *Administradores del Grupo* pueden usar este comando.\n\n👑 *🜸 DEVLYONN 🜸*`,
-    botAdmin: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n> 🤖 *BOT NO ES ADMIN*\n\n> 📌 El bot necesita ser *Administrador del Grupo* para usar este comando.\n\n👑 *🜸 DEVLYONN 🜸*`,
-    unreg: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n> 📜 *NO REGISTRADO*\n\n> 📌 Usa *${usedPrefix || '#'}registrar Nombre.Edad* para registrarte.\n> 🎯 *Ejemplo:* ${usedPrefix || '#'}registrar Lyonn.17\n\n👑 *🜸 DEVLYONN 🜸*`,
-    mods: `—͟͟͞͞   *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n> 🛡️ *ACCESO RESTRINGIDO*\n\n> 📌 Solo los *Moderadores* pueden usar este comando.\n\n👑 *🜸 DEVLYONN 🜸*`
+    rowner: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🛑 *ACCESO RESTRINGIDO* 🛑\n\n> 👑 Solo *la Creadora* puede usar esto\n\n🌸 *Danny Yulieth* 🌸`,
+    owner: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🔒 *SOLO LA DUEÑA* 🔒\n\n> 📌 Solo *la dueña del bot* puede usar este comando\n\n🌸 *Danny Yulieth* 🌸`,
+    premium: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 💎 *REQUIERE PREMIUM* 💎\n\n> 📌 Este comando es solo para usuarios *Premium*\n\n🌸 *Danny Yulieth* 🌸`,
+    private: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🔒 *SOLO CHAT PRIVADO* 🔒\n\n> 📌 Este comando solo funciona en privado\n\n🌸 *Danny Yulieth* 🌸`,
+    group: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 👥 *SOLO GRUPOS* 👥\n\n> 📌 Este comando solo funciona en grupos\n\n🌸 *Danny Yulieth* 🌸`,
+    admin: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🛡️ *SOLO ADMINISTRADORAS* 🛡️\n\n> 📌 Solo *las administradoras* pueden usar esto\n\n🌸 *Danny Yulieth* 🌸`,
+    botAdmin: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🤖 *EL BOT NO ES ADMIN* 🤖\n\n> 📌 El bot necesita ser *admin del grupo*\n\n🌸 *Danny Yulieth* 🌸`,
+    unreg: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 📜 *NO REGISTRAD@* 📜\n\n> 📌 Usa *${usedPrefix || '#'}registrar Nombre.Edad*\n> 🎯 *Ejemplo:* ${usedPrefix || '#'}registrar Yuliety.17\n\n🌸 *Danny Yulieth* 🌸`,
+    mods: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🛡️ *SOLO MODERADORAS* 🛡️\n\n> 📌 Solo *las moderadoras* pueden usar esto\n\n🌸 *Danny Yulieth* 🌸`
   };
   if (msg[type]) return m.reply(msg[type]).then(() => m.react('❌'));
 };
