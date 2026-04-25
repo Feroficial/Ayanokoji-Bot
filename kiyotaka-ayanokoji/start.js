@@ -92,12 +92,12 @@ const question = (texto) => new Promise((resolver) => rl.question(texto, resolve
 let opcion
 do {
     opcion = await question(
-        chalk.bgYellow.black('🎭 KIYOTAKA AYANOKOJI - SELECCIONA MODO:\n') +
-        chalk.bold.yellow('1. Código QR\n') +
-        chalk.bold.cyan('2. Código de 8 dígitos\n🗡️➤ ')
+        chalk.bgMagenta.black('🌸 ANIA BOT - SELECCIONA MODO:\n') +
+        chalk.bold.magenta('1. Código QR\n') +
+        chalk.bold.cyan('2. Código de 8 dígitos\n🌸➤ ')
     )
     if (!/^[1-2]$/.test(opcion)) {
-        console.log(chalk.bold.redBright(`✞ Opción inválida. Elige 1 o 2.`))
+        console.log(chalk.bold.redBright(`✨ Opción inválida. Elige 1 o 2.`))
     }
 } while (opcion !== '1' && opcion !== '2')
 
@@ -136,7 +136,7 @@ async function updateBotProfilePicture(imageUrl) {
         if (imgRes.ok) {
             const imgBuffer = Buffer.from(await imgRes.arrayBuffer())
             await global.conn.updateProfilePicture(global.conn.user.jid, imgBuffer)
-            console.log(chalk.bold.green('✅ FOTO ACTUALIZADA'))
+            console.log(chalk.bold.green('✅ FOTO DE PERFIL ACTUALIZADA 🌸'))
         }
     } catch (e) {
         console.log(chalk.bold.red(`❌ ERROR: ${e.message}`))
@@ -148,7 +148,7 @@ async function getGroupPicture(groupJid) {
         const url = await global.conn.profilePictureUrl(groupJid, 'image')
         return url
     } catch (e) {
-        return 'https://files.catbox.moe/ld5wqg.jpg'
+        return 'https://files.catbox.moe/74aty6.jpg'
     }
 }
 
@@ -156,14 +156,14 @@ async function requestPairingCode() {
     if (pairingRequested) return
     pairingRequested = true
     try {
-        let userNumber = await question(chalk.bgBlack(chalk.bold.greenBright(`✞ INGRESA TU NÚMERO SIN +:\n🗡️➤ `)))
+        let userNumber = await question(chalk.bgMagenta(chalk.bold.white(`🌸 INGRESA TU NÚMERO SIN +:\n🌸➤ `)))
         userNumber = userNumber.replace(/\D/g, '')
         rl.close()
         console.log(chalk.yellow(`📱 Solicitando código para: ${userNumber}...`))
         await new Promise(resolve => setTimeout(resolve, 2000))
         let codeBot = await global.conn.requestPairingCode(userNumber)
         let formattedCode = codeBot.match(/.{1,4}/g)?.join("-") || codeBot
-        console.log(chalk.bold.white(chalk.bgMagenta(`🎭 CÓDIGO: ${formattedCode} 🗡️`)))
+        console.log(chalk.bold.white(chalk.bgMagenta(`🌸 CÓDIGO: ${formattedCode} 🌸`)))
         console.log(chalk.cyan(`📌 Ingresa este código en: WhatsApp > Dispositivos vinculados`))
     } catch (e) {
         console.log(chalk.red('❌ Error:', e.message))
@@ -188,12 +188,12 @@ async function connectionUpdate(update) {
     if (!global.db.data) loadDatabase()
 
     if ((qr && qr !== '0') && opcion === '1') {
-        console.log(chalk.bold.yellow(`\n❐ ESCANEA EL CÓDIGO QR`))
+        console.log(chalk.bold.magenta(`\n❐ ESCANEA EL CÓDIGO QR 🌸`))
     }
 
     if (connection === 'open') {
-        console.log(chalk.bold.green('\n🎭 KIYOTAKA AYANOKOJI BOT CONECTADO 🗡️'))
-        await updateBotProfilePicture('https://files.catbox.moe/ld5wqg.jpg')
+        console.log(chalk.bold.magenta('\n🌸 ANIA BOT CONECTADA 🌸'))
+        await updateBotProfilePicture('https://files.catbox.moe/74aty6.jpg')
     }
 
     if (connection === 'close') {
@@ -210,7 +210,7 @@ async function connectionUpdate(update) {
 
 global.conn.ev.on('connection.update', connectionUpdate)
 
-// ========== SISTEMA DE WELCOME ==========
+// ========== SISTEMA DE WELCOME (VERSIÓN MUJER) ==========
 global.conn.ev.on('group-participants.update', async (update) => {
     try {
         const { id, participants, action } = update;
@@ -238,9 +238,9 @@ global.conn.ev.on('group-participants.update', async (update) => {
                     
                     let userData = global.db.data.users[jid];
                     let userLevel = userData.level || 1;
-                    let userRole = userData.role || '⚔️ Escudero';
+                    let userRole = userData.role || '🌸 Aprendiz de Dulzura';
                     
-                    let welcomeText = chat.welcomeMessage || `—͟͟͞͞ *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n\n> ✨ BIENVENIDO/A AL AULA DE ÉLITE ✨\n\n> 👤 @user\n> 📊 Nivel: @level\n> 🛡️ Rol: @role\n> 👥 Miembros: @count\n\n> 🌟 Disfruta @group\n\n👑 DevLyonn`;
+                    let welcomeText = chat.welcomeMessage || `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n\n> ✨ 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗔 𝗔𝗟 𝗔𝗨𝗟𝗔 𝗗𝗘 𝗘́𝗟𝗜𝗧𝗘 ✨\n\n> 👤 @user\n> 📊 Nivel: @level\n> 🎀 Rol: @role\n> 👥 Miembros: @count\n\n> 🌟 Disfruta @group 💗\n\n🌸 *Danny Yulieth* 🌸`;
                     
                     welcomeText = welcomeText
                         .replace(/@user/g, `@${jid.split('@')[0]}`)
@@ -268,7 +268,7 @@ global.conn.ev.on('group-participants.update', async (update) => {
         if (action === 'remove') {
             for (const jid of participants) {
                 try {
-                    const goodbyeText = `—͟͟͞͞ *🎭 KIYOTAKA AYANOKOJI 🗡️* —͟͟͞͞\n\n> 👋 HASTA PRONTO 👋\n\n> 👤 @${jid.split('@')[0]} ha abandonado el grupo\n> 👥 Miembros restantes: ${memberCount}\n\n👑 DevLyonn`;
+                    const goodbyeText = `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n\n> 👋 𝗛𝗔𝗦𝗧𝗔 𝗣𝗥𝗢𝗡𝗧𝗢 👋\n\n> 👤 @${jid.split('@')[0]} ha abandonado el grupo\n> 👥 Miembros restantes: ${memberCount}\n\n🌸 *Danny Yulieth* 🌸`;
                     
                     await global.conn.sendMessage(id, {
                         image: { url: groupIcon },
@@ -331,7 +331,7 @@ global.reloadHandler = async function (restatConn) {
 }
 
 global.conn.isInit = false
-global.conn.logger.info(` ✞ H E C H O\n`)
+global.conn.logger.info(` 🌸 𝗔𝗻𝗶𝗮 𝗕𝗼𝘁 𝗜𝗻𝗶𝗰𝗶𝗮𝗱𝗮 𝗖𝗼𝗿𝗿𝗲𝗰𝘁𝗮𝗺𝗲𝗻𝘁𝗲 🌸\n`)
 
 if (!opts['test']) {
     if (global.db) setInterval(async () => {
