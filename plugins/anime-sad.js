@@ -21,7 +21,8 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 `
 
   await conn.sendMessage(m.chat, {
-    gif: { url: randomGif },
+    video: { url: randomGif },
+    gifPlayback: true,
     caption: respuesta,
     mentions: [user]
   })
