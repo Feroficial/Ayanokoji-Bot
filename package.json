@@ -1,7 +1,7 @@
 {
-  "name": "kiyotaka-ayanokoji",
-  "version": "7.7.7",
-  "description": "🎭 KIYOTAKA AYANOKOJI - Bot de WhatsApp del Aula de Élite",
+  "name": "ania-bot",
+  "version": "1.0.0",
+  "description": "🌸 ANIA BOT - Bot de WhatsApp kawaii creado por Danny Yulieth",
   "main": "index.js",
   "type": "module",
 
@@ -21,21 +21,21 @@
     "eslint": "eslint .",
     "eslintfix": "eslint --fix ."
   },
-  "homepage": "https://github.com/Feroficial/Kiyotaka-Ayanokoji-Bot",
+  "homepage": "https://github.com/DannyYulieth/Ania-Bot",
   "author": {
-    "name": "DEVLYONN"
+    "name": "DANNY YULIETH"
   },
   "collaborators": {
-    "col1": "DEVLYONN",
-    "col2": "KIYOTAKA AYANOKOJI",
-    "col3": "EL AULA DE ELITE"
+    "col1": "DANNY YULIETH",
+    "col2": "ANIA BOT",
+    "col3": "KAWAII VERSION"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Feroficial/Kiyotaka-Ayanokoji-Bot.git"
+    "url": "git+https://github.com/DannyYulieth/Ania-Bot.git"
   },
   "bugs": {
-    "url": "https://github.com/Feroficial/Kiyotaka-Ayanokoji-Bot/issues"
+    "url": "https://github.com/DannyYulieth/Ania-Bot/issues"
   },
   "license": "GPL-3.0-or-later",
   "dependencies": {
@@ -108,5 +108,5 @@
     "wa-sticker-formatter": "^4.3.2",
     "moment-timezone": "^0.5.37"
   },
-  "_note": "🎭 KIYOTAKA AYANOKOJI - El aula de élite ahora está en WhatsApp"
+  "_note": "🌸 ANIA BOT - Versión kawaii creada por Danny Yulieth 🌸"
 }
