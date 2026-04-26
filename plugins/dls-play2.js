@@ -2,9 +2,16 @@ import yts from "yt-search"
 import fetch from "node-fetch"
 
 const handler = async (m, { conn, text }) => {
-  if (!text) return m.reply(`*《 🎬  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🎬 》*\n\n➤ *Uso:* #play2 <nombre o link del video>\n➤ *Ejemplo:* #play2 Bad Bunny video\n\n*"Cada imagen guarda un secreto"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+  if (!text) return m.reply(`
+🌸 *— ✧ 𝐏𝐋𝐀𝐘𝟐 (𝐕𝐈𝐃𝐄𝐎) ✧ —* 🌸
 
-  await m.react('🎬')
+> 🎀 *Uso:* #play2 <nombre o link>
+> 💗 *Ejemplo:* #play2 Bad Bunny video
+
+🌸 *"Ania Bot trae el video que buscas"* 🌸
+`)
+
+  await m.react('🎀')
 
   try {
     let url = text.trim()
@@ -18,18 +25,36 @@ const handler = async (m, { conn, text }) => {
 
     if (isUrl) {
       if (!isYouTubeUrl(url)) {
-        return m.reply(`*《 🎬  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🎬 》*\n\n➤ *El enlace no es valido*\n\n*"Verifica el objetivo antes de atacar"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+        return m.reply(`
+🌸 *— ✧ 𝐄𝐑𝐑𝐎𝐑 ✧ —* 🌸
+
+> 💗 *El enlace no es válido*
+
+🌸 *"Verifica el enlace antes de continuar"* 🌸
+`)
       }
 
       const videoId = extractVideoId(url)
       if (!videoId) {
-        return m.reply(`*《 🎬  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🎬 》*\n\n➤ *No pude extraer el ID del video*\n\n*"El sistema tiene fallos"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+        return m.reply(`
+🌸 *— ✧ 𝐄𝐑𝐑𝐎𝐑 ✧ —* 🌸
+
+> 💗 *No se pudo obtener el ID del video*
+
+🌸 *"El sistema tiene un pequeño fallo"* 🌸
+`)
       }
 
       const res = await yts({ videoId })
 
       if (!res) {
-        return m.reply(`*《 🎬  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🎬 》*\n\n➤ *Informacion no disponible*\n\n*"El enemigo es astuto"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+        return m.reply(`
+🌸 *— ✧ 𝐄𝐑𝐑𝐎𝐑 ✧ —* 🌸
+
+> 💗 *Información no disponible*
+
+🌸 *"Intenta de nuevo más tarde"* 🌸
+`)
       }
 
       title = res.title || title
@@ -39,12 +64,25 @@ const handler = async (m, { conn, text }) => {
       thumbnail = res.thumbnail || thumbnail
       url = res.url || url
     } else {
-      await m.reply(`*《 🎬  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🎬 》*\n\n➤ *Escaneando el campo de batalla...*\n➤ *Buscando video:* ${text}\n\n*"La paciencia es clave en la estrategia"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+      await m.reply(`
+🌸 *— ✧ 𝐁𝐔𝐒𝐂𝐀𝐍𝐃𝐎 ✧ —* 🌸
+
+> 🎀 *${text}*
+> 💗 *Rastreando en YouTube...*
+
+🌸 *"Preparando el video"* 🌸
+`)
 
       const res = await yts(url)
 
       if (!res?.videos?.length) {
-        return m.reply(`*《 🎬  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🎬 》*\n\n➤ *No encontre el video:* "${text}"\n\n*"El rastro se perdio"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+        return m.reply(`
+🌸 *— ✧ 𝐍𝐎 𝐄𝐍𝐂𝐎𝐍𝐓𝐑𝐀𝐃𝐎 ✧ —* 🌸
+
+> 💗 *No encontré:* "${text}"
+
+🌸 *"Prueba con otro nombre"* 🌸
+`)
       }
 
       const video = res.videos[0]
@@ -58,39 +96,23 @@ const handler = async (m, { conn, text }) => {
 
     const vistas = formatViews(views)
 
-    const fallbackThumbRes = await fetch("https://i.ibb.co/83pbxQN/5eecaebbc7c3.jpg")
+    // Fallback con tu foto de catbox
+    const fallbackThumbRes = await fetch("https://files.catbox.moe/74aty6.jpg")
     const fallbackThumb = Buffer.from(await fallbackThumbRes.arrayBuffer())
 
-    const fkontak = {
-      key: {
-        fromMe: false,
-        participant: "0@s.whatsapp.net",
-        remoteJid: "status@broadcast"
-      },
-      message: {
-        locationMessage: {
-          name: `『 ${title} 』`,
-          jpegThumbnail: fallbackThumb
-        }
-      }
-    }
-
+    // Mensaje con estilo elegante (sin el fake contact de antes)
     const caption = `
-*《 🎬  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🎬 》*
+🌸 *— ✧ 𝐎𝐁𝐉𝐄𝐓𝐈𝐕𝐎 𝐋𝐎𝐂𝐀𝐋𝐈𝐙𝐀𝐃𝐎 ✧ —* 🌸
 
-➤ *Objetivo localizado*
+> 🎀 *Título:* ${title}
+> 💗 *Creador:* ${authorName}
+> ✨ *Vistas:* ${vistas}
+> 🧸 *Duración:* ${durationTimestamp}
 
-🎬 *Titulo:* ${title}
-📺 *Creador:* ${authorName}
-👁️ *Vistas:* ${vistas}
-⏳ *Duracion:* ${durationTimestamp}
-
-*"El video esta en la mira"*
-*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*
+🌸 *"El video está listo para descargar"* 🌸
 `
 
     let thumb = fallbackThumb
-
     if (thumbnail) {
       try {
         thumb = (await conn.getFile(thumbnail)).data
@@ -105,23 +127,36 @@ const handler = async (m, { conn, text }) => {
         image: thumb,
         caption
       },
-      { quoted: fkontak }
+      { quoted: m }
     )
 
-    await downloadVideo(conn, m, url, fkontak)
+    await downloadVideo(conn, m, url)
     await m.react('✅')
   } catch (e) {
     console.error(e)
-    await m.reply(`*《 🎬  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🎬 》*\n\n➤ *Error:* ${e.message}\n\n*"Algo salio mal"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+    await m.reply(`
+🌸 *— ✧ 𝐄𝐑𝐑𝐎𝐑 ✧ —* 🌸
+
+> 💗 *Error:* ${e.message}
+
+🌸 *"Algo salió mal, intenta de nuevo"* 🌸
+`)
     await m.react('❌')
   }
 }
 
-const downloadVideo = async (conn, m, url, quotedMsg) => {
+const downloadVideo = async (conn, m, url) => {
   try {
     const sent = await conn.sendMessage(
       m.chat,
-      { text: `*《 🎬  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🎬 》*\n\n➤ *Descargando video...*\n\n*"Preparando el material"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*` },
+      { text: `
+🌸 *— ✧ 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀𝐍𝐃𝐎 ✧ —* 🌸
+
+> 🎀 *Procesando video...*
+> 💗 *Un momento por favor*
+
+🌸 *"Preparando tu video"* 🌸
+` },
       { quoted: m }
     )
 
@@ -129,13 +164,25 @@ const downloadVideo = async (conn, m, url, quotedMsg) => {
     const r = await fetch(apiUrl)
 
     if (!r.ok) {
-      return m.reply(`*《 🎬  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🎬 》*\n\n➤ *Error HTTP ${r.status}*\n\n*"El servidor rechazo el ataque"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+      return m.reply(`
+🌸 *— ✧ 𝐄𝐑𝐑𝐎𝐑 ✧ —* 🌸
+
+> 💗 *Error HTTP ${r.status}*
+
+🌸 *"El servidor no responde"* 🌸
+`)
     }
 
     const data = await r.json()
 
     if (!data?.status || !data?.result?.download_url) {
-      return m.reply(`*《 🎬  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🎬 》*\n\n➤ *No se pudo obtener el video*\n\n*"El objetivo es escurridizo"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
+      return m.reply(`
+🌸 *— ✧ 𝐄𝐑𝐑𝐎𝐑 ✧ —* 🌸
+
+> 💗 *No se pudo obtener el video*
+
+🌸 *"El enlace puede estar caído"* 🌸
+`)
     }
 
     const fileUrl = data.result.download_url
@@ -147,24 +194,44 @@ const downloadVideo = async (conn, m, url, quotedMsg) => {
         video: { url: fileUrl },
         mimetype: "video/mp4",
         fileName: `${fileTitle}.mp4`,
-        caption: `*《 🎬  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🎬 》*\n\n➤ *Video descargado*\n🎬 *${fileTitle}*\n\n*"Mision cumplida"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`
+        caption: `
+🌸 *— ✧ 𝐕𝐈𝐃𝐄𝐎 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀𝐃𝐎 ✧ —* 🌸
+
+> 🎀 *${fileTitle}*
+> 💗 *Disfruta tu video*
+
+🌸 *Ania Bot siempre contigo* 🌸
+`
       },
-      { quoted: quotedMsg }
+      { quoted: m }
     )
 
     try {
       await conn.sendMessage(
         m.chat,
         {
-          text: `*《 🎬  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🎬 》*\n\n➤ *Completado*\n🎬 *${fileTitle}*\n\n*"El aula de elite siempre gana"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`,
+          text: `
+🌸 *— ✧ 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀𝐃𝐎 ✧ —* 🌸
+
+> 🎀 *${fileTitle}*
+> 💗 *Video enviado con éxito*
+
+🌸 *"Misión cumplida"* 🌸
+`,
           edit: sent.key
         }
       )
     } catch {}
   } catch (e) {
     console.error(e)
-    await m.reply(`*《 🎬  𝐊𝐈𝐘𝐎𝐓𝐀𝐊𝐀 𝐀𝐘𝐀𝐍𝐎𝐊𝐎𝐉𝐈  🎬 》*\n\n➤ *Error:* ${e.message}\n\n*"Fallo en la mision"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`)
-    await m.react('💀')
+    await m.reply(`
+🌸 *— ✧ 𝐄𝐑𝐑𝐎𝐑 ✧ —* 🌸
+
+> 💗 *Error:* ${e.message}
+
+🌸 *"Fallo en la descarga"* 🌸
+`)
+    await m.react('❌')
   }
 }
 
@@ -194,5 +261,4 @@ const extractVideoId = (url) => {
 handler.command = ["play2", "ytmp4", "ytvideo"]
 handler.tags = ["downloader"]
 handler.help = ['play2']
-
 export default handler
