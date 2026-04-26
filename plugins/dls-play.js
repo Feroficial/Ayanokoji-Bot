@@ -2,40 +2,16 @@ import yts from "yt-search"
 import fetch from "node-fetch"
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
-  let user = global.db.data.users[m.sender]
-  if (!user) user = { saes: 100 }
-  if (user.saes === undefined) user.saes = 100
-
   if (!text) return m.reply(`
-> *•───⧼⧼⧼ 𝙿𝙻𝙰𝚈 ⧽⧽⧽───•*
+🌸 *— ✧ 𝐏𝐋𝐀𝐘 ✧ —* 🌸
 
-> *• Uso:* ${usedPrefix + command} <canción>
-> *• Ejemplo:* ${usedPrefix + command} Bad Bunny
-> *• Costo:* 5 🪙 (Saes)
+> 🎀 *Uso:* ${usedPrefix + command} <canción>
+> 💗 *Ejemplo:* ${usedPrefix + command} Bad Bunny
 
-> *"El aula de élite no espera a nadie"*
-> *•───────────────•*
+🌸 *"Ania Bot reproduce tu música favorita"* 🌸
 `)
 
-  const costo = 5
-  if (user.saes < costo) {
-    return m.reply(`
-> *•───⧼⧼⧼ 𝚂𝙸𝙽 𝚂𝙰𝙴𝚂 ⧽⧽⧽───•*
-
-> ❌ *No tienes suficientes Saes*
-
-> *• Necesitas:* ${costo} 🪙
-> *• Tienes:* ${user.saes} 🪙
-
-> *Gana Saes con:*
-> *• #daily* - Recompensa diaria
-> *• #minar* - Minar Saes
-> *• #work* - Trabajar
-> *•───────────────•*
-`)
-  }
-
-  await m.react('🔍')
+  await m.react('🌸')
 
   try {
     let url = text.trim()
@@ -48,11 +24,11 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     const isUrl = /^https?:\/\/\S+/i.test(url)
 
     if (isUrl) {
-      if (!isYouTubeUrl(url)) return m.reply(`> ❌ *Enlace inválido*`)
+      if (!isYouTubeUrl(url)) return m.reply(`> 💗 *Enlace inválido*`)
       const videoId = extractVideoId(url)
-      if (!videoId) return m.reply(`> ❌ *No se pudo extraer el ID*`)
+      if (!videoId) return m.reply(`> 💗 *No se pudo extraer el ID*`)
       const res = await yts({ videoId })
-      if (!res) return m.reply(`> ❌ *Información no disponible*`)
+      if (!res) return m.reply(`> 💗 *Información no disponible*`)
       title = res.title || title
       authorName = res.author?.name || authorName
       durationTimestamp = res.timestamp || durationTimestamp
@@ -61,13 +37,15 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       url = res.url || url
     } else {
       await m.reply(`
-> *•───⧼⧼⧼ 𝙱𝚄𝚂𝙲𝙰𝙽𝙳𝙾 ⧽⧽⧽───•*
+🌸 *— ✧ 𝐁𝐔𝐒𝐂𝐀𝐍𝐃𝐎 ✧ —* 🌸
 
-> *• ${text}*
-> *•───────────────•*
+> 🎀 *${text}*
+> 💗 *Buscando en YouTube...*
+
+🌸 *"Preparando tu música"* 🌸
 `)
       const res = await yts(url)
-      if (!res?.videos?.length) return m.reply(`> ❌ *No se encontraron resultados*`)
+      if (!res?.videos?.length) return m.reply(`> 💗 *No se encontraron resultados*`)
       const video = res.videos[0]
       title = video.title || title
       authorName = video.author?.name || authorName
@@ -81,13 +59,14 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     const fallbackThumb = await getFallbackThumb()
 
     const caption = `
-> *•───⧼⧼⧼ 𝙾𝙱𝙹𝙴𝚃𝙸𝚅𝙾 𝙻𝙾𝙲𝙰𝙻𝙸𝚉𝙰𝙳𝙾 ⧽⧽⧽───•*
+🌸 *— ✧ 𝐎𝐁𝐉𝐄𝐓𝐈𝐕𝐎 𝐋𝐎𝐂𝐀𝐋𝐈𝐙𝐀𝐃𝐎 ✧ —* 🌸
 
-> *• Título:* ${title}
-> *• Creador:* ${authorName}
-> *• Vistas:* ${vistas}
-> *• Duración:* ${durationTimestamp}
-> *•───────────────•*
+> 🎀 *Título:* ${title}
+> 💗 *Creador:* ${authorName}
+> ✨ *Vistas:* ${vistas}
+> 🧸 *Duración:* ${durationTimestamp}
+
+🌸 *"Reproduciendo..."* 🌸
 `
 
     let thumb = fallbackThumb
@@ -99,35 +78,33 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
     await conn.sendMessage(m.chat, { image: thumb, caption }, { quoted: m })
     await downloadMedia(conn, m, url)
-    
-    user.saes -= costo
+
     await m.react('✅')
     await m.reply(`
-> *•───⧼⧼⧼ 𝙳𝙴𝚂𝙲𝙰𝚁𝙶𝙰 𝙲𝙾𝙼𝙿𝙻𝙴𝚃𝙰 ⧽⧽⧽───•*
+🌸 *— ✧ 𝐀𝐔𝐃𝐈𝐎 𝐄𝐍𝐕𝐈𝐀𝐃𝐎 ✧ —* 🌸
 
-> ✅ *Audio enviado*
+> 🎀 *${title}*
+> 💗 *¡Disfruta la música!*
 
-> *• -${costo} 🪙*
-> *• Saes restantes:* ${user.saes} 🪙
-
-> *"El aula de élite cobra por sus servicios"*
-> *•───────────────•*
+🌸 *Ania Bot siempre contigo* 🌸
 `)
-    
+
   } catch (e) {
     console.error(e)
     await m.react('❌')
-    await m.reply(`> ❌ *Error:* ${e.message}`)
+    await m.reply(`> 💗 *Error:* ${e.message}`)
   }
 }
 
 const downloadMedia = async (conn, m, url) => {
   try {
     await m.reply(`
-> *•───⧼⧼⧼ 𝙳𝙴𝚂𝙲𝙰𝚁𝙶𝙰𝙽𝙳𝙾 ⧽⧽⧽───•*
+🌸 *— ✧ 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀𝐍𝐃𝐎 ✧ —* 🌸
 
-> *• Procesando audio...*
-> *•───────────────•*
+> 🎀 *Procesando audio...*
+> 💗 *Un momento por favor*
+
+🌸 *"Preparando tu canción"* 🌸
 `)
 
     const apiUrl = `https://api-gohan.onrender.com/download/ytaudio?url=${encodeURIComponent(url)}`
@@ -146,22 +123,15 @@ const downloadMedia = async (conn, m, url) => {
       fileName: `${fileTitle}.mp3`
     }, { quoted: m })
 
-    await m.reply(`
-> *•───⧼⧼⧼ 𝙰𝚄𝙳𝙸𝙾 𝙴𝙽𝚅𝙸𝙰𝙳𝙾 ⧽⧽⧽───•*
-
-> 🎵 *${fileTitle}*
-> *•───────────────•*
-`)
-    
   } catch (e) {
     console.error(e)
-    await m.reply(`> ❌ *Error al descargar:* ${e.message}`)
+    await m.reply(`> 💗 *Error al descargar:* ${e.message}`)
   }
 }
 
 const getFallbackThumb = async () => {
   try {
-    const res = await fetch("https://i.ibb.co/83pbxQN/5eecaebbc7c3.jpg")
+    const res = await fetch("https://files.catbox.moe/74aty6.jpg")
     return Buffer.from(await res.arrayBuffer())
   } catch {
     return null
