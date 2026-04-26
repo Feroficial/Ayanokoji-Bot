@@ -5,16 +5,13 @@ let handler = async (m, { conn, usedPrefix, text, args, command }) => {
   let nomorown = '5732475517485'
   // TÚ COLABORADOR (Bolivia) - LYONN
   let nomorcolab = '59177474230'
-  let nomorbot = conn.user.jid.split('@')[0]
   
-  let bioOwn = (await conn.fetchStatus(nomorown + '@s.whatsapp.net').catch(_ => {}))?.status || '🌸 Creadora de Ania Bot'
-  let bioColab = (await conn.fetchStatus(nomorcolab + '@s.whatsapp.net').catch(_ => {}))?.status || '🎭 Colaborador oficial - Lyonn'
-  let biobot = (await conn.fetchStatus(conn.user.jid).catch(_ => {}))?.status || '🌸 Ania Bot - Tu bot kawaii'
+  let bioOwn = (await conn.fetchStatus(nomorown + '@s.whatsapp.net').catch(_ => {}))?.status || '🌸 Creadora'
+  let bioColab = (await conn.fetchStatus(nomorcolab + '@s.whatsapp.net').catch(_ => {}))?.status || '🎭 Colaborador'
 
   await sendContactArray(conn, m.chat, [
-    [`${nomorown}`, `🌸 Danny Yulieth`, `🌸 CREADORA PRINCIPAL`, `🌸 Ania Bot`, `danny@aniabot.com`, `🇨🇴 Colombia`, bioOwn],
-    [`${nomorcolab}`, `🎭 Lyonn`, `🎭 COLABORADOR`, `🎭 Administrador`, `lyonn@aniabot.com`, `🇧🇴 Bolivia`, bioColab],
-    [`${nomorbot}`, `🌸 Ania Bot`, `🌸 ANIA BOT`, `🤖 Bot Oficial`, `ania@aniabot.com`, `🌐 Online`, biobot]
+    [`${nomorown}`, `🌸 Danny Yulieth`, `🌸 CREADORA`, `🌸`, `danny@danny.com`, `🇨🇴 Colombia`, bioOwn],
+    [`${nomorcolab}`, `🎭 Lyonn`, `🎭 COLABORADOR`, `🎭`, `lyonn@lyonn.com`, `🇧🇴 Bolivia`, bioColab]
   ], m)
 
   throw false
