@@ -149,11 +149,11 @@ async function getXsrfToken(cookieHeader) {
     } catch { return null }
 }
 
-let modoActual = 'ayanokoji'
+let modoActual = 'ania'
 const mensajesBienvenida = {
-    ayanokoji: '🎭 *ＫＩＹＯＴＡＫＡ ＡＹＡＮＯＫＯＪＩ* 🗡️\n\n❄️ *"El aula de élite no espera a nadie..."* ❄️\n\n📌 *Usa #gemini <pregunta> para hablar conmigo*',
-    frio: '🗡️ *ＫＩＹＯＴＡＫＡ* 🗡️\n\n💀 *"Habla. No tengo tiempo que perder"* 💀',
-    estratega: '♟️ *ＡＹＡＮＯＫＯＪＩ* ♟️\n\n📊 *"Cada movimiento tiene un propósito. ¿Cuál es el tuyo?"* 📊'
+    ania: '🌸 *ＡＮＩＡ ＢＯＴ* 🌸\n\n💗 *"Estoy aquí para ayudarte, ¿en qué puedo servirte?"* 💗\n\n📌 *Usa #gemini <pregunta> para hablar conmigo*',
+    kawaii: '🎀 *ＡＮＩＡ* 🎀\n\n✨ *"Hola, hablemos bonito"* ✨',
+    tierna: '🧸 *ＡＮＩＡ* 🧸\n\n🌸 *"Cuéntame, te escucho"* 🌸'
 }
 
 async function askGemini(prompt, previousId = null) {
@@ -161,18 +161,18 @@ async function askGemini(prompt, previousId = null) {
     if (previousId) {
         try { resumeArray = JSON.parse(atob2(previousId))?.resumeArray || null } catch {}
     }
-    
+
     let systemPrompt = ''
-    if (modoActual === 'ayanokoji') {
-        systemPrompt = 'Eres Kiyotaka Ayanokoji, el protagonista de "El aula de élite". Eres frío, calculador, estratégico, manipulador. Hablas poco, piensas mucho. Tus respuestas son cortas, directas, con un tono de superioridad intelectual. No muestras emociones. Analizas a las personas como si fueran piezas de ajedrez. Usas frases como "Interesante", "No me importa", "Eres predecible", "Todo está bajo control". Siempre respondes con calma y seguridad.'
-    } else if (modoActual === 'frio') {
-        systemPrompt = 'Eres Kiyotaka Ayanokoji en su modo más frío. Respuestas ultra cortas, sin emociones, directas al grano. Usas monosílabos. Das la sensación de que todo te aburre.'
+    if (modoActual === 'ania') {
+        systemPrompt = 'Eres Ania, una asistente virtual amable, dulce y kawaii. Hablas con emojis como 🌸, 💗, 🎀, ✨. Das respuestas cálidas, positivas y alentadoras. Siempre tratas de ayudar con una sonrisa virtual. Tus respuestas son amigables y llenas de buenas vibras. Usas frases como "¡Claro que sí!", "Qué bonito", "Eres increíble", "Me encanta ayudar".'
+    } else if (modoActual === 'kawaii') {
+        systemPrompt = 'Eres Ania en modo súper kawaii. Usas muchos emojis, expresiones tiernas, respuestas cortas y adorables. Hablas como una chica dulce de anime.'
     } else {
-        systemPrompt = 'Eres Kiyotaka Ayanokoji, un estratega. Analizas cada situación, buscas ventajas, piensas varios pasos adelante. Tus respuestas son analíticas y profundas.'
+        systemPrompt = 'Eres Ania en modo tierna. Das respuestas suaves, tranquilas, como una amiga que escucha y apoya. Transmites paz y cariño.'
     }
-    
-    let finalPrompt = `${systemPrompt}\n\nUsuario: ${prompt.trim()}\n\nKiyotaka Ayanokoji:`
-    
+
+    let finalPrompt = `${systemPrompt}\n\nUsuario: ${prompt.trim()}\n\nAnia:`
+
     let lastErr = null
     for (let attempt = 1; attempt <= 3; attempt++) {
         try {
@@ -209,26 +209,33 @@ async function askGemini(prompt, previousId = null) {
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (command === 'setmodoia') {
-        if (!text) return m.reply(`🎭 *MODOS DISPONIBLES* 🎭\n\n❄️ *ayanokoji* - Frío y calculador (por defecto)\n🗡️ *frio* - Ultra cortante\n♟️ *estratega* - Analítico y profundo\n\n📌 *Ejemplo:* ${usedPrefix}setmodoia estratega`)
-        
-        if (text === 'ayanokoji') {
-            modoActual = 'ayanokoji'
-            m.reply(`🎭 *MODO AYANOKOJI ACTIVADO* 🎭\n\n❄️ *"Interesante..."* ❄️`)
-        } else if (text === 'frio') {
-            modoActual = 'frio'
-            m.reply(`🗡️ *MODO FRÍO ACTIVADO* 🗡️\n\n💀 *"Habla"* 💀`)
-        } else if (text === 'estratega') {
-            modoActual = 'estratega'
-            m.reply(`♟️ *MODO ESTRATEGA ACTIVADO* ♟️\n\n📊 *"Analizando..."* 📊`)
+        if (!text) return m.reply(`
+🌸 *MODOS DISPONIBLES* 🌸
+
+> 🎀 *ania* - Amable y kawaii (por defecto)
+> 💗 *kawaii* - Súper tierna
+> 🧸 *tierna* - Tranquila y dulce
+
+📌 *Ejemplo:* ${usedPrefix}setmodoia kawaii`)
+
+        if (text === 'ania') {
+            modoActual = 'ania'
+            m.reply(`🌸 *MODO ANIA ACTIVADO* 🌸\n\n💗 *"¡Hola! Estoy aquí para ayudarte"* 💗`)
+        } else if (text === 'kawaii') {
+            modoActual = 'kawaii'
+            m.reply(`🎀 *MODO KAWAII ACTIVADO* 🎀\n\n✨ *"Holi, ¿en qué te ayudo?"* ✨`)
+        } else if (text === 'tierna') {
+            modoActual = 'tierna'
+            m.reply(`🧸 *MODO TIERNA ACTIVADO* 🧸\n\n🌸 *"Cuéntame, te escucho con cariño"* 🌸`)
         } else {
-            m.reply(`❌ Modo "${text}" no existe. Usa: ayanokoji, frio, estratega`)
+            m.reply(`💗 Modo "${text}" no existe. Usa: ania, kawaii, tierna`)
         }
         return
     }
-    
-    if (!text) return m.reply(mensajesBienvenida[modoActual] + `\n\n➤ *Uso:* ${usedPrefix}${command} <pregunta>\n➤ *Ejemplo:* ${usedPrefix}${command} Quién eres?`)
 
-    await m.react('🎭')
+    if (!text) return m.reply(mensajesBienvenida[modoActual] + `\n\n➤ *Uso:* ${usedPrefix}${command} <pregunta>\n➤ *Ejemplo:* ${usedPrefix}${command} ¿Quién eres?`)
+
+    await m.react('🌸')
 
     try {
         let res = await askGemini(text)
@@ -236,17 +243,17 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         if (res.images?.length) {
             await conn.sendMessage(m.chat, {
                 image: { url: res.images[0] },
-                caption: `🎭 *ＫＩＹＯＴＡＫＡ ＡＹＡＮＯＫＯＪＩ* 🗡️\n\n❄️ *${res.text || ''}* ❄️\n\n*"El aula de élite ha hablado"*`
+                caption: `🌸 *ＡＮＩＡ ＢＯＴ* 🌸\n\n💗 *${res.text || ''}* 💗\n\n*"Siempre aquí para ti"*`
             }, { quoted: m });
         } else {
-            await m.reply(`🎭 *ＫＩＹＯＴＡＫＡ ＡＹＡＮＯＫＯＪＩ* 🗡️\n\n❄️ *${res.text || '...'}* ❄️`)
+            await m.reply(`🌸 *ＡＮＩＡ ＢＯＴ* 🌸\n\n💗 *${res.text || '...'}* 💗`)
         }
 
         await m.react('✅')
     } catch (e) {
         console.error('[ia]', e);
         await m.react('❌')
-        m.reply(`🎭 *ＫＩＹＯＴＡＫＡ ＡＹＡＮＯＫＯＪＩ* 🗡️\n\n❄️ *"El sistema ha fallado... Interesante"* ❄️`)
+        m.reply(`🌸 *ＡＮＩＡ ＢＯＴ* 🌸\n\n💗 *"Ups, algo salió mal... Intenta de nuevo"* 💗`)
     }
 }
 
