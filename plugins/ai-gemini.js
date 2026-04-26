@@ -257,8 +257,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }
 }
 
-handler.command = ['gemini', 'setmodo']
-handler.help = ['gemini <pregunta>', 'setmodo <modo>']
+handler.command = ['ania', 'setmodo']
+handler.help = ['ania <pregunta>', 'setmodo <modo>']
 handler.tags = ['ai']
 
 export default handler
