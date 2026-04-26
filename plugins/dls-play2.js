@@ -261,4 +261,5 @@ const extractVideoId = (url) => {
 handler.command = ["play2", "ytmp4", "ytvideo"]
 handler.tags = ["downloader"]
 handler.help = ['play2']
+handler.register = true
 export default handler
