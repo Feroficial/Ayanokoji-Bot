@@ -260,5 +260,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 handler.command = ['ania', 'setmodo']
 handler.help = ['ania <pregunta>', 'setmodo <modo>']
 handler.tags = ['ai']
+handler.register = true
 
 export default handler
