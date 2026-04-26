@@ -2,7 +2,7 @@ import PhoneNumber from 'awesome-phonenumber'
 
 let handler = async (m, { conn, usedPrefix, text, args, command }) => {
   // CREADORA PRINCIPAL (Colombia)
-  let nomorown = '5732475517485'
+  let nomorown = '573245517485'
   // TÚ COLABORADOR (Bolivia) - LYONN
   let nomorcolab = '59177474230'
   
