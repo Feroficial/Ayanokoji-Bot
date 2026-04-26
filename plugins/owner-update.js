@@ -9,24 +9,11 @@ let handler = async (m, { conn, isROwner }) => {
   await m.react('🔄')
 
   try {
-    const { stdout: isGit } = await execPromise('git rev-parse --is-inside-work-tree').catch(() => ({ stdout: 'false' }))
-    if (isGit.trim() !== 'true') throw new Error('No es un repositorio git')
-
-    const { stdout: branch } = await execPromise('git branch --show-current')
-    const ramaActual = branch.trim() || 'main'
-
-    const { stdout: cambiosLocales } = await execPromise('git status --porcelain')
-    if (cambiosLocales.trim()) {
-      await m.reply(`🌸 *— ✧ 𝐀𝐃𝐕𝐄𝐑𝐓𝐄𝐍𝐂𝐈𝐀 ✧ —* 🌸\n\n> 💗 Tienes cambios locales sin guardar\n> 🎀 Usa #guardar o haz commit antes de actualizar\n\n🌸 *"Los cambios se pueden perder"* 🌸`)
-      await m.react('⚠️')
-      return
-    }
-
     const { stdout: commitActual } = await execPromise('git rev-parse --short HEAD')
     
-    await m.reply(`🌸 *— ✧ 𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐍𝐃𝐎 ✧ —* 🌸\n\n> 🎀 *Rama:* ${ramaActual}\n> 💗 *Commit:* ${commitActual.trim()}\n> ✨ Descargando cambios...\n\n🌸 *"Ania Bot se está actualizando"* 🌸`)
+    await m.reply(`🌸 *— ✧ 𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐍𝐃𝐎 ✧ —* 🌸\n\n> 🎀 *Commit actual:* ${commitActual.trim()}\n> 💗 Descargando cambios...\n\n🌸 *"Ania Bot se está actualizando"* 🌸`)
 
-    const { stdout, stderr } = await execPromise('git pull origin ' + ramaActual)
+    const { stdout, stderr } = await execPromise('git pull')
     
     if (stderr && !stderr.includes('Ya está actualizado') && !stderr.includes('Already up to date')) throw new Error(stderr)
     
@@ -38,9 +25,7 @@ let handler = async (m, { conn, isROwner }) => {
     
     const { stdout: nuevoCommit } = await execPromise('git rev-parse --short HEAD')
     
-    const lineas = stdout.split('\n').filter(l => l.trim() && !l.includes('Already up to date')).slice(0, 5)
-    
-    await m.reply(`🌸 *— ✧ 𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐂𝐈Ó𝐍 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀 ✧ —* 🌸\n\n> 🎀 *Rama:* ${ramaActual}\n> 💗 *Commit anterior:* ${commitActual.trim()}\n> ✨ *Nuevo commit:* ${nuevoCommit.trim()}\n\n📌 *Cambios:*\n${lineas.map(l => `> • ${l}`).join('\n')}\n\n🌸 *"Reinicia el bot para aplicar los cambios"* 🌸`)
+    await m.reply(`🌸 *— ✧ 𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐂𝐈Ó𝐍 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀 ✧ —* 🌸\n\n> 🎀 *Commit anterior:* ${commitActual.trim()}\n> 💗 *Nuevo commit:* ${nuevoCommit.trim()}\n> ✨ Cambios descargados correctamente\n\n🌸 *"Reinicia el bot para aplicar los cambios"* 🌸`)
     await m.react('✅')
     
   } catch (error) {
