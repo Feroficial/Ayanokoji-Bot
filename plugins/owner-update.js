@@ -24,7 +24,26 @@ let handler = async (m, { conn, isROwner }) => {
     if (stdout.includes('Updating') || stdout.includes('Actualizando')) {
       const { stdout: nuevoCommit } = await execPromise('git rev-parse --short HEAD')
       
-      await m.reply(`🌸 *— ✧ 𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐂𝐈Ó𝐍 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀 ✧ —* 🌸\n\n> 🎀 *Commit anterior:* ${commitActual.trim()}\n> 💗 *Nuevo commit:* ${nuevoCommit.trim()}\n> ✨ Cambios descargados correctamente\n\n🌸 *"Usa #restart para reiniciar manualmente"* 🌸`)
+      const { stdout: archivos } = await execPromise('git diff --name-status ' + commitActual.trim() + '..' + nuevoCommit.trim())
+      
+      let nuevos = []
+      let modificados = []
+      let eliminados = []
+      
+      archivos.split('\n').forEach(line => {
+        if (line.startsWith('A')) nuevos.push(line.slice(1).trim())
+        else if (line.startsWith('M')) modificados.push(line.slice(1).trim())
+        else if (line.startsWith('D')) eliminados.push(line.slice(1).trim())
+      })
+      
+      let cambios = ''
+      if (nuevos.length > 0) cambios += `\n> ✨ *Nuevos:*\n${nuevos.slice(0, 10).map(f => `> • ${f}`).join('\n')}${nuevos.length > 10 ? `\n> • ... y ${nuevos.length - 10} más` : ''}`
+      if (modificados.length > 0) cambios += `\n\n> 📝 *Modificados:*\n${modificados.slice(0, 10).map(f => `> • ${f}`).join('\n')}${modificados.length > 10 ? `\n> • ... y ${modificados.length - 10} más` : ''}`
+      if (eliminados.length > 0) cambios += `\n\n> 🗑️ *Eliminados:*\n${eliminados.slice(0, 10).map(f => `> • ${f}`).join('\n')}${eliminados.length > 10 ? `\n> • ... y ${eliminados.length - 10} más` : ''}`
+      
+      if (cambios === '') cambios = '\n> • Cambios menores'
+      
+      await m.reply(`🌸 *— ✧ 𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐂𝐈Ó𝐍 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀 ✧ —* 🌸\n\n> 🎀 *Commit anterior:* ${commitActual.trim()}\n> 💗 *Nuevo commit:* ${nuevoCommit.trim()}\n> ✨ *Cambios descargados*${cambios}\n\n🌸 *"Usa #restart para reiniciar manualmente"* 🌸`)
       await m.react('✅')
       return
     }
