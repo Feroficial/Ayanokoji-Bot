@@ -2,39 +2,68 @@ import axios from 'axios';
 import cheerio from 'cheerio';
 
 let handler = async (m, { conn, text, args, usedPrefix, command }) => {
-  if (!text) return m.reply(`*《 🎭  𝐏𝐈𝐍𝐓𝐄𝐑𝐄𝐒𝐓  🗡️ 》*\n\n➤ *Uso:* ${usedPrefix + command} <búsqueda o link>\n➤ *Ejemplo:* ${usedPrefix + command} Kiyotaka Ayanokoji\n\n*"El aula de élite encuentra inspiración visual"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`);
+  if (!text) return m.reply(`
+🌸 *— ✧ 𝐏𝐈𝐍𝐓𝐄𝐑𝐄𝐒𝐓 ✧ —* 🌸
+
+> 🎀 *Uso:* ${usedPrefix + command} <búsqueda o link>
+> 💗 *Ejemplo:* ${usedPrefix + command} Kiyotaka Ayanokoji
+
+🌸 *"Ania Bot encuentra inspiración visual"* 🌸
+`);
 
   try {
     if (text.includes("https://")) {
-      await m.react("🎭");
+      await m.react("🎀");
       let i = await dl(args[0]);
       let isVideo = i.download?.includes(".mp4");
       await conn.sendMessage(
         m.chat,
-        { [isVideo ? "video" : "image"]: { url: i.download }, caption: `*《 🎭  𝐏𝐈𝐍𝐓𝐄𝐑𝐄𝐒𝐓  🗡️ 》*\n\n📌 *Título:* ${i.title}\n\n*"Contenido extraído del aula visual"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*` },
+        { [isVideo ? "video" : "image"]: { url: i.download }, caption: `
+🌸 *— ✧ 𝐏𝐈𝐍𝐓𝐄𝐑𝐄𝐒𝐓 ✧ —* 🌸
+
+> 🎀 *Título:* ${i.title}
+> 💗 *Contenido extraído con éxito*
+
+🌸 *"Ania Bot te trae lo mejor"* 🌸` },
         { quoted: m }
       );
       await m.react("✅");
     } else {
-      await m.react('🔍');
+      await m.react('🎀');
       const results = await pins(text);
-      if (!results.length) return conn.sendMessage(m.chat, { text: `*《 🎭  𝐏𝐈𝐍𝐓𝐄𝐑𝐄𝐒𝐓  🗡️ 》*\n\n➤ ❌ No se encontraron resultados para "${text}".\n\n*"La búsqueda no dio resultados"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*` }, { quoted: m });
+      if (!results.length) return conn.sendMessage(m.chat, { text: `
+🌸 *— ✧ 𝐍𝐎 𝐄𝐍𝐂𝐎𝐍𝐓𝐑𝐀𝐃𝐎 ✧ —* 🌸
 
-      const medias = results.slice(0, 10).map(img => ({ type: 'image', data: { url: img.image_large_url } }));
+> 💗 *No se encontraron resultados para:* "${text}"
 
-      await conn.sendSylphy(
-        m.chat,
-        medias,
-        {
-          caption: `*《 🎭  𝐏𝐈𝐍𝐓𝐄𝐑𝐄𝐒𝐓  🗡️ 》*\n\n🔎 *Búsqueda:* "${text}"\n📄 *Resultados:* ${medias.length}\n\n*"Imágenes extraídas del aula de élite"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*`,
-          quoted: m
-        }
-      );
+🌸 *"Prueba con otra búsqueda"* 🌸` }, { quoted: m });
+
+      // Enviar las primeras 5 imágenes (ya que enviar 10 puede ser pesado)
+      const medias = results.slice(0, 5);
+      
+      for (let i = 0; i < medias.length; i++) {
+        await conn.sendMessage(
+          m.chat,
+          { image: { url: medias[i].image_large_url }, caption: i === 0 ? `
+🌸 *— ✧ 𝐏𝐈𝐍𝐓𝐄𝐫𝐄𝐒𝐓 ✧ —* 🌸
+
+> 🎀 *Búsqueda:* "${text}"
+> 💗 *Resultados encontrados:* ${medias.length}
+
+🌸 *"Imágenes extraídas para ti"* 🌸` : null },
+          { quoted: m }
+        );
+      }
 
       await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
     }
   } catch (e) {
-    conn.sendMessage(m.chat, { text: `*《 🎭  𝐏𝐈𝐍𝐓𝐄𝐑𝐄𝐒𝐓  🗡️ 》*\n\n➤ ❌ Error: ${e.message}\n\n*"El sistema ha fallado"*\n*⚔️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 ⚔️*` }, { quoted: m });
+    conn.sendMessage(m.chat, { text: `
+🌸 *— ✧ 𝐄𝐑𝐑𝐎𝐑 ✧ —* 🌸
+
+> 💗 *Error:* ${e.message}
+
+🌸 *"El sistema ha fallado"* 🌸` }, { quoted: m });
   }
 };
 
