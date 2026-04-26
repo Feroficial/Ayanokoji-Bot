@@ -1,22 +1,28 @@
 import PhoneNumber from 'awesome-phonenumber'
 
 let handler = async (m, { conn, usedPrefix, text, args, command }) => {
-  let nomorown = '59177474230'
-  let nomorbot = '584160066967'
-  let bio = (await conn.fetchStatus(nomorown + '@s.whatsapp.net').catch(_ => {}))?.status || '🎭 Creador del aula de élite'
-  let biobot = (await conn.fetchStatus(conn.user.jid).catch(_ => {}))?.status || '🎭 Kiyotaka Ayanokoji - El aula de élite'
+  // CREADORA PRINCIPAL (Colombia)
+  let nomorown = '5732475517485'
+  // TÚ COLABORADOR (Bolivia) - LYONN
+  let nomorcolab = '59177474230'
+  let nomorbot = conn.user.jid.split('@')[0]
+  
+  let bioOwn = (await conn.fetchStatus(nomorown + '@s.whatsapp.net').catch(_ => {}))?.status || '🌸 Creadora de Ania Bot'
+  let bioColab = (await conn.fetchStatus(nomorcolab + '@s.whatsapp.net').catch(_ => {}))?.status || '🎭 Colaborador oficial - Lyonn'
+  let biobot = (await conn.fetchStatus(conn.user.jid).catch(_ => {}))?.status || '🌸 Ania Bot - Tu bot kawaii'
 
   await sendContactArray(conn, m.chat, [
-    [`${nomorown}`, `🎭 LyonnOFC`, `🎭 CREADOR`, `🎭 DevLyonn`, `devlyonn@kiyotaka.com`, `🇧🇴 Bolivia`, bio],
-    [`${nomorbot}`, `🎭 Kiyotaka Ayanokoji`, `🎭 EL AULA DE ÉLITE`, `🤖 Bot oficial`, `bot@kiyotaka.com`, `🌐 Online`, biobot]
+    [`${nomorown}`, `🌸 Danny Yulieth`, `🌸 CREADORA PRINCIPAL`, `🌸 Ania Bot`, `danny@aniabot.com`, `🇨🇴 Colombia`, bioOwn],
+    [`${nomorcolab}`, `🎭 Lyonn`, `🎭 COLABORADOR`, `🎭 Administrador`, `lyonn@aniabot.com`, `🇧🇴 Bolivia`, bioColab],
+    [`${nomorbot}`, `🌸 Ania Bot`, `🌸 ANIA BOT`, `🤖 Bot Oficial`, `ania@aniabot.com`, `🌐 Online`, biobot]
   ], m)
 
   throw false
 }
 
-handler.help = ["creador", "owner"]
+handler.help = ["creadora", "owner"]
 handler.tags = ["info"]
-handler.command = ['owner', 'creador']
+handler.command = ['owner', 'creadora']
 
 export default handler
 
@@ -55,4 +61,4 @@ END:VCARD`.trim()
       ...options
     }
   )
-                                                                              }
+}
