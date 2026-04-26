@@ -15,17 +15,21 @@ let handler = async (m, { conn, isROwner }) => {
 
     const { stdout, stderr } = await execPromise('git pull')
     
-    if (stderr && !stderr.includes('Ya está actualizado') && !stderr.includes('Already up to date')) throw new Error(stderr)
-    
-    if (stdout.includes('Ya está actualizado') || stdout.includes('Already up to date')) {
+    if (stdout.includes('Already up to date') || stdout.includes('Ya está actualizado')) {
       await m.reply(`🌸 *— ✧ 𝐘𝐀 𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐃𝐀 ✧ —* 🌸\n\n> 💗 El bot ya está en la última versión\n> 🎀 No hay cambios pendientes\n\n🌸 *Ania Bot siempre al día* 🌸`)
       await m.react('✅')
       return
     }
     
-    const { stdout: nuevoCommit } = await execPromise('git rev-parse --short HEAD')
+    if (stdout.includes('Updating') || stdout.includes('Actualizando')) {
+      const { stdout: nuevoCommit } = await execPromise('git rev-parse --short HEAD')
+      
+      await m.reply(`🌸 *— ✧ 𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐂𝐈Ó𝐍 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀 ✧ —* 🌸\n\n> 🎀 *Commit anterior:* ${commitActual.trim()}\n> 💗 *Nuevo commit:* ${nuevoCommit.trim()}\n> ✨ Cambios descargados correctamente\n\n🌸 *"Reinicia el bot para aplicar los cambios"* 🌸`)
+      await m.react('✅')
+      return
+    }
     
-    await m.reply(`🌸 *— ✧ 𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐂𝐈Ó𝐍 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀 ✧ —* 🌸\n\n> 🎀 *Commit anterior:* ${commitActual.trim()}\n> 💗 *Nuevo commit:* ${nuevoCommit.trim()}\n> ✨ Cambios descargados correctamente\n\n🌸 *"Reinicia el bot para aplicar los cambios"* 🌸`)
+    await m.reply(`🌸 *— ✧ 𝐒𝐈𝐍 𝐂𝐀𝐌𝐁𝐈𝐎𝐒 ✧ —* 🌸\n\n> 💗 No hubo cambios descargados\n\n🌸 *"Ania Bot ya está actualizada"* 🌸`)
     await m.react('✅')
     
   } catch (error) {
