@@ -158,6 +158,6 @@ const extractVideoId = (url) => {
 
 handler.help = ["play"]
 handler.tags = ["downloader"]
-handler.command = ["play", "yt", "yta", "audio"
-handler.register = false
+handler.command = ["play", "yt", "yta", "audio"]
+handler.register = true
 export default handler
