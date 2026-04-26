@@ -14,7 +14,6 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 > 💗 *Nombre:* Ania Bot
 > 🎀 *Versión:* 1.0.0
 > 👑 *Creadora:* Danny Yulieth
-> 🎭 *Colaborador:* Lyonn
 
 > 📊 *Estadísticas:*
 > • 👥 Usuarios: ${totalUsers}
