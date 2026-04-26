@@ -3,114 +3,55 @@ import util from 'util'
 
 const execPromise = util.promisify(exec)
 
-let handler = async (m, { conn, text, usedPrefix, command, isOwner }) => {
-  if (!isOwner) return m.reply(`╭━━━━━━━━━━━━━━━━━━━━╮
-┃ 🔖 ＡＣＣＥＳＯ ＤＥＮＥＧＡＤＯ 🔖
-╰━━━━━━━━━━━━━━━━━━━━╯
+let handler = async (m, { conn, isROwner }) => {
+  if (!isROwner) return m.reply(`🌸 *— ✧ 𝐀𝐂𝐂𝐄𝐒𝐎 𝐑𝐄𝐒𝐓𝐑𝐈𝐍𝐆𝐈𝐃𝐎 ✧ —* 🌸\n\n> 💗 Solo la creadora puede usar este comando\n\n🌸 *Danny Yulieth* 🌸`)
 
-❖ *❌ 𝐒𝐨𝐥𝐨 𝐞𝐥 𝐜𝐫𝐞𝐚𝐝𝐨𝐫 𝐩𝐮𝐞𝐝𝐞 𝐮𝐬𝐚𝐫 𝐞𝐬𝐭𝐨*
-❖ *🎭 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 𝐧𝐨 𝐜𝐨𝐧𝐟𝐢𝐚 𝐞𝐧 𝐜𝐮𝐚𝐥𝐪𝐮𝐢𝐞𝐫𝐚*
-
-╰━━━━━━━━━━━━━━━━━━━━╯`)
-
-  await m.react('🔖')
-
-  if (!text) {
-   return m.reply(`
-  ♪ ••• ♪  🔖 𝐔𝐏𝐃𝐀𝐓𝐄 𝐒𝐘𝐒𝐓𝐄𝐌 🔖  ♪ ••• ♪  
-
-┌───『 🔖 𝐂𝐎𝐌𝐀𝐍𝐃𝐎𝐒 𝐃𝐈𝐒𝐏𝐎𝐍𝐈𝐁𝐋𝐄𝐒 🔖 ───┐
-│
-│  🔖 *${usedPrefix + command} pull*   ──  𝐃𝐞𝐬𝐜𝐚𝐫𝐠𝐚𝐫 𝐜𝐚𝐦𝐛𝐢𝐨𝐬
-│  🔖 *${usedPrefix + command} status* ──  𝐕𝐞𝐫 𝐞𝐬𝐭𝐚𝐝𝐨
-│  🔖 *${usedPrefix + command} logs*   ──  𝐕𝐞𝐫 𝐜𝐨𝐦𝐦𝐢𝐭𝐬
-│  🔖 *${usedPrefix + command} all*    ──  𝐓𝐨𝐝𝐨 𝐞𝐧 𝐮𝐧𝐨
-│
-└───『 🗡️ 🔖 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 𝐥𝐢𝐬𝐭𝐨 🔖 🎭 』───┘`)
-  }
-
-  let opcion = text.toLowerCase()
+  await m.react('🔄')
 
   try {
-    if (opcion === 'pull') {
-      await m.reply(`┌───『 🔖 𝐄𝐉𝐄𝐂𝐔𝐓𝐀𝐍𝐃𝐎 🔖 ───┐
-│
-│  ⬇️ *𝐃𝐞𝐬𝐜𝐚𝐫𝐠𝐚𝐧𝐝𝐨 𝐜𝐚𝐦𝐛𝐢𝐨𝐬...*
-│
-└───『 🗡️ 𝐀𝐜𝐭𝐮𝐚𝐥𝐢𝐳𝐚𝐧𝐝𝐨 🎭 』───┘`)
-      let { stdout, stderr } = await execPromise('git pull')
-      let resultado = stdout || stderr || '✨ 𝐒𝐢𝐧 𝐜𝐚𝐦𝐛𝐢𝐨𝐬'
-      await m.reply(`┌───『 🔖 𝐑𝐄𝐒𝐔𝐋𝐓𝐀𝐃𝐎 🔖 ───┐
-│
-│  📋 *𝐒𝐚𝐥𝐢𝐝𝐚:*
-│  ${resultado.split('\n').map(l => `│  ${l}`).join('\n').slice(0, 1500)}
-│
-└───『 ✅ 𝐂𝐨𝐦𝐩𝐥𝐞𝐭𝐚𝐝𝐨 🎭 』───┘`)
+    const { stdout: isGit } = await execPromise('git rev-parse --is-inside-work-tree').catch(() => ({ stdout: 'false' }))
+    if (isGit.trim() !== 'true') throw new Error('No es un repositorio git')
+
+    const { stdout: branch } = await execPromise('git branch --show-current')
+    const ramaActual = branch.trim() || 'main'
+
+    const { stdout: cambiosLocales } = await execPromise('git status --porcelain')
+    if (cambiosLocales.trim()) {
+      await m.reply(`🌸 *— ✧ 𝐀𝐃𝐕𝐄𝐑𝐓𝐄𝐍𝐂𝐈𝐀 ✧ —* 🌸\n\n> 💗 Tienes cambios locales sin guardar\n> 🎀 Usa #guardar o haz commit antes de actualizar\n\n🌸 *"Los cambios se pueden perder"* 🌸`)
+      await m.react('⚠️')
+      return
     }
-    else if (opcion === 'status') {
-      await m.reply(`┌───『 🔖 𝐂𝐎𝐍𝐒𝐔𝐋𝐓𝐀𝐍𝐃𝐎 🔖 ───┐
-│
-│  📊 *𝐕𝐞𝐫𝐢𝐟𝐢𝐜𝐚𝐧𝐝𝐨 𝐞𝐬𝐭𝐚𝐝𝐨...*
-│
-└───『 🗡️ 𝐠𝐢𝐭 𝐬𝐭𝐚𝐭𝐮𝐬 🎭 』───┘`)
-      let { stdout } = await execPromise('git status')
-      await m.reply(`┌───『 🔖 𝐄𝐒𝐓𝐀𝐃𝐎 🔖 ───┐
-│
-│  ${stdout.split('\n').map(l => `│  ${l}`).join('\n')}
-│
-└───『 ✅ 𝐂𝐨𝐦𝐩𝐥𝐞𝐭𝐚𝐝𝐨 🎭 』───┘`)
-    }
-    else if (opcion === 'logs') {
-      await m.reply(`┌───『 🔖 𝐂𝐎𝐍𝐒𝐔𝐋𝐓𝐀𝐍𝐃𝐎 🔖 ───┐
-│
-│  📜 *𝐎𝐛𝐭𝐞𝐧𝐢𝐞𝐧𝐝𝐨 𝐜𝐨𝐦𝐦𝐢𝐭𝐬...*
-│
-└───『 🗡️ 𝐠𝐢𝐭 𝐥𝐨𝐠 🎭 』───┘`)
-      let { stdout } = await execPromise('git log --oneline -5')
-      await m.reply(`┌───『 🔖 𝐔𝐋𝐓𝐈𝐌𝐎𝐒 𝐂𝐎𝐌𝐌𝐈𝐓𝐒 🔖 ───┐
-│
-${stdout.split('\n').map(l => `│  ${l}`).join('\n')}
-│
-└───『 ✅ 𝐂𝐨𝐦𝐩𝐥𝐞𝐭𝐚𝐝𝐨 🎭 』───┘`)
-    }
-    else if (opcion === 'all') {
-      await m.reply(`┌───『 🔖 𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐂𝐈𝐎𝐍 🔖 ───┐
-│
-│  🔄 *𝐏𝐚𝐬𝐨 𝟏:* 𝐃𝐞𝐬𝐜𝐚𝐫𝐠𝐚𝐧𝐝𝐨 𝐜𝐚𝐦𝐛𝐢𝐨𝐬...
-│  📦 *𝐏𝐚𝐬𝐨 𝟐:* 𝐈𝐧𝐬𝐭𝐚𝐥𝐚𝐧𝐝𝐨 𝐝𝐞𝐩𝐞𝐧𝐝𝐞𝐧𝐜𝐢𝐚𝐬...
-│
-└───『 🗡️ 𝐏𝐫𝐨𝐜𝐞𝐬𝐚𝐧𝐝𝐨 🎭 』───┘`)
-      await execPromise('git pull')
-      await execPromise('npm install')
-      await m.reply(`┌───『 🔖 𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐂𝐈𝐎𝐍 𝐄𝐗𝐈𝐓𝐎𝐒𝐀 🔖 ───┐
-│
-│  ✅ *𝐂𝐚𝐦𝐛𝐢𝐨𝐬 𝐚𝐩𝐥𝐢𝐜𝐚𝐝𝐨𝐬 𝐜𝐨𝐫𝐫𝐞𝐜𝐭𝐚𝐦𝐞𝐧𝐭𝐞*
-│
-└───『 🎭 🔖 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 𝐥𝐢𝐬𝐭𝐨 🔖 🗡️ 』───┘`)
+
+    const { stdout: commitActual } = await execPromise('git rev-parse --short HEAD')
+    
+    await m.reply(`🌸 *— ✧ 𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐍𝐃𝐎 ✧ —* 🌸\n\n> 🎀 *Rama:* ${ramaActual}\n> 💗 *Commit:* ${commitActual.trim()}\n> ✨ Descargando cambios...\n\n🌸 *"Ania Bot se está actualizando"* 🌸`)
+
+    const { stdout, stderr } = await execPromise('git pull origin ' + ramaActual)
+    
+    if (stderr && !stderr.includes('Ya está actualizado') && !stderr.includes('Already up to date')) throw new Error(stderr)
+    
+    if (stdout.includes('Ya está actualizado') || stdout.includes('Already up to date')) {
+      await m.reply(`🌸 *— ✧ 𝐘𝐀 𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐃𝐀 ✧ —* 🌸\n\n> 💗 El bot ya está en la última versión\n> 🎀 No hay cambios pendientes\n\n🌸 *Ania Bot siempre al día* 🌸`)
       await m.react('✅')
+      return
     }
-    else {
-      await m.reply(`┌───『 🔖 𝐄𝐑𝐑𝐎𝐑 🔖 ───┐
-│
-│  ❌ *𝐎𝐩𝐜𝐢𝐨́𝐧 𝐧𝐨 𝐯𝐚́𝐥𝐢𝐝𝐚*
-│  📌 *𝐔𝐬𝐚: ${usedPrefix + command} pull, status, logs, all*
-│
-└───『 🗡️ © 2026 𝐊𝐢𝐲𝐨𝐭𝐚𝐤𝐚 𝐀𝐲𝐚𝐧𝐨𝐤𝐨𝐣𝐢 🎭 』───┘`)
-    }
+    
+    const { stdout: nuevoCommit } = await execPromise('git rev-parse --short HEAD')
+    
+    const lineas = stdout.split('\n').filter(l => l.trim() && !l.includes('Already up to date')).slice(0, 5)
+    
+    await m.reply(`🌸 *— ✧ 𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐂𝐈Ó𝐍 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀 ✧ —* 🌸\n\n> 🎀 *Rama:* ${ramaActual}\n> 💗 *Commit anterior:* ${commitActual.trim()}\n> ✨ *Nuevo commit:* ${nuevoCommit.trim()}\n\n📌 *Cambios:*\n${lineas.map(l => `> • ${l}`).join('\n')}\n\n🌸 *"Reinicia el bot para aplicar los cambios"* 🌸`)
     await m.react('✅')
-  } catch (e) {
+    
+  } catch (error) {
+    await m.reply(`🌸 *— ✧ 𝐄𝐑𝐑𝐎𝐑 ✧ —* 🌸\n\n> 💗 Error: ${error.message}\n\n🌸 *"Verifica la conexión a internet"* 🌸`)
     await m.react('❌')
-    await m.reply(`┌───『 🔖 𝐄𝐑𝐑𝐎𝐑 🔖 ───┐
-│
-│  ❌ *𝐄𝐫𝐫𝐨𝐫:* ${e.message}
-│
-└───『 🗡️ 𝐄𝐥 𝐬𝐢𝐬𝐭𝐞𝐦𝐚 𝐡𝐚 𝐟𝐚𝐥𝐥𝐚𝐝𝐨 🎭 』───┘`)
   }
 }
 
-handler.help = ['update <opción>']
+handler.help = ['update']
 handler.tags = ['owner']
-handler.command = /^(update|actualizar|up)$/i
+handler.command = ['update', 'actualizar']
 handler.rowner = true
 
 export default handler
