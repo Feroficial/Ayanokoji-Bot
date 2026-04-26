@@ -55,6 +55,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 handler.command = ["ttsearch", "tiktoksearch", "tts", "tiktok"];
 handler.help = ["tiktoksearch"];
 handler.tags = ["downloader"];
+handler.register = true
 
 export default handler;
 
