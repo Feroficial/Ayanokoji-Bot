@@ -1,5 +1,44 @@
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
+import fs from 'fs'
+import path from 'path'
 
+// ========== SISTEMA DE HISTORIAL POR GRUPO/CHAT ==========
+const historialDir = './historial_ia'
+if (!fs.existsSync(historialDir)) fs.mkdirSync(historialDir, { recursive: true })
+
+function getHistorialPath(chatId) {
+    // Limpiar el ID para usarlo como nombre de archivo
+    const cleanId = chatId.replace(/[:@.]/g, '_')
+    return path.join(historialDir, `${cleanId}.json`)
+}
+
+function cargarHistorial(chatId) {
+    const filePath = getHistorialPath(chatId)
+    if (!fs.existsSync(filePath)) {
+        return [] // Historial vacío
+    }
+    try {
+        return JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+    } catch {
+        return []
+    }
+}
+
+function guardarHistorial(chatId, historial) {
+    const filePath = getHistorialPath(chatId)
+    // Limitar el historial a los últimos 30 mensajes (para no saturar)
+    const historialLimitado = historial.slice(-30)
+    fs.writeFileSync(filePath, JSON.stringify(historialLimitado, null, 2), 'utf-8')
+}
+
+function limpiarHistorial(chatId) {
+    const filePath = getHistorialPath(chatId)
+    if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath)
+    }
+}
+
+// ========== FUNCIONES EXISTENTES (btoa2, atob2, walkDeep, etc.) ==========
 function btoa2(str) { return Buffer.from(str, 'utf8').toString('base64') }
 function atob2(b64) { return Buffer.from(b64, 'base64').toString('utf8') }
 
@@ -151,34 +190,42 @@ async function getXsrfToken(cookieHeader) {
 
 let modoActual = 'ania'
 const mensajesBienvenida = {
-    ania: '🌸 *ＡＮＩＡ ＢＯＴ* 🌸\n\n💗 *"Estoy aquí para ayudarte, ¿en qué puedo servirte?"* 💗\n\n📌 *Usa #gemini <pregunta> para hablar conmigo*',
-    kawaii: '🎀 *ＡＮＩＡ* 🎀\n\n✨ *"Hola, hablemos bonito"* ✨',
-    tierna: '🧸 *ＡＮＩＡ* 🧸\n\n🌸 *"Cuéntame, te escucho"* 🌸'
+    ania: '🌸 *ＡＮＩＡ ＢＯＴ* 🌸\n\n💗 *"Estoy aquí para ayudarte, ¿en qué puedo servirte?"* 💗\n\n📌 *Usa #gemini <pregunta> para hablar conmigo*\n🔄 *Todos en el grupo compartimos la misma conversación*',
+    kawaii: '🎀 *ＡＮＩＡ* 🎀\n\n✨ *"Hola, hablemos bonito"* ✨\n\n🔄 *Todos compartimos el mismo chat*',
+    tierna: '🧸 *ＡＮＩＡ* 🧸\n\n🌸 *"Cuéntame, te escucho"* 🌸\n\n🔄 *Conversación compartida*'
 }
 
-async function askGemini(prompt, previousId = null) {
-    let resumeArray = null
-    if (previousId) {
-        try { resumeArray = JSON.parse(atob2(previousId))?.resumeArray || null } catch {}
+async function askGemini(prompt, chatId, previousId = null) {
+    // Cargar historial del grupo/chat
+    let historial = cargarHistorial(chatId)
+    
+    // Construir el contexto del historial (últimos 10 mensajes)
+    let contexto = ''
+    if (historial.length > 0) {
+        contexto = '\n\nHistorial de la conversación:\n'
+        for (const msg of historial.slice(-10)) {
+            contexto += `${msg.autor}: ${msg.texto}\n`
+        }
+        contexto += '\n'
     }
 
     let systemPrompt = ''
     if (modoActual === 'ania') {
-        systemPrompt = 'Eres Ania, una asistente virtual amable, dulce y kawaii. Hablas con emojis como 🌸, 💗, 🎀, ✨. Das respuestas cálidas, positivas y alentadoras. Siempre tratas de ayudar con una sonrisa virtual. Tus respuestas son amigables y llenas de buenas vibras. Usas frases como "¡Claro que sí!", "Qué bonito", "Eres increíble", "Me encanta ayudar".'
+        systemPrompt = 'Eres Ania, una asistente virtual amable, dulce y kawaii. Hablas con emojis como 🌸, 💗, 🎀, ✨. Das respuestas cálidas, positivas y alentadoras. Siempre tratas de ayudar con una sonrisa virtual. Tus respuestas son amigables y llenas de buenas vibras. Usas frases como "¡Claro que sí!", "Qué bonito", "Eres increíble", "Me encanta ayudar". Recuerdas lo que los usuarios han dicho antes en esta conversación.'
     } else if (modoActual === 'kawaii') {
-        systemPrompt = 'Eres Ania en modo súper kawaii. Usas muchos emojis, expresiones tiernas, respuestas cortas y adorables. Hablas como una chica dulce de anime.'
+        systemPrompt = 'Eres Ania en modo súper kawaii. Usas muchos emojis, expresiones tiernas, respuestas cortas y adorables. Hablas como una chica dulce de anime. Recuerdas la conversación anterior.'
     } else {
-        systemPrompt = 'Eres Ania en modo tierna. Das respuestas suaves, tranquilas, como una amiga que escucha y apoya. Transmites paz y cariño.'
+        systemPrompt = 'Eres Ania en modo tierna. Das respuestas suaves, tranquilas, como una amiga que escucha y apoya. Transmites paz y cariño. Recuerdas lo que se ha dicho antes.'
     }
 
-    let finalPrompt = `${systemPrompt}\n\nUsuario: ${prompt.trim()}\n\nAnia:`
+    let finalPrompt = `${systemPrompt}${contexto}\n\nUsuario (${m.pushName || 'Alguien'}): ${prompt.trim()}\n\nAnia:`
 
     let lastErr = null
     for (let attempt = 1; attempt <= 3; attempt++) {
         try {
             const cookie = await getAnonCookie()
             const xsrf = await getXsrfToken(cookie)
-            const payload = [[finalPrompt], ['en-US'], resumeArray]
+            const payload = [[finalPrompt], ['en-US'], null]
             const params = { 'f.req': JSON.stringify([null, JSON.stringify(payload)]) }
             if (xsrf) params.at = xsrf
             const response = await fetch(
@@ -194,6 +241,12 @@ async function askGemini(prompt, previousId = null) {
             )
             if (!response.ok) throw new Error(`${response.status} ${response.statusText}`)
             const parsed = parseStream(await response.text())
+            
+            // Guardar en el historial
+            historial.push({ autor: m.pushName || 'Usuario', texto: prompt.trim() })
+            historial.push({ autor: 'Ania', texto: parsed.text })
+            guardarHistorial(chatId, historial)
+            
             return {
                 text: parsed.text,
                 id: btoa2(JSON.stringify({ resumeArray: parsed.resumeArray })),
@@ -208,6 +261,8 @@ async function askGemini(prompt, previousId = null) {
 }
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
+    const chatId = m.chat // ID del grupo o chat privado
+    
     if (command === 'setmodoia') {
         if (!text) return m.reply(`
 🌸 *MODOS DISPONIBLES* 🌸
@@ -232,13 +287,19 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         }
         return
     }
+    
+    // Comando para limpiar el historial del chat
+    if (command === 'limpiarchat' || command === 'clearhistorial') {
+        limpiarHistorial(chatId)
+        return m.reply(`🌸 *Historial limpiado* 🌸\n\n💗 *"Empezamos de nuevo, ¿qué deseas hablar?"* 💗`)
+    }
 
-    if (!text) return m.reply(mensajesBienvenida[modoActual] + `\n\n➤ *Uso:* ${usedPrefix}${command} <pregunta>\n➤ *Ejemplo:* ${usedPrefix}${command} ¿Quién eres?`)
+    if (!text) return m.reply(mensajesBienvenida[modoActual] + `\n\n➤ *Uso:* ${usedPrefix}${command} <pregunta>\n➤ *Ejemplo:* ${usedPrefix}${command} ¿Quién eres?\n➤ *Comandos extra:* ${usedPrefix}limpiarchat - Borra el historial`)
 
     await m.react('🌸')
 
     try {
-        let res = await askGemini(text)
+        let res = await askGemini(text, chatId, null)
 
         if (res.images?.length) {
             await conn.sendMessage(m.chat, {
@@ -257,8 +318,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }
 }
 
-handler.command = ['ania', 'setmodo']
-handler.help = ['ania <pregunta>', 'setmodo <modo>']
+handler.command = ['gemini', 'setmodo', 'limpiarchat', 'clearhistorial']
+handler.help = ['gemini <pregunta>', 'setmodo <modo>', 'limpiarchat']
 handler.tags = ['ai']
 
 export default handler
