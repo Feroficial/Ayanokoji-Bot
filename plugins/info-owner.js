@@ -1,17 +1,12 @@
 import PhoneNumber from 'awesome-phonenumber'
 
 let handler = async (m, { conn, usedPrefix, text, args, command }) => {
-  // CREADORA PRINCIPAL (Colombia)
   let nomorown = '573245517485'
-  // TÚ COLABORADOR (Bolivia) - LYONN
-  let nomorcolab = '59177474230'
-  
-  let bioOwn = (await conn.fetchStatus(nomorown + '@s.whatsapp.net').catch(_ => {}))?.status || '🌸 Creadora'
-  let bioColab = (await conn.fetchStatus(nomorcolab + '@s.whatsapp.net').catch(_ => {}))?.status || '🎭 Colaborador'
+
+  let bioOwn = (await conn.fetchStatus(nomorown + '@s.whatsapp.net').catch(_ => {}))?.status || '🌸 Creadora de Ania Bot'
 
   await sendContactArray(conn, m.chat, [
-    [`${nomorown}`, `🌸 Danny Yulieth`, `🌸 CREADORA`, `🌸`, `danny@danny.com`, `🇨🇴 Colombia`, bioOwn],
-    [`${nomorcolab}`, `🎭 Lyonn`, `🎭 COLABORADOR`, `🎭`, `lyonn@lyonn.com`, `🇧🇴 Bolivia`, bioColab]
+    [`${nomorown}`, `🌸 Danny Yulieth`, `🌸 CREADORA PRINCIPAL`, `🌸`, `danny@aniabot.com`, `🇨🇴 Colombia`, bioOwn]
   ], m)
 
   throw false
