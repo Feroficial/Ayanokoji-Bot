@@ -43,7 +43,7 @@ let handler = async (m, { conn, isROwner }) => {
       
       if (cambios === '') cambios = '\n> • Cambios menores'
       
-      await m.reply(`🌸 *— ✧ 𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐂𝐈Ó𝐍 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀 ✧ —* 🌸\n\n> 🎀 *Commit anterior:* ${commitActual.trim()}\n> 💗 *Nuevo commit:* ${nuevoCommit.trim()}\n> ✨ *Cambios descargados*${cambios}\n\n🌸 *"Usa #restart para reiniciar manualmente"* 🌸`)
+      await m.reply(`🌸 *— ✧ 𝐀𝐂𝐓𝐔𝐀𝐋𝐈𝐙𝐀𝐂𝐈Ó𝐍 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀 ✧ —* 🌸\n\n> 🎀 *Commit anterior:* ${commitActual.trim()}\n> 💗 *Nuevo commit:* ${nuevoCommit.trim()}\n> ✨ *Cambios descargados*${cambios}\n\n🌸 *"Botsita actualizada"* 🌸`)
       await m.react('✅')
       return
     }
