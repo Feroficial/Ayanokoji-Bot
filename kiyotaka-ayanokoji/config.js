@@ -1,3 +1,4 @@
+
 import { watchFile, unwatchFile } from 'fs';
 import chalk from 'chalk';
 import { fileURLToPath } from 'url';
@@ -13,15 +14,16 @@ import moment from 'moment-timezone';
 global.botNumber = '';
 
 //*─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─*
-// ========== global.owner = [
-  ['573245517485', '🌸 Danny Yulieth', true],  // CREADORA PRINCIPAL
+// ========== DETECCIÓN DE LA CREADORA ==========
+global.owner = [
+  ['573245517485', '🌸 Danny Yulieth', true],
   ['573245517485@s.whatsapp.net', 'Danny Yulieth', true],
   ['573245517485@c.us', 'Danny Yulieth', true]
-]
+];
 
-global.mods = ['573245517485', '573245517485@s.whatsapp.net']
-global.suittag = ['573245517485']
-global.prems = ['573245517485', '573245517485@s.whatsapp.net']
+global.mods = ['573245517485', '573245517485@s.whatsapp.net'];
+global.suittag = ['573245517485'];
+global.prems = ['573245517485', '573245517485@s.whatsapp.net'];
 
 //*─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─*
 global.libreria = 'Baileys';
