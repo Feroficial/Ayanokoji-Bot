@@ -350,7 +350,7 @@ export async function handler(chatUpdate) {
           return;
         }
 
-        
+
           let adminMode = global.db.data.chats[m.chat].modoadmin;
         let mini = `${plugin.botAdmin || plugin.admin || plugin.group || plugin || noPrefix}`;
         if (adminMode && !isOwner && !isROwner && m.isGroup && !isAdmin && mini) return;
