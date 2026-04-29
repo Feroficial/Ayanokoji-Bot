@@ -21,7 +21,7 @@ setInterval(async () => {
   }
 }, 30000);
 
-const dbPath = './database.json';
+const dbPath = './aniadb.json';
 if (fs.existsSync(dbPath)) {
   watchFile(dbPath, async () => {
     console.log(chalk.yellow('📁 Database modificada, recargando...'));
