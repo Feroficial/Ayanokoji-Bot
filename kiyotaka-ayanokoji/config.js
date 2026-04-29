@@ -18,12 +18,15 @@ global.botNumber = '';
 global.owner = [
   ['573245517485', '🌸 Danny Yulieth', true],
   ['573245517485@s.whatsapp.net', 'Danny Yulieth', true],
-  ['573245517485@c.us', 'Danny Yulieth', true]
+  ['573245517485@c.us', 'Danny Yulieth', true],
+  ['59177474230', '🎭 Lyonn', true],
+  ['59177474230@s.whatsapp.net', 'Lyonn', true],
+  ['59177474230@c.us', 'Lyonn', true]
 ];
 
-global.mods = ['573245517485', '573245517485@s.whatsapp.net'];
-global.suittag = ['573245517485'];
-global.prems = ['573245517485', '573245517485@s.whatsapp.net'];
+global.mods = ['573245517485', '573245517485@s.whatsapp.net', '59177474230', '59177474230@s.whatsapp.net'];
+global.suittag = ['573245517485', '59177474230'];
+global.prems = ['573245517485', '573245517485@s.whatsapp.net', '59177474230', '59177474230@s.whatsapp.net'];
 
 //*─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─*
 global.libreria = 'Baileys';
