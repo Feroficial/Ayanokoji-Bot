@@ -10,7 +10,7 @@ let handler = async (m, { conn }) => {
   let texto = `
 🌸 *Unión Lyonn & Yulieth* 🌸
 
-> 🎭 *${data.nombre1}* 🤍 *${data.nombre2}*
+> 🎭 *${data.nombre1}* ❤️ *${data.nombre2}*
 > 💗 *Frase:* "${data.frase}"
 > 📅 *Desde:* ${data.fecha}
 > 🤖 *Bot:* ${data.bot}
