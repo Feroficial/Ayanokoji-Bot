@@ -1,11 +1,13 @@
-import fetch from 'node-fetch'
-
 let handler = async (m, { conn }) => {
-  try {
-    let res = await fetch('dbyulieth.xo.je/union.json')
-    let data = await res.json()
-    
-    let texto = `
+  let data = {
+    nombre1: "Lyonn",
+    nombre2: "Danny Yulieth",
+    frase: "Hicimos un bot, pero construimos un recuerdo",
+    fecha: "2026-04-26",
+    bot: "Ania Bot"
+  }
+  
+  let texto = `
 🌸 *Unión Lyonn & Yulieth* 🌸
 
 > 🎭 *${data.nombre1}* 🤍 *${data.nombre2}*
@@ -14,13 +16,9 @@ let handler = async (m, { conn }) => {
 > 🤖 *Bot:* ${data.bot}
 
 🌸 *"Esto no se borra con el tiempo"* 🌸
-    `.trim()
-    
-    await m.reply(texto)
-  } catch (error) {
-    console.error(error)
-    await m.reply(`🌸 *Error al cargar la unión* 🌸\n> 💗 ${error.message}`)
-  }
+  `.trim()
+  
+  await m.reply(texto)
 }
 
 handler.command = ['union']
