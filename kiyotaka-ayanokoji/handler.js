@@ -12,22 +12,7 @@ const { proto } = (await import('@whiskeysockets/baileys')).default;
 const isNumber = x => typeof x === 'number' && !isNaN(x);
 const delay = ms => isNumber(ms) && new Promise(resolve => setTimeout(() => resolve(), ms));
 
-setInterval(async () => {
-  if (global.db && global.loadDatabase) {
-    try {
-      await global.loadDatabase();
-      console.log(chalk.cyan('🔄 Database recargada automáticamente'));
-    } catch(e) {}
-  }
-}, 30000);
-
 const dbPath = './aniadb.json';
-if (fs.existsSync(dbPath)) {
-  watchFile(dbPath, async () => {
-    console.log(chalk.yellow('📁 Database modificada, recargando...'));
-    if (global.loadDatabase) await global.loadDatabase();
-  });
-}
 
 export async function handler(chatUpdate) {
   this.msgqueque ||= [];
@@ -426,6 +411,7 @@ export async function handler(chatUpdate) {
   }
 }
 
+
 global.dfail = (type, m, conn, usedPrefix) => {
   const msg = {
     rowner: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🛑 *ACCESO RESTRINGIDO* 🛑\n\n> 👑 Solo *la Creadora* puede usar esto\n\n🌸 *Danny Yulieth* 🌸`,
@@ -435,7 +421,7 @@ global.dfail = (type, m, conn, usedPrefix) => {
     group: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 👥 *SOLO GRUPOS* 👥\n\n> 📌 Este comando solo funciona en grupos\n\n🌸 *Danny Yulieth* 🌸`,
     admin: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🛡️ *SOLO ADMINISTRADORAS* 🛡️\n\n> 📌 Solo *las administradoras* pueden usar esto\n\n🌸 *Danny Yulieth* 🌸`,
     botAdmin: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🤖 *EL BOT NO ES ADMIN* 🤖\n\n> 📌 El bot necesita ser *admin del grupo*\n\n🌸 *Danny Yulieth* 🌸`,
-    unreg: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 📜 *NO REGISTRAD@* 📜\n\n> 📌 Usa *${usedPrefix || '#'}registrar Nombre.Edad*\n> 🎯 *Ejemplo:* ${usedPrefix || '#'}registrar Yuliety.17\n\n🌸 *Danny Yulieth* 🌸`,
+    unreg: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 📜 *NO REGISTRAD@* 📜\n\n> 📌 Usa *${usedPrefix || '#'}registrar Nombre.Edad*\n> 🎯 *Ejemplo:* ${usedPrefix || '#'}registrar Yulieth.17\n\n🌸 *Danny Yulieth* 🌸`,
     mods: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🛡️ *SOLO MODERADORAS* 🛡️\n\n> 📌 Solo *las moderadoras* pueden usar esto\n\n🌸 *Danny Yulieth* 🌸`
   };
   if (msg[type]) return m.reply(msg[type]).then(() => m.react('❌'));
