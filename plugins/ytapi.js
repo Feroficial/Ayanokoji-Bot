@@ -12,7 +12,7 @@ let handler = async (m, { conn, text, command }) => {
 `)
 
   let url = encodeURIComponent(text)
-  let apiBase = 'https://appreciated-river-measurements-universal.trycloudflare.com'
+  let apiBase = 'https://country-bearing-tab-any.trycloudflare.com'
 
   try {
     if (command === 'ytinfo') {
