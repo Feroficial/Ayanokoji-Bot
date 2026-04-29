@@ -1,19 +1,17 @@
 let handler = async (m, { conn }) => {
-  let data = {
-    nombre1: "Lyonn",
-    nombre2: "Danny Yulieth",
-    frase: "Hicimos un bot, pero construimos un recuerdo",
-    fecha: "2026-04-26",
-    bot: "Ania Bot"
+  let union = global.db.data.union || {}
+  
+  if (!union.nombre1 || !union.nombre2) {
+    return m.reply(`🌸 *Unión no registrada* 🌸\n\n> 💗 La creadora aún no ha guardado la unión.\n> 🎀 Usa #guardarunion para crearla.`)
   }
   
   let texto = `
 🌸 *Unión Lyonn & Yulieth* 🌸
 
-> 🎭 *${data.nombre1}* ❤️ *${data.nombre2}*
-> 💗 *Frase:* "${data.frase}"
-> 📅 *Desde:* ${data.fecha}
-> 🤖 *Bot:* ${data.bot}
+> 🎭 *${union.nombre1}* ❤️ *${union.nombre2}*
+> 💗 *Frase:* "${union.frase}"
+> 📅 *Desde:* ${union.fecha}
+> 🤖 *Bot:* ${union.bot || 'Ania Bot'}
 
 🌸 *"Esto no se borra con el tiempo"* 🌸
   `.trim()
@@ -21,8 +19,8 @@ let handler = async (m, { conn }) => {
   await m.reply(texto)
 }
 
-handler.command = ['union']
 handler.help = ['union']
 handler.tags = ['main']
+handler.command = ['union']
 
 export default handler
