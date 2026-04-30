@@ -406,11 +406,25 @@ export async function handler(chatUpdate) {
       stats[m.plugin] = stat;
     }
 
-    try { if (!opts['noprint']) await (await import('../lib/print.js')).default(m, this); } catch (e) { console.log(m, m.quoted, e); }
+        try { if (!opts['noprint']) await (await import('../lib/print.js')).default(m, this); } catch (e) { console.log(m, m.quoted, e); }
     if (opts['autoread']) await this.readMessages([m.key]);
   }
 }
 
+// ========== COMANDO NO ENCONTRADO ==========
+if (!m.isCommand && m.text && (m.text.startsWith('#') || m.text.startsWith('!') || m.text.startsWith('/'))) {
+    const cmd = m.text.split(' ')[0].toLowerCase();
+    const existe = Object.values(global.plugins || {}).some(plugin => {
+        if (!plugin.command) return false;
+        const cmds = Array.isArray(plugin.command) ? plugin.command : [plugin.command];
+        return cmds.some(c => c.toLowerCase() === cmd.replace(/^[#!\/]/, ''));
+    });
+    
+    if (!existe && !m.isBaileys) {
+        m.reply(`> ✨ *Comando no encontrado* ✨\n\n> 🌸 *Usa #menu para ver los comandos disponibles* 🌸\n> 💗 *Ania Bot siempre aquí para ti* 💗`);
+        return;
+    }
+}
 
 global.dfail = (type, m, conn, usedPrefix) => {
   const msg = {
