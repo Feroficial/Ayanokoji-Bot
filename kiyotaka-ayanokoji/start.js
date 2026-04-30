@@ -1,5 +1,5 @@
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1'
-import '.config.js'
+import './config.js'
 import { watchFile, unwatchFile } from 'fs'
 import cfonts from 'cfonts'
 import { createRequire } from 'module'
@@ -116,16 +116,16 @@ async function solicitarConfiguracion() {
             console.log(chalk.bold.redBright(`✨ Opción inválida. Elige 1 o 2.`))
         }
     } while (opcion !== '1' && opcion !== '2')
-    
+
     config.modo = opcion
-    
+
     if (opcion === '2') {
         let numero = await question(chalk.bgMagenta(chalk.bold.white(`🌸 INGRESA TU NÚMERO CON CÓDIGO DE PAÍS SIN +:\n🌸➤ `)))
         numero = numero.replace(/\D/g, '')
         config.numero = numero
         console.log(chalk.bold.green(`✅ Número guardado: ${numero}`))
     }
-    
+
     fs.writeFileSync(configFile, JSON.stringify(config, null, 2))
     console.log(chalk.bold.green(`✅ Configuración guardada en ${configFile}`))
 }
