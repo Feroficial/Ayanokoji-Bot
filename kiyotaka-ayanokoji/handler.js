@@ -290,23 +290,34 @@ export async function handler(chatUpdate) {
     // ========== AUTO-RESPUESTAS ELIMINADAS ==========
     // (No hay respuestas automáticas de "hola", "gracias", etc.)
 
-    // ========== COMANDO NO ENCONTRADO ==========
-if (!m.isCommand && m.text && (m.text.startsWith('#') || m.text.startsWith('!') || m.text.startsWith('/'))) {
-    const cmd = m.text.split(' ')[0].toLowerCase().replace(/^[#!\/]/, '');
-    const existe = Object.values(global.plugins || {}).some(plugin => {
-        if (!plugin.command) return false;
-        const cmds = Array.isArray(plugin.command) ? plugin.command : [plugin.command];
-        return cmds.some(c => {
-            if (typeof c !== 'string') return false;
-            return c.toLowerCase() === cmd;
+        // ========== COMANDO NO ENCONTRADO ==========
+    if (!m.isCommand && m.text && (m.text.startsWith('#') || m.text.startsWith('!') || m.text.startsWith('/'))) {
+        const cmd = m.text.split(' ')[0].toLowerCase().replace(/^[#!\/]/, '');
+        const existe = Object.values(global.plugins || {}).some(plugin => {
+            if (!plugin.command) return false;
+            const cmds = Array.isArray(plugin.command) ? plugin.command : [plugin.command];
+            return cmds.some(c => {
+                if (typeof c !== 'string') return false;
+                return c.toLowerCase() === cmd;
+            });
         });
-    });
 
-    if (!existe && !m.isBaileys) {
-        await m.reply(`> ✨ *Comando no encontrado* ✨\n\n> 🌸 *Usa #menu para ver los comandos disponibles* 🌸\n> 💗 *Ania Bot siempre aquí para ti* 💗`);
-        return;
+        if (!existe && !m.isBaileys) {
+            let texto = `🌸 *— ✧ 𝐂𝐎𝐌𝐀𝐍𝐃𝐎 𝐍𝐎 𝐄𝐍𝐂𝐎𝐍𝐓𝐑𝐀𝐃𝐎 ✧ —* 🌸
+            
+> 💗 *El comando "${cmd}" no existe en mi sistema*
+
+> 🎀 *Usa #menu para ver los comandos disponibles*
+
+> ✨ *Ania Bot siempre aquí para ti* ✨
+
+🌸 *Danny Yulieth* 🌸`;
+
+            await m.reply(texto);
+            return;
+        }
     }
-}
+
     // ========== PROCESAR PLUGINS ==========
     const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), '../plugins');
     for (let name in global.plugins) {
