@@ -89,23 +89,23 @@ const { version } = await fetchLatestBaileysVersion()
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = (texto) => new Promise((resolver) => rl.question(texto, resolver))
 
-let opcion
-const modeFile = './mode.json'
+const configFile = './bot-config.json'
+let config = { modo: '1', numero: '' }
 
-if (fs.existsSync(modeFile)) {
+if (fs.existsSync(configFile)) {
     try {
-        const modeData = JSON.parse(fs.readFileSync(modeFile, 'utf-8'))
-        opcion = modeData.modo
-        console.log(chalk.bold.green(`✅ Modo cargado: ${opcion === '1' ? 'QR' : 'Código de 8 dígitos'}`))
+        config = JSON.parse(fs.readFileSync(configFile, 'utf-8'))
+        console.log(chalk.bold.green(`✅ Configuración cargada: Modo ${config.modo === '1' ? 'QR' : 'Código de 8 dígitos'}${config.numero ? ` - Número: ${config.numero}` : ''}`))
     } catch (e) {
-        console.log(chalk.bold.red('❌ Error leyendo mode.json, solicitando modo...'))
-        await solicitarModo()
+        console.log(chalk.bold.red('❌ Error leyendo configuración, se solicitará de nuevo...'))
+        await solicitarConfiguracion()
     }
 } else {
-    await solicitarModo()
+    await solicitarConfiguracion()
 }
 
-async function solicitarModo() {
+async function solicitarConfiguracion() {
+    let opcion
     do {
         opcion = await question(
             chalk.bgMagenta.black('🌸 ANIA BOT - SELECCIONA MODO:\n') +
@@ -116,19 +116,29 @@ async function solicitarModo() {
             console.log(chalk.bold.redBright(`✨ Opción inválida. Elige 1 o 2.`))
         }
     } while (opcion !== '1' && opcion !== '2')
-    fs.writeFileSync(modeFile, JSON.stringify({ modo: opcion }))
-    console.log(chalk.bold.green(`✅ Modo guardado: ${opcion === '1' ? 'QR' : 'Código de 8 dígitos'}`))
+    
+    config.modo = opcion
+    
+    if (opcion === '2') {
+        let numero = await question(chalk.bgMagenta(chalk.bold.white(`🌸 INGRESA TU NÚMERO CON CÓDIGO DE PAÍS SIN +:\n🌸➤ `)))
+        numero = numero.replace(/\D/g, '')
+        config.numero = numero
+        console.log(chalk.bold.green(`✅ Número guardado: ${numero}`))
+    }
+    
+    fs.writeFileSync(configFile, JSON.stringify(config, null, 2))
+    console.log(chalk.bold.green(`✅ Configuración guardada en ${configFile}`))
 }
 
-console.log(chalk.bold.green(`✅ Modo seleccionado: ${opcion === '1' ? 'QR' : 'Código de 8 dígitos'}\n`))
+console.log(chalk.bold.green(`✅ Modo seleccionado: ${config.modo === '1' ? 'QR' : 'Código de 8 dígitos'}\n`))
 
 console.info = () => { }
 console.debug = () => { }
 
 const connectionOptions = {
     logger: pino({ level: 'silent' }),
-    printQRInTerminal: opcion === '1',
-    browser: opcion === '1' ? [`${global.nameqr}`, 'Edge', '20.0.04'] : ['Windows', 'Chrome', 'Chrome 114.0.5735.198'],
+    printQRInTerminal: config.modo === '1',
+    browser: config.modo === '1' ? [`${global.nameqr}`, 'Edge', '20.0.04'] : ['Windows', 'Chrome', 'Chrome 114.0.5735.198'],
     auth: {
         creds: state.creds,
         keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' })),
@@ -174,13 +184,14 @@ async function getGroupPicture(groupJid) {
 async function requestPairingCode() {
     if (pairingRequested) return
     pairingRequested = true
+    if (!config.numero) {
+        console.log(chalk.red('❌ No hay número guardado para el código de 8 dígitos'))
+        return
+    }
     try {
-        let userNumber = await question(chalk.bgMagenta(chalk.bold.white(`🌸 INGRESA TU NÚMERO SIN +:\n🌸➤ `)))
-        userNumber = userNumber.replace(/\D/g, '')
-        rl.close()
-        console.log(chalk.yellow(`📱 Solicitando código para: ${userNumber}...`))
+        console.log(chalk.yellow(`📱 Solicitando código para: ${config.numero}...`))
         await new Promise(resolve => setTimeout(resolve, 2000))
-        let codeBot = await global.conn.requestPairingCode(userNumber)
+        let codeBot = await global.conn.requestPairingCode(config.numero)
         let formattedCode = codeBot.match(/.{1,4}/g)?.join("-") || codeBot
         console.log(chalk.bold.white(chalk.bgMagenta(`🌸 CÓDIGO: ${formattedCode} 🌸`)))
         console.log(chalk.cyan(`📌 Ingresa este código en: WhatsApp > Dispositivos vinculados`))
@@ -195,7 +206,7 @@ async function connectionUpdate(update) {
     const reason = new Boom(lastDisconnect?.error)?.output?.statusCode
     global.stopped = connection
 
-    if (opcion === '2' && !pairingRequested && !global.conn.authState.creds.registered) {
+    if (config.modo === '2' && !pairingRequested && !global.conn.authState.creds.registered) {
         setTimeout(() => {
             if (!pairingRequested && !global.conn.authState.creds.registered) {
                 requestPairingCode()
@@ -206,7 +217,7 @@ async function connectionUpdate(update) {
     if (isNewLogin) global.conn.isInit = true
     if (!global.db.data) loadDatabase()
 
-    if ((qr && qr !== '0') && opcion === '1') {
+    if ((qr && qr !== '0') && config.modo === '1') {
         console.log(chalk.bold.magenta(`\n❐ ESCANEA EL CÓDIGO QR 🌸`))
     }
 
