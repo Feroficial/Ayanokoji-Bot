@@ -12,7 +12,7 @@ const { proto } = (await import('@whiskeysockets/baileys')).default;
 const isNumber = x => typeof x === 'number' && !isNaN(x);
 const delay = ms => isNumber(ms) && new Promise(resolve => setTimeout(() => resolve(), ms));
 
-const dbPath = './aniadb.json';
+const dbPath = './src/database/aniadb.json';
 
 export async function handler(chatUpdate) {
   this.msgqueque ||= [];
