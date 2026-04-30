@@ -66,15 +66,26 @@ global.gp2 = 'https://chat.whatsapp.com/LPHJXnuklWy62oyHB3FJoQ';
 global.comunidad1 = 'https://chat.whatsapp.com/LPHJXnuklWy62oyHB3FJoQ';
 global.channel = '';
 global.cn = global.channel;
-global.yt = 'https://youtube.com/@DevLyonn';
-global.md = 'https://github.com/Feroficial/Kiyotaka-Ayanokoji-Bot';
+global.yt = 'https://youtube.com/@DannyYulieth';
+global.md = 'https://github.com/DannyYulieth/Ania-Bot';
 global.correo = 'danny@aniabot.com';
 
-global.catalogo = fs.readFileSync(new URL('../src/catalogo.jpg', import.meta.url));
-global.photoSity = [global.catalogo];
+//*─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─*
+global.catalogo = null;
+try {
+    const catalogoPath = new URL('../src/catalogo.jpg', import.meta.url);
+    if (fs.existsSync(catalogoPath)) {
+        global.catalogo = fs.readFileSync(catalogoPath);
+    } else {
+        console.log(chalk.yellow('⚠️ No se encontró catalogo.jpg'));
+    }
+} catch(e) {
+    console.log(chalk.yellow('⚠️ Error cargando catalogo.jpg'));
+}
+
+global.photoSity = global.catalogo ? [global.catalogo] : [];
 
 //*─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─*
-
 global.estilo = { 
   key: {  
     fromMe: false, 
@@ -87,7 +98,7 @@ global.estilo = {
       surface : 1, 
       message: global.packname, 
       orderTitle: 'ANIA BOT', 
-      thumbnail: global.catalogo, 
+      thumbnail: global.catalogo || Buffer.from(''), 
       sellerJid: '0@s.whatsapp.net'
     }
   }
@@ -97,7 +108,6 @@ global.ch = { ch1: "" };
 global.rcanal = global.ch.ch1;
 
 //*─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─*
-
 global.cheerio = cheerio;
 global.fs = fs;
 global.fetch = fetch;
@@ -105,7 +115,6 @@ global.axios = axios;
 global.moment = moment;
 
 //*─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─*
-
 global.multiplier = 69;
 global.maxwarn = 3;
 
@@ -114,5 +123,6 @@ const file = fileURLToPath(import.meta.url);
 watchFile(file, () => {
   unwatchFile(file);
   console.log(chalk.magenta('🔄 Se actualizó config.js de Ania Bot 🌸'));
-  import(`${file}?update=${Date.now()}`);
 });
+
+console.log(chalk.green('✅ config.js cargado correctamente 🌸'));
