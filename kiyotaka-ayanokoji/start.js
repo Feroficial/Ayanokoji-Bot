@@ -90,16 +90,35 @@ const rl = readline.createInterface({ input: process.stdin, output: process.stdo
 const question = (texto) => new Promise((resolver) => rl.question(texto, resolver))
 
 let opcion
-do {
-    opcion = await question(
-        chalk.bgMagenta.black('🌸 ANIA BOT - SELECCIONA MODO:\n') +
-        chalk.bold.magenta('1. Código QR\n') +
-        chalk.bold.cyan('2. Código de 8 dígitos\n🌸➤ ')
-    )
-    if (!/^[1-2]$/.test(opcion)) {
-        console.log(chalk.bold.redBright(`✨ Opción inválida. Elige 1 o 2.`))
+const modeFile = './mode.json'
+
+if (fs.existsSync(modeFile)) {
+    try {
+        const modeData = JSON.parse(fs.readFileSync(modeFile, 'utf-8'))
+        opcion = modeData.modo
+        console.log(chalk.bold.green(`✅ Modo cargado: ${opcion === '1' ? 'QR' : 'Código de 8 dígitos'}`))
+    } catch (e) {
+        console.log(chalk.bold.red('❌ Error leyendo mode.json, solicitando modo...'))
+        await solicitarModo()
     }
-} while (opcion !== '1' && opcion !== '2')
+} else {
+    await solicitarModo()
+}
+
+async function solicitarModo() {
+    do {
+        opcion = await question(
+            chalk.bgMagenta.black('🌸 ANIA BOT - SELECCIONA MODO:\n') +
+            chalk.bold.magenta('1. Código QR\n') +
+            chalk.bold.cyan('2. Código de 8 dígitos\n🌸➤ ')
+        )
+        if (!/^[1-2]$/.test(opcion)) {
+            console.log(chalk.bold.redBright(`✨ Opción inválida. Elige 1 o 2.`))
+        }
+    } while (opcion !== '1' && opcion !== '2')
+    fs.writeFileSync(modeFile, JSON.stringify({ modo: opcion }))
+    console.log(chalk.bold.green(`✅ Modo guardado: ${opcion === '1' ? 'QR' : 'Código de 8 dígitos'}`))
+}
 
 console.log(chalk.bold.green(`✅ Modo seleccionado: ${opcion === '1' ? 'QR' : 'Código de 8 dígitos'}\n`))
 
@@ -210,51 +229,50 @@ async function connectionUpdate(update) {
 
 global.conn.ev.on('connection.update', connectionUpdate)
 
-// ========== SISTEMA DE WELCOME (VERSIÓN MUJER) ==========
 global.conn.ev.on('group-participants.update', async (update) => {
     try {
         const { id, participants, action } = update;
-        
+
         if (!global.db.data) await loadDatabase();
-        
+
         if (!global.db.data.chats[id]) {
             global.db.data.chats[id] = {};
         }
-        
+
         const chat = global.db.data.chats[id];
         if (!chat || chat.welcome !== true) return;
-        
+
         const groupMetadata = await global.conn.groupMetadata(id).catch(() => null);
         const groupName = groupMetadata?.subject || 'el grupo';
         const memberCount = groupMetadata?.participants?.length || 0;
         const groupIcon = await getGroupPicture(id);
-        
+
         if (action === 'add') {
             for (const jid of participants) {
                 try {
                     if (!global.db.data.users[jid]) {
                         global.db.data.users[jid] = {};
                     }
-                    
+
                     let userData = global.db.data.users[jid];
                     let userLevel = userData.level || 1;
                     let userRole = userData.role || '🌸 Aprendiz de Dulzura';
-                    
+
                     let welcomeText = chat.welcomeMessage || `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n\n> ✨ 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗔 𝗔𝗟 𝗔𝗨𝗟𝗔 𝗗𝗘 𝗘́𝗟𝗜𝗧𝗘 ✨\n\n> 👤 @user\n> 📊 Nivel: @level\n> 🎀 Rol: @role\n> 👥 Miembros: @count\n\n> 🌟 Disfruta @group 💗\n\n🌸 *Danny Yulieth* 🌸`;
-                    
+
                     welcomeText = welcomeText
                         .replace(/@user/g, `@${jid.split('@')[0]}`)
                         .replace(/@level/g, userLevel)
                         .replace(/@role/g, userRole)
                         .replace(/@count/g, memberCount)
                         .replace(/@group/g, groupName);
-                    
+
                     await global.conn.sendMessage(id, {
                         image: { url: groupIcon },
                         caption: welcomeText,
                         mentions: [jid]
                     });
-                    
+
                     if (chat.welcomeBonus !== false) {
                         userData.monedas = (userData.monedas || 0) + 50;
                         userData.exp = (userData.exp || 0) + 100;
@@ -264,12 +282,12 @@ global.conn.ev.on('group-participants.update', async (update) => {
                 }
             }
         }
-        
+
         if (action === 'remove') {
             for (const jid of participants) {
                 try {
                     const goodbyeText = `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n\n> 👋 𝗛𝗔𝗦𝗧𝗔 𝗣𝗥𝗢𝗡𝗧𝗢 👋\n\n> 👤 @${jid.split('@')[0]} ha abandonado el grupo\n> 👥 Miembros restantes: ${memberCount}\n\n🌸 *Danny Yulieth* 🌸`;
-                    
+
                     await global.conn.sendMessage(id, {
                         image: { url: groupIcon },
                         caption: goodbyeText,
@@ -283,7 +301,6 @@ global.conn.ev.on('group-participants.update', async (update) => {
     }
 });
 
-// ========== RELOAD HANDLER ==========
 let isInit = true
 let handler = await import('./handler.js')
 
