@@ -22,7 +22,7 @@ import { Low, JSONFile } from 'lowdb'
 import store from '../lib/store.js'
 const { proto } = (await import('@whiskeysockets/baileys')).default
 import pkg from 'google-libphonenumber'
-const { PhoneNumberUtil } = pkg
+const { PhoneNumberUtil } = pk
 const phoneUtil = PhoneNumberUtil.getInstance()
 const { DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, jidNormalizedUser } = await import('@whiskeysockets/baileys')
 import readline, { createInterface } from 'readline'
