@@ -1,5 +1,5 @@
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1'
-import './kiyotaka-ayanokoji/config.js'
+import '.config.js'
 import { watchFile, unwatchFile } from 'fs'
 import cfonts from 'cfonts'
 import { createRequire } from 'module'
