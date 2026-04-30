@@ -1,7 +1,7 @@
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
-import ytdl from '@distube/ytdl-core';
+import ytdl from 'ytdl-core';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -43,7 +43,11 @@ async function downloadMP3(videoUrl, outputPath) {
         const stream = ytdl(videoUrl, {
             quality: 'lowestaudio',
             filter: 'audioonly',
-            agent: { headers: { 'User-Agent': USER_AGENT } }
+            requestOptions: {
+                headers: {
+                    'User-Agent': USER_AGENT
+                }
+            }
         });
         const writeStream = fs.createWriteStream(outputPath);
         stream.pipe(writeStream);
@@ -57,7 +61,11 @@ async function downloadMP4(videoUrl, outputPath, quality = '18') {
     return new Promise((resolve, reject) => {
         const stream = ytdl(videoUrl, {
             quality: quality,
-            agent: { headers: { 'User-Agent': USER_AGENT } }
+            requestOptions: {
+                headers: {
+                    'User-Agent': USER_AGENT
+                }
+            }
         });
         const writeStream = fs.createWriteStream(outputPath);
         stream.pipe(writeStream);
