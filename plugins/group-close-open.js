@@ -45,5 +45,6 @@ handler.help = ['grupo <open/close>']
 handler.tags = ['group']
 handler.command = ['grupo', 'grupos']
 handler.group = true
+handler.admin = true
 
 export default handler
