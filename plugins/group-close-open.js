@@ -1,15 +1,14 @@
-let handler = async (m, { conn, text, isAdmin }) => {
+let handler = async (m, { conn, text }) => {
     if (!m.isGroup) return m.reply('🌸 Este comando solo funciona en grupos')
-    if (!isAdmin) return m.reply(`˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🛡️ *SOLO ADMINISTRADORAS* 🛡️\n\n> 📌 Solo *las administradoras* pueden usar esto\n\n🌸 *Danny Yulieth* 🌸`)
     
     const groupId = m.chat
     const groupMetadata = await conn.groupMetadata(groupId)
-    const botJid = conn.user.jid.split(':')[0] + '@s.whatsapp.net'
+    const botNumber = conn.user.jid.split('@')[0]
     
     let botIsAdmin = false
     for (let p of groupMetadata.participants) {
-        let participantJid = p.id.split('@')[0] + '@s.whatsapp.net'
-        if (participantJid === botJid && (p.admin === 'admin' || p.admin === 'superadmin')) {
+        const participantNumber = p.id.split('@')[0]
+        if (participantNumber === botNumber && (p.admin === 'admin' || p.admin === 'superadmin')) {
             botIsAdmin = true
             break
         }
