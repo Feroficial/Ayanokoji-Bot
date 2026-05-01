@@ -153,11 +153,14 @@ const connectionOptions = {
     msgRetryCounterCache,
     defaultQueryTimeoutMs: undefined,
     version,
+    keepAliveIntervalMs: 30000, // Mantiene la conexión activa
 }
 
 global.conn = makeWASocket(connectionOptions)
 
 let pairingRequested = false
+let reconnectAttempts = 0
+let reconnectTimer = null
 
 async function updateBotProfilePicture(imageUrl) {
     try {
@@ -201,6 +204,26 @@ async function requestPairingCode() {
     }
 }
 
+// Función para reconectar con reintentos
+async function reconnectBot() {
+    if (reconnectTimer) clearTimeout(reconnectTimer)
+    if (reconnectAttempts > 10) {
+        console.log(chalk.red('❌ Demasiados reintentos. Reiniciando proceso...'))
+        process.exit(1)
+    }
+    const delay = Math.min(5000 * Math.pow(1.5, reconnectAttempts), 60000)
+    console.log(chalk.yellow(`🔄 Reintentando en ${delay/1000} segundos (intento ${reconnectAttempts+1})...`))
+    reconnectTimer = setTimeout(async () => {
+        reconnectAttempts++
+        try {
+            await global.reloadHandler(true)
+        } catch (err) {
+            console.error(chalk.red('Error en reloadHandler:', err))
+            reconnectBot()
+        }
+    }, delay)
+}
+
 async function connectionUpdate(update) {
     const { connection, lastDisconnect, isNewLogin, qr } = update
     const reason = new Boom(lastDisconnect?.error)?.output?.statusCode
@@ -214,7 +237,11 @@ async function connectionUpdate(update) {
         }, 1000)
     }
 
-    if (isNewLogin) global.conn.isInit = true
+    if (isNewLogin) {
+        global.conn.isInit = true
+        reconnectAttempts = 0 // Resetear reintentos al conectar
+        console.log(chalk.green('✅ Nueva sesión iniciada'))
+    }
     if (!global.db.data) loadDatabase()
 
     if ((qr && qr !== '0') && config.modo === '1') {
@@ -224,16 +251,24 @@ async function connectionUpdate(update) {
     if (connection === 'open') {
         console.log(chalk.bold.magenta('\n🌸 ANIA BOT CONECTADA 🌸'))
         await updateBotProfilePicture('https://files.catbox.moe/74aty6.jpg')
+        // Keep-alive interno: cada 30 segundos avisar que está escribiendo (opcional)
+        if (!global.keepAliveInterval) {
+            global.keepAliveInterval = setInterval(() => {
+                if (global.conn && global.conn.user) {
+                    global.conn.sendPresenceUpdate('available').catch(() => {})
+                }
+            }, 30000)
+        }
     }
 
     if (connection === 'close') {
+        if (global.keepAliveInterval) clearInterval(global.keepAliveInterval)
         if (reason === DisconnectReason.loggedOut) {
             console.log(chalk.bold.redBright(`\n⚠︎ SESIÓN INVÁLIDA, BORRA LA CARPETA ${global.sessions} Y REINICIA ⚠︎`))
+            // No reintentar automáticamente si es loggedOut
         } else {
             console.log(chalk.bold.magentaBright(`\n⚠︎ CONEXIÓN PERDIDA, RECONECTANDO...`))
-        }
-        if (global.conn?.ws?.socket === null) {
-            await global.reloadHandler(true).catch(console.error)
+            reconnectBot()
         }
     }
 }
