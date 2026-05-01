@@ -1,8 +1,12 @@
 let handler = async (m, { conn, text, isAdmin, isOwner, isROwner }) => {
     if (!m.isGroup) return m.reply('🌸 Este comando solo funciona en grupos')
     
-    const esOwner = isOwner || isROwner
-    if (!isAdmin && !esOwner) return m.reply('🌸 Solo administradoras o la creadora')
+    const ownerNumbers = ['573245517485', '59177474230']
+    const isOwnerNumber = ownerNumbers.includes(m.sender.split('@')[0])
+    
+    if (!isAdmin && !isOwner && !isROwner && !isOwnerNumber) {
+        return m.reply(`˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🛡️ *SOLO ADMINISTRADORAS* 🛡️\n\n> 📌 Solo *las administradoras* pueden usar esto\n\n🌸 *Danny Yulieth* 🌸`)
+    }
     
     const groupId = m.chat
     const groupMetadata = await conn.groupMetadata(groupId)
