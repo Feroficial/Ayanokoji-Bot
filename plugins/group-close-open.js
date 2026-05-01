@@ -4,11 +4,11 @@ let handler = async (m, { conn, text, isAdmin }) => {
     
     const groupId = m.chat
     const groupMetadata = await conn.groupMetadata(groupId)
-    const botJid = conn.user.id.split(':')[0] + '@s.whatsapp.net'
+    const botJid = conn.user.jid.split(':')[0] + '@s.whatsapp.net'
     
     let botIsAdmin = false
     for (let p of groupMetadata.participants) {
-        let participantJid = p.id.split(':')[0] + '@s.whatsapp.net'
+        let participantJid = p.id.split('@')[0] + '@s.whatsapp.net'
         if (participantJid === botJid && (p.admin === 'admin' || p.admin === 'superadmin')) {
             botIsAdmin = true
             break
