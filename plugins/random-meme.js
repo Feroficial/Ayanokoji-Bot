@@ -8,14 +8,19 @@ let handler = async (m, { conn }) => {
         if (!data.status) throw new Error('No se pudo obtener el meme')
         
         const meme = data.resultado
+        let fuenteEmoji = '🌐'
+        if (meme.fuente === 'Reddit') fuenteEmoji = '📖'
+        else if (meme.fuente === 'Pinterest') fuenteEmoji = '📌'
+        else if (meme.fuente === 'Imgflip') fuenteEmoji = '🎭'
+        
         const caption = `🌸 *— ✧ 𝐌𝐄𝐌𝐄 𝐀𝐋𝐄𝐀𝐓𝐎𝐑𝐈𝐎 ✧ —* 🌸
         
 > 🎀 *Título:* ${meme.titulo}
-> 💗 *Subreddit:* ${meme.subreddit}
-> ✨ *Votos:* ${meme.votos} 👍
-> 🧸 *Comentarios:* ${meme.comentarios}
-> 👤 *Autor:* ${meme.autor}
-> 📅 *Fecha:* ${meme.creado}
+> 💗 *Fuente:* ${fuenteEmoji} ${meme.fuente}
+> ✨ *Votos:* ${meme.votos || 0} 👍
+> 🧸 *Comentarios:* ${meme.comentarios || 0}
+> 👤 *Autor:* ${meme.autor || 'Anónimo'}
+> 📅 *Fecha:* ${meme.creado || new Date().toLocaleDateString('es-ES')}
 
 🌸 *"Alya Bot te trae el mejor contenido"* 🌸`
         
