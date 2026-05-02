@@ -4,29 +4,11 @@ import path from 'path'
 import fetch from 'node-fetch'
 
 const defaultMenu = {
-  before: `
-ㅤ    ꒰  ㅤ 🕸️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ info 木 att ㅤ 性
-
-> ₊· hola *.* bienvenido al menu de *αℓуα - вσт*
-> ⫏⫏   ✿ canal  ›
-> » https://whatsapp.com/channel/0029VbCOTaJ9RZAQPdiZ4J1K
-‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎
-%readmore
-`.trimStart(),
+  before: ` ㅤ    ꒰  ㅤ 🕸️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱ ㅤ    ⿻ ㅤ ✿ ㅤ info 木 att ㅤ 性  > ₊· hola *.* bienvenido al menu de *αℓуα - вσт* > ⫏⫏   ✿ canal  › > » https://whatsapp.com/channel/0029VbCOTaJ9RZAQPdiZ4J1K ‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎ %readmore `.trimStart(),
   header: '\nㅤ    ꒰  ㅤ ✿ ㅤ *%category* ㅤ ⫏⫏  ꒱\nㅤ    ⿻ ㅤ 性 ㅤ seccion ㅤ ✿',
   body: '> ₊· ⫏⫏ ㅤ %cmd',
   footer: 'ㅤ',
-  after: `
-ㅤ
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ 性 ㅤ Sistema ejecutado ㅤ ✿
-> ₊· ⫏⫏ ㅤ #ping ─ 📡 *Estado del bot*
-ㅤ
-ㅤ    ꒰  ㅤ 🕸️ ㅤ *ᴄʀᴇᴀᴅᴏ ᴘᴏʀ ʟʏᴏɴɴ* ㅤ ⫏⫏  ꒱
-> ₊· ⫏⫏ ㅤ ✿ 木 性 ㅤ Alya
-`
-}
+  after: ` ㅤ ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱ ㅤ    ⿻ ㅤ 性 ㅤ Sistema ejecutado ㅤ ✿ > ₊· ⫏⫏ ㅤ #ping ─ 📡 *Estado del bot* ㅤ ㅤ    ꒰  ㅤ 🕸️ ㅤ *ᴄʀᴇᴀᴅᴏ ᴘᴏʀ ʟʏᴏɴɴ* ㅤ ⫏⫏  ꒱ > ₊· ⫏⫏ ㅤ ✿ 木 性 ㅤ Alya ` }
 
 const menuDir = './media/menu'
 fs.mkdirSync(menuDir, { recursive: true })
@@ -111,29 +93,44 @@ let handler = async (m, { conn, usedPrefix }) => {
 
     const uniqueThumb = Buffer.concat([thumb, Buffer.from(botJid)])
 
-    // Versión corregida del botón para tu fork
+    // ESTRUCTURA CORRECTA PARA DVWILKERBAIL
     await conn.sendMessage(m.chat, {
       image: uniqueThumb,
       caption: text,
       mentions: [m.sender],
+      headerType: 4,
+      viewOnce: false
+    }, { quoted: m })
+
+    // Enviar botones POR SEPARADO (DvwilkerBail no soporta botones en la imagen)
+    const buttonMessage = {
+      text: '> 📡 *ESTADO DEL BOT*',
+      footer: 'αℓуα - вσт',
       buttons: [
         {
           buttonId: `${usedPrefix}ping`,
-          buttonText: { displayText: '📡 PING' },
+          buttonText: { displayText: '🔔 PING' },
+          type: 1
+        },
+        {
+          buttonId: `${usedPrefix}menu`,
+          buttonText: { displayText: '📋 MENU' },
           type: 1
         }
-      ]
-    }, { quoted: m })
-    
+      ],
+      headerType: 0
+    }
+
+    await conn.sendMessage(m.chat, buttonMessage, { quoted: m })
+
   } catch (error) {
     console.error('Error en menu:', error)
-    // Si falla el botón, enviar solo imagen y texto
     try {
       const thumb = defaultThumb
       const uniqueThumb = Buffer.concat([thumb, Buffer.from(conn.user.jid)])
       await conn.sendMessage(m.chat, {
         image: uniqueThumb,
-        caption: '❌ Error al cargar el menú completo. Usa #menu de nuevo.'
+        caption: '❌ Error al cargar el menú. Intenta de nuevo con #menu'
       }, { quoted: m })
     } catch (e) {
       await m.reply('❌ Error: No se pudo mostrar el menú')
