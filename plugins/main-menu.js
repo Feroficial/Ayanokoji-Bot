@@ -47,83 +47,98 @@ const fetchBuffer = async url =>
 const defaultThumb = await fetchBuffer('https://files.catbox.moe/z4qgf1.jpeg')
 
 let handler = async (m, { conn, usedPrefix }) => {
-  await conn.sendMessage(m.chat, { react: { text: '🕸️', key: m.key } })
+  try {
+    await conn.sendMessage(m.chat, { react: { text: '🕸️', key: m.key } })
 
-  const botJid = conn.user.jid
-  const menuMedia = loadMenuMedia(botJid)
-  const menu = global.subBotMenus?.[botJid] || defaultMenu
+    const botJid = conn.user.jid
+    const menuMedia = loadMenuMedia(botJid)
+    const menu = global.subBotMenus?.[botJid] || defaultMenu
 
-  const user = global.db.data.users[m.sender] || { level: 0, exp: 0 }
-  const { min, xp } = xpRange(user.level, global.multiplier)
+    const user = global.db.data.users[m.sender] || { level: 0, exp: 0 }
+    const { min, xp } = xpRange(user.level, global.multiplier)
 
-  const replace = {
-    name: await conn.getName(m.sender),
-    level: user.level,
-    exp: user.exp - min,
-    maxexp: xp,
-    totalreg: Object.keys(global.db.data.users).length,
-    mode: global.opts.self ? 'Privado' : 'Público',
-    muptime: clockString(process.uptime() * 1000),
-    readmore: String.fromCharCode(8206).repeat(4001)
-  }
+    const replace = {
+      name: await conn.getName(m.sender),
+      level: user.level,
+      exp: user.exp - min,
+      maxexp: xp,
+      totalreg: Object.keys(global.db.data.users).length,
+      mode: global.opts.self ? 'Privado' : 'Público',
+      muptime: clockString(process.uptime() * 1000),
+      readmore: String.fromCharCode(8206).repeat(4001)
+    }
 
-  const help = Object.values(global.plugins || {})
-    .filter(p => !p.disabled)
-    .map(p => ({
-      help: [].concat(p.help || []),
-      tags: [].concat(p.tags || []),
-      prefix: 'customPrefix' in p
-    }))
+    const help = Object.values(global.plugins || {})
+      .filter(p => !p.disabled)
+      .map(p => ({
+        help: [].concat(p.help || []),
+        tags: [].concat(p.tags || []),
+        prefix: 'customPrefix' in p
+      }))
 
-  const tags = {
-    main: 'princɨքαl',
-    group: 'ɢʀυքos',
-    downloader: 'dᦅwnlᦅαdᧉr',
-    search: 'sᧉαrch',
-    economy: 'ᧉcᦅnᦅmy',
-    game: 'ɢαcɦα',
-    nsfw: 'nsfw +18',
-    tools: 'łᦅᦅls',
-    owner: 'ᦅwnᧉr',
-    sticker: 'słickᧉrs',
-    reaction: 'rᧉαccꪱᦅnᧉs',
-    register: 'rᧉɢisᧉr'
-  }
+    const tags = {
+      main: 'princɨքαl',
+      group: 'ɢʀυքos',
+      downloader: 'dᦅwnlᦅαdᧉr',
+      search: 'sᧉαrch',
+      economy: 'ᧉcᦅnᦅmy',
+      game: 'ɢαcɦα',
+      nsfw: 'nsfw +18',
+      tools: 'łᦅᦅls',
+      owner: 'ᦅwnᧉr',
+      sticker: 'słickᧉrs',
+      reaction: 'rᧉαccꪱᦅnᧉs',
+      register: 'rᧉɢisᧉr'
+    }
 
-  const text = [
-    menu.before,
-    ...Object.keys(tags).map(tag => {
-      const cmds = help
-        .filter(p => p.tags.includes(tag))
-        .flatMap(p => p.help.map(c =>
-          menu.body.replace('%cmd', p.prefix ? c : usedPrefix + c)
-        )).join('\n')
-      if (!cmds) return ''
-      return `${menu.header.replace('%category', tags[tag])}\n${cmds}\n${menu.footer}`
-    }).filter(v => v),
-    menu.after
-  ].join('\n').replace(/%(\w+)/g, (_, k) => replace[k] ?? '')
+    const text = [
+      menu.before,
+      ...Object.keys(tags).map(tag => {
+        const cmds = help
+          .filter(p => p.tags.includes(tag))
+          .flatMap(p => p.help.map(c =>
+            menu.body.replace('%cmd', p.prefix ? c : usedPrefix + c)
+          )).join('\n')
+        if (!cmds) return ''
+        return `${menu.header.replace('%category', tags[tag])}\n${cmds}\n${menu.footer}`
+      }).filter(v => v),
+      menu.after
+    ].join('\n').replace(/%(\w+)/g, (_, k) => replace[k] ?? '')
 
-  const thumb = menuMedia.thumbnail && fs.existsSync(menuMedia.thumbnail)
-    ? fs.readFileSync(menuMedia.thumbnail)
-    : defaultThumb
+    const thumb = menuMedia.thumbnail && fs.existsSync(menuMedia.thumbnail)
+      ? fs.readFileSync(menuMedia.thumbnail)
+      : defaultThumb
 
-  const uniqueThumb = Buffer.concat([thumb, Buffer.from(botJid)])
+    const uniqueThumb = Buffer.concat([thumb, Buffer.from(botJid)])
 
-  // Botón corregido para tu fork de Baileys
-  await conn.sendMessage(m.chat, {
-    image: uniqueThumb,
-    caption: text,
-    mentions: [m.sender],
-    templateButtons: [
-      {
-        quickReplyButton: {
-          displayText: '📡 PING',
-          id: `${usedPrefix}ping`
+    // Versión corregida del botón para tu fork
+    await conn.sendMessage(m.chat, {
+      image: uniqueThumb,
+      caption: text,
+      mentions: [m.sender],
+      buttons: [
+        {
+          buttonId: `${usedPrefix}ping`,
+          buttonText: { displayText: '📡 PING' },
+          type: 1
         }
-      }
-    ]
-  }, { quoted: m })
+      ]
+    }, { quoted: m })
+    
+  } catch (error) {
+    console.error('Error en menu:', error)
+    // Si falla el botón, enviar solo imagen y texto
+    try {
+      const thumb = defaultThumb
+      const uniqueThumb = Buffer.concat([thumb, Buffer.from(conn.user.jid)])
+      await conn.sendMessage(m.chat, {
+        image: uniqueThumb,
+        caption: '❌ Error al cargar el menú completo. Usa #menu de nuevo.'
+      }, { quoted: m })
+    } catch (e) {
+      await m.reply('❌ Error: No se pudo mostrar el menú')
+    }
+  }
 }
 
 handler.help = ['menu', 'menú']
