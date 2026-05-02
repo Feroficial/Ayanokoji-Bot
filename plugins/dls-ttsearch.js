@@ -9,6 +9,8 @@ let handler = async (m, { conn, text, command }) => {
 > • #tt Bad Bunny
 > • #tt https://vm.tiktok.com/xxxxx
 
+🔗 *API oficial:* https://dvlyonn.onrender.com
+
 🎭 *Alya Bot - Potencia en tus manos* 🎭`)
 
     await m.react('🎭')
@@ -36,6 +38,7 @@ let handler = async (m, { conn, text, command }) => {
 > 💬 *Comentarios:* ${video.comments || 0}
 > 👁️ *Vistas:* ${video.views || 0}
 
+🔗 *API oficial:* ${baseApi}
 🎭 *Alya Bot - Potencia en tus manos* 🎭`
             
             await conn.sendMessage(m.chat, {
@@ -58,7 +61,7 @@ let handler = async (m, { conn, text, command }) => {
             throw new Error('No se encontraron resultados')
         }
         
-        await m.reply(`🎭 *— ✧ 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀𝐍𝐃𝐨 ${data.result.length} 𝐕𝐈𝐃𝐄𝐎𝐒 ✧ —* 🎭\n> 📌 Los videos llegarán uno tras otro...`)
+        await m.reply(`🎭 *— ✧ 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀𝐍𝐃𝐎 ${data.result.length} 𝐕𝐈𝐃𝐄𝐎𝐒 ✧ —* 🎭\n> 📌 Los videos llegarán uno tras otro...\n> 🔗 *API oficial:* ${baseApi}`)
         
         for (let i = 0; i < data.result.length; i++) {
             const videoInfo = data.result[i]
@@ -81,6 +84,7 @@ let handler = async (m, { conn, text, command }) => {
 > ❤️ *Likes:* ${video.likes || videoInfo.stats.likes}
 > 👁️ *Vistas:* ${video.views || videoInfo.stats.plays}
 
+🔗 *API oficial:* ${baseApi}
 🎭 *Alya Bot - Potencia en tus manos* 🎭`
             
             await conn.sendMessage(m.chat, {
@@ -92,12 +96,12 @@ let handler = async (m, { conn, text, command }) => {
             await new Promise(resolve => setTimeout(resolve, 2000))
         }
         
-        await m.reply(`🎭 *— ✧ 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀 ✧ —* 🎭\n> 📌 Se enviaron ${data.result.length} videos de "${query}"\n\n🎭 *Alya Bot - Siempre contigo* 🎭`)
+        await m.reply(`🎭 *— ✧ 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀 ✧ —* 🎭\n> 📌 Se enviaron ${data.result.length} videos de "${query}"\n> 🔗 *API oficial:* ${baseApi}\n\n🎭 *Alya Bot - Siempre contigo* 🎭`)
         await m.react('✅')
         
     } catch (error) {
         console.error(error)
-        await m.reply(`🎭 *Error* 🎭\n> 📌 ${error.message || 'No se pudo procesar tu solicitud.'}`)
+        await m.reply(`🎭 *Error* 🎭\n> 📌 ${error.message || 'No se pudo procesar tu solicitud.'}\n> 🔗 *API oficial:* https://dvlyonn.onrender.com`)
         await m.react('❌')
     }
 }
