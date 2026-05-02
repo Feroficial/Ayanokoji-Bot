@@ -2,14 +2,12 @@ let handler = async (m, { conn, text, command }) => {
     if (!text) return m.reply(`🎭 *— ✧ 𝐓𝐈𝐊𝐓𝐎𝐊 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐄𝐑 ✧ —* 🎭
     
 > 🎯 *Comandos:*
-> • #tt <búsqueda> - Buscar y descargar videos
+> • #tt <búsqueda> - Buscar y descargar 3 videos
 > • #tt <url> - Descargar video directo
 
 > 📌 *Ejemplos:*
 > • #tt Bad Bunny
 > • #tt https://vm.tiktok.com/xxxxx
-
-🔗 *API oficial:* https://dvlyonn.onrender.com
 
 🎭 *Alya Bot - Potencia en tus manos* 🎭`)
 
@@ -53,56 +51,35 @@ let handler = async (m, { conn, text, command }) => {
         let query = text
         await m.reply(`🎭 Buscando "${query}"...`)
         
-        const res = await fetch(`${baseApi}/search/tiktok?query=${encodeURIComponent(query)}&limit=5`)
+        const res = await fetch(`${baseApi}/search/tiktok?query=${encodeURIComponent(query)}&limit=3`)
         const data = await res.json()
         
         if (!data.status || data.total_results === 0) {
             throw new Error('No se encontraron resultados')
         }
         
-        let txt = `🎭 *— ✧ 𝐑𝐄𝐒𝐔𝐋𝐓𝐀𝐃𝐎𝐒 𝐓𝐈𝐊𝐓𝐎𝐊 ✧ —* 🎭\n\n`
+        await m.reply(`🎭 *— ✧ 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀𝐍𝐃𝐨 ${data.result.length} 𝐕𝐈𝐃𝐄𝐎𝐒 ✧ —* 🎭\n> 📌 Los videos llegarán uno tras otro...`)
+        
         for (let i = 0; i < data.result.length; i++) {
-            const v = data.result[i]
-            txt += `> 🎯 *${i + 1}.* ${v.title}\n`
-            txt += `> 📌 👤 ${v.author.name} | ❤️ ${v.stats.likes} | 👁️ ${v.stats.plays}\n\n`
-        }
-        txt += `🎭 *Responde con el número del video que deseas descargar (1-${data.result.length})*\n🔗 *O usa:* #tt <url>\n\n🎭 *Alya Bot - Siempre contigo* 🎭`
-        
-        await conn.sendMessage(m.chat, { text: txt }, { quoted: m })
-        
-        const timeout = 30000
-        const collector = async (msg) => {
-            if (msg.key.remoteJid !== m.chat) return false
-            if (msg.key.fromMe) return false
-            if (!msg.message?.conversation) return false
+            const videoInfo = data.result[i]
             
-            const response = msg.message.conversation.trim()
-            const selected = parseInt(response)
+            await m.reply(`🎭 *Descargando video ${i + 1}/${data.result.length}*: ${videoInfo.title.substring(0, 50)}...`)
             
-            if (isNaN(selected) || selected < 1 || selected > data.result.length) {
-                await m.reply(`🎭 *Opción inválida*\n> 📌 Responde con un número entre 1 y ${data.result.length}`)
-                return false
-            }
-            
-            const selectedVideo = data.result[selected - 1]
-            await m.reply(`🎭 Descargando video ${selected}...`)
-            
-            const downloadRes = await fetch(`${baseApi}/download/tiktok?url=${encodeURIComponent(selectedVideo.url)}`)
+            const downloadRes = await fetch(`${baseApi}/download/tiktok?url=${encodeURIComponent(videoInfo.url)}`)
             const downloadData = await downloadRes.json()
             
             if (!downloadData.status || !downloadData.result?.video) {
-                await m.reply(`🎭 *Error*\n> 📌 No se pudo descargar el video`)
-                return false
+                await m.reply(`🎭 *Error* - No se pudo descargar el video ${i + 1}`)
+                continue
             }
             
             const video = downloadData.result
-            const caption = `🎭 *— ✧ 𝐓𝐈𝐊𝐓𝐎𝐊 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃 ✧ —* 🎭
+            const caption = `🎭 *— ✧ 𝐓𝐈𝐊𝐓𝐎𝐊 ${i + 1}/${data.result.length} ✧ —* 🎭
             
-> 🎯 *Título:* ${video.title || selectedVideo.title}
-> 📌 *Autor:* ${video.author?.name || selectedVideo.author.name}
-> ❤️ *Likes:* ${video.likes || 0}
-> 💬 *Comentarios:* ${video.comments || 0}
-> 👁️ *Vistas:* ${video.views || 0}
+> 🎯 *Título:* ${video.title || videoInfo.title}
+> 📌 *Autor:* ${video.author?.name || videoInfo.author.name}
+> ❤️ *Likes:* ${video.likes || videoInfo.stats.likes}
+> 👁️ *Vistas:* ${video.views || videoInfo.stats.plays}
 
 🎭 *Alya Bot - Potencia en tus manos* 🎭`
             
@@ -112,19 +89,11 @@ let handler = async (m, { conn, text, command }) => {
                 mimetype: 'video/mp4'
             }, { quoted: m })
             
-            await m.react('✅')
-            return true
+            await new Promise(resolve => setTimeout(resolve, 2000))
         }
         
-        const startTime = Date.now()
-        while (Date.now() - startTime < timeout) {
-            const messages = await conn.loadMessage(m.chat, 5)
-            for (const msg of messages) {
-                const result = await collector(msg)
-                if (result) break
-            }
-            await new Promise(resolve => setTimeout(resolve, 1000))
-        }
+        await m.reply(`🎭 *— ✧ 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀 ✧ —* 🎭\n> 📌 Se enviaron ${data.result.length} videos de "${query}"\n\n🎭 *Alya Bot - Siempre contigo* 🎭`)
+        await m.react('✅')
         
     } catch (error) {
         console.error(error)
