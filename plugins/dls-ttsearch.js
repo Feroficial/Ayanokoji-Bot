@@ -11,18 +11,16 @@ let handler = async (m, { conn, text, command }) => {
 
 🔗 *API oficial:* https://dvlyonn.onrender.com
 
-🎭 *Alya Bot - Potencia en tus manos* 🎭`)
+🎭 *Alya 2026* 🎭`)
 
     await m.react('🎭')
     
     try {
-        const baseApi = 'https://dvlyonn.onrender.com'
-        
         if (text.includes('tiktok.com')) {
             let url = text
             await m.reply('🎭 Descargando video... un momento')
             
-            const res = await fetch(`${baseApi}/download/tiktok?url=${encodeURIComponent(url)}`)
+            const res = await fetch(`https://dvlyonn.onrender.com/download/tiktok?url=${encodeURIComponent(url)}`)
             const data = await res.json()
             
             if (!data.status || !data.result?.video) {
@@ -38,8 +36,8 @@ let handler = async (m, { conn, text, command }) => {
 > 💬 *Comentarios:* ${video.comments || 0}
 > 👁️ *Vistas:* ${video.views || 0}
 
-🔗 *API oficial:* ${baseApi}
-🎭 *Alya Bot - Potencia en tus manos* 🎭`
+🔗 *API oficial:* https://dvlyonn.onrender.com
+🎭 *Alya 2026* 🎭`
             
             await conn.sendMessage(m.chat, {
                 video: { url: video.video },
@@ -54,21 +52,28 @@ let handler = async (m, { conn, text, command }) => {
         let query = text
         await m.reply(`🎭 Buscando "${query}"...`)
         
-        const res = await fetch(`${baseApi}/search/tiktok?query=${encodeURIComponent(query)}&limit=3`)
+        const res = await fetch(`https://dvlyonn.onrender.com/search/tiktok?query=${encodeURIComponent(query)}&limit=3`)
         const data = await res.json()
         
         if (!data.status || data.total_results === 0) {
             throw new Error('No se encontraron resultados')
         }
         
-        await m.reply(`🎭 *— ✧ 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀𝐍𝐃𝐎 ${data.result.length} 𝐕𝐈𝐃𝐄𝐎𝐒 ✧ —* 🎭\n> 📌 Los videos llegarán uno tras otro...\n> 🔗 *API oficial:* ${baseApi}`)
+        let lista = `🎭 *— ✧ 𝐑𝐄𝐒𝐔𝐋𝐓𝐀𝐃𝐎𝐒 ✧ —* 🎭\n\n`
+        for (let i = 0; i < data.result.length; i++) {
+            const v = data.result[i]
+            lista += `> 🎯 *${i + 1}.* ${v.title.substring(0, 50)}\n`
+            lista += `> 📌 👤 ${v.author.name} | ❤️ ${v.stats.likes}\n`
+            lista += `> 🔗 ${v.url}\n\n`
+        }
+        lista += `🎭 *Descargando los 3 videos...*\n🔗 *API oficial:* https://dvlyonn.onrender.com\n🎭 *Alya 2026* 🎭`
+        
+        await m.reply(lista)
         
         for (let i = 0; i < data.result.length; i++) {
             const videoInfo = data.result[i]
             
-            await m.reply(`🎭 *Descargando video ${i + 1}/${data.result.length}*: ${videoInfo.title.substring(0, 50)}...`)
-            
-            const downloadRes = await fetch(`${baseApi}/download/tiktok?url=${encodeURIComponent(videoInfo.url)}`)
+            const downloadRes = await fetch(`https://dvlyonn.onrender.com/download/tiktok?url=${encodeURIComponent(videoInfo.url)}`)
             const downloadData = await downloadRes.json()
             
             if (!downloadData.status || !downloadData.result?.video) {
@@ -84,8 +89,8 @@ let handler = async (m, { conn, text, command }) => {
 > ❤️ *Likes:* ${video.likes || videoInfo.stats.likes}
 > 👁️ *Vistas:* ${video.views || videoInfo.stats.plays}
 
-🔗 *API oficial:* ${baseApi}
-🎭 *Alya Bot - Potencia en tus manos* 🎭`
+🔗 *API oficial:* https://dvlyonn.onrender.com
+🎭 *Alya 2026* 🎭`
             
             await conn.sendMessage(m.chat, {
                 video: { url: video.video },
@@ -93,10 +98,10 @@ let handler = async (m, { conn, text, command }) => {
                 mimetype: 'video/mp4'
             }, { quoted: m })
             
-            await new Promise(resolve => setTimeout(resolve, 2000))
+            await new Promise(resolve => setTimeout(resolve, 1500))
         }
         
-        await m.reply(`🎭 *— ✧ 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀 ✧ —* 🎭\n> 📌 Se enviaron ${data.result.length} videos de "${query}"\n> 🔗 *API oficial:* ${baseApi}\n\n🎭 *Alya Bot - Siempre contigo* 🎭`)
+        await m.reply(`🎭 *— ✧ 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀𝐃𝐎 ✧ —* 🎭\n> 📌 Se enviaron ${data.result.length} videos\n> 🔗 *API oficial:* https://dvlyonn.onrender.com\n\n🎭 *Alya 2026* 🎭`)
         await m.react('✅')
         
     } catch (error) {
