@@ -110,14 +110,19 @@ let handler = async (m, { conn, usedPrefix }) => {
 
   const uniqueThumb = Buffer.concat([thumb, Buffer.from(botJid)])
 
+  // Botón corregido para tu fork de Baileys
   await conn.sendMessage(m.chat, {
     image: uniqueThumb,
     caption: text,
     mentions: [m.sender],
-    buttons: [
-      { buttonId: `${usedPrefix}ping`, buttonText: { displayText: '📡 PING' }, type: 1 }
-    ],
-    viewOnce: true
+    templateButtons: [
+      {
+        quickReplyButton: {
+          displayText: '📡 PING',
+          id: `${usedPrefix}ping`
+        }
+      }
+    ]
   }, { quoted: m })
 }
 
