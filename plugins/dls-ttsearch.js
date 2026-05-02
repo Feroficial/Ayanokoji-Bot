@@ -18,7 +18,7 @@ let handler = async (m, { conn, text, command }) => {
     try {
         if (text.includes('tiktok.com')) {
             let url = text
-            await m.reply('🎭 Descargando video... un momento')
+            await m.reply('🎭 Descargando video (calidad 360p, peso reducido)...')
             
             const res = await fetch(`https://dvlyonn.onrender.com/download/tiktok?url=${encodeURIComponent(url)}`)
             const data = await res.json()
@@ -32,6 +32,7 @@ let handler = async (m, { conn, text, command }) => {
             
 > 🎯 *Título:* ${video.title || 'Sin título'}
 > 📌 *Autor:* ${video.author?.name || 'Desconocido'}
+> 💾 *Calidad:* ${video.quality || '360p'}
 > ❤️ *Likes:* ${video.likes || 0}
 > 💬 *Comentarios:* ${video.comments || 0}
 > 👁️ *Vistas:* ${video.views || 0}
@@ -66,7 +67,7 @@ let handler = async (m, { conn, text, command }) => {
             lista += `> 📌 👤 ${v.author.name} | ❤️ ${v.stats.likes}\n`
             lista += `> 🔗 ${v.url}\n\n`
         }
-        lista += `🎭 *Descargando los 3 videos...*\n🔗 *API oficial:* https://dvlyonn.onrender.com\n🎭 *Alya 2026* 🎭`
+        lista += `🎭 *Descargando los 3 videos (360p, peso reducido)...*\n🔗 *API oficial:* https://dvlyonn.onrender.com\n🎭 *Alya 2026* 🎭`
         
         await m.reply(lista)
         
@@ -86,6 +87,7 @@ let handler = async (m, { conn, text, command }) => {
             
 > 🎯 *Título:* ${video.title || videoInfo.title}
 > 📌 *Autor:* ${video.author?.name || videoInfo.author.name}
+> 💾 *Calidad:* 360p (peso liviano)
 > ❤️ *Likes:* ${video.likes || videoInfo.stats.likes}
 > 👁️ *Vistas:* ${video.views || videoInfo.stats.plays}
 
@@ -101,7 +103,7 @@ let handler = async (m, { conn, text, command }) => {
             await new Promise(resolve => setTimeout(resolve, 1500))
         }
         
-        await m.reply(`🎭 *— ✧ 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀𝐃𝐎 ✧ —* 🎭\n> 📌 Se enviaron ${data.result.length} videos\n> 🔗 *API oficial:* https://dvlyonn.onrender.com\n\n🎭 *Alya 2026* 🎭`)
+        await m.reply(`🎭 *— ✧ 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀𝐃𝐎 ✧ —* 🎭\n> 📌 Se enviaron ${data.result.length} videos en calidad 360p\n> 🔗 *API oficial:* https://dvlyonn.onrender.com\n\n🎭 *Alya 2026* 🎭`)
         await m.react('✅')
         
     } catch (error) {
@@ -113,6 +115,6 @@ let handler = async (m, { conn, text, command }) => {
 
 handler.help = ['tt <búsqueda|url>']
 handler.tags = ['downloader']
-handler.command = ['tt', 'tiktok']
+handler.command = ['tt', 'tiktok', 'tiktokdl']
 
 export default handler
