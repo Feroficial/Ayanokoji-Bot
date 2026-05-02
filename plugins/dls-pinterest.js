@@ -1,146 +1,137 @@
-import axios from 'axios';
-import cheerio from 'cheerio';
+let handler = async (m, { conn, text }) => {
+    if (!text) return m.reply(`🎭 *— ✧ 𝐏𝐈𝐍𝐓𝐸𝐑𝐄𝐒𝐓 ✧ —* 🎭
+    
+> 🎯 *Comandos:*
+> • #pinterest <búsqueda> - Buscar imágenes (5 resultados)
+> • #pinterest <url> - Descargar pin directo
 
-let handler = async (m, { conn, text, args, usedPrefix, command }) => {
-  if (!text) return m.reply(`
-🌸 *— ✧ 𝐏𝐈𝐍𝐓𝐄𝐑𝐄𝐒𝐓 ✧ —* 🌸
+> 📌 *Ejemplos:*
+> • #pinterest gatos
+> • #pinterest https://pinterest.com/pin/123456789
 
-> 🎀 *Uso:* ${usedPrefix + command} <búsqueda o link>
-> 💗 *Ejemplo:* ${usedPrefix + command} Kiyotaka Ayanokoji
+🔗 *API oficial:* https://dvlyonn.onrender.com
 
-🌸 *"Ania Bot encuentra inspiración visual"* 🌸
-`);
+🎭 *Alya 2026* 🎭`)
 
-  try {
-    if (text.includes("https://")) {
-      await m.react("🎀");
-      let i = await dl(args[0]);
-      let isVideo = i.download?.includes(".mp4");
-      await conn.sendMessage(
-        m.chat,
-        { [isVideo ? "video" : "image"]: { url: i.download }, caption: `
-🌸 *— ✧ 𝐏𝐈𝐍𝐓𝐄𝐑𝐄𝐒𝐓 ✧ —* 🌸
+    await m.react('🎭')
+    
+    try {
+        const pinUrl = text.includes('pinterest.com/pin/') ? text : null
+        
+        // Descarga directa por URL
+        if (pinUrl) {
+            await m.reply(`🎭 Obteniendo contenido del pin...`)
+            const res = await fetch(`https://dvlyonn.onrender.com/pinterest?url=${encodeURIComponent(pinUrl)}`)
+            const data = await res.json()
+            if (!data.status || !data.result) throw new Error('No se pudo obtener el pin')
+            
+            const pin = data.result
+            const isVideo = pin.type === 'video'
+            const caption = `🎭 *— ✧ 𝐏𝐈𝐍 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀𝐃𝐎 ✧ —* 🎭
+            
+> 🎯 *Título:* ${pin.title || 'Sin título'}
+> 🎭 *Tipo:* ${isVideo ? 'Video 📹' : 'Imagen 🖼️'}
+> 🔗 *Fuente:* ${pin.source_url}
 
-> 🎀 *Título:* ${i.title}
-> 💗 *Contenido extraído con éxito*
-
-🌸 *"Ania Bot te trae lo mejor"* 🌸` },
-        { quoted: m }
-      );
-      await m.react("✅");
-    } else {
-      await m.react('🎀');
-      const results = await pins(text);
-      if (!results.length) return conn.sendMessage(m.chat, { text: `
-🌸 *— ✧ 𝐍𝐎 𝐄𝐍𝐂𝐎𝐍𝐓𝐑𝐀𝐃𝐎 ✧ —* 🌸
-
-> 💗 *No se encontraron resultados para:* "${text}"
-
-🌸 *"Prueba con otra búsqueda"* 🌸` }, { quoted: m });
-
-      // Enviar las primeras 5 imágenes (ya que enviar 10 puede ser pesado)
-      const medias = results.slice(0, 5);
-      
-      for (let i = 0; i < medias.length; i++) {
-        await conn.sendMessage(
-          m.chat,
-          { image: { url: medias[i].image_large_url }, caption: i === 0 ? `
-🌸 *— ✧ 𝐏𝐈𝐍𝐓𝐄𝐫𝐄𝐒𝐓 ✧ —* 🌸
-
-> 🎀 *Búsqueda:* "${text}"
-> 💗 *Resultados encontrados:* ${medias.length}
-
-🌸 *"Imágenes extraídas para ti"* 🌸` : null },
-          { quoted: m }
-        );
-      }
-
-      await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
-    }
-  } catch (e) {
-    conn.sendMessage(m.chat, { text: `
-🌸 *— ✧ 𝐄𝐑𝐑𝐎𝐑 ✧ —* 🌸
-
-> 💗 *Error:* ${e.message}
-
-🌸 *"El sistema ha fallado"* 🌸` }, { quoted: m });
-  }
-};
-
-handler.help = ['pinterest <búsqueda>'];
-handler.command = ['pinterest', 'pin'];
-handler.tags = ["downloader"];
-
-export default handler;
-
-async function dl(url) {
-  try {
-    let res = await axios.get(url, { headers: { "User-Agent": "Mozilla/5.0" } }).catch(e => e.response);
-    let $ = cheerio.load(res.data);
-    let tag = $('script[data-test-id="video-snippet"]');
-
-    if (tag.length) {
-      let result = JSON.parse(tag.text());
-      return {
-        title: result.name,
-        download: result.contentUrl
-      };
-    } else {
-      let json = JSON.parse($("script[data-relay-response='true']").eq(0).text());
-      let result = json.response.data["v3GetPinQuery"].data;
-      return {
-        title: result.title,
-        download: result.imageLargeUrl
-      };
-    }
-  } catch {
-    return { msg: "Error, inténtalo de nuevo más tarde" };
-  }
-};
-
-const pins = async (judul) => {
-  const link = `https://id.pinterest.com/resource/BaseSearchResource/get/?source_url=%2Fsearch%2Fpins%2F%3Fq%3D${encodeURIComponent(judul)}%26rs%3Dtyped&data=%7B%22options%22%3A%7B%22applied_unified_filters%22%3Anull%2C%22appliedProductFilters%22%3A%22---%22%2C%22article%22%3Anull%2C%22auto_correction_disabled%22%3Afalse%2C%22corpus%22%3Anull%2C%22customized_rerank_type%22%3Anull%2C%22domains%22%3Anull%2C%22dynamicPageSizeExpGroup%22%3A%22control%22%2C%22filters%22%3Anull%2C%22journey_depth%22%3Anull%2C%22page_size%22%3Anull%2C%22price_max%22%3Anull%2C%22price_min%22%3Anull%2C%22query_pin_sigs%22%3Anull%2C%22query%22%3A%22${encodeURIComponent(judul)}%22%2C%22redux_normalize_feed%22%3Atrue%2C%22request_params%22%3Anull%2C%22rs%22%3A%22typed%22%2C%22scope%22%3A%22pins%22%2C%22selected_one_bar_modules%22%3Anull%2C%22seoDrawerEnabled%22%3Afalse%2C%22source_id%22%3Anull%2C%22source_module_id%22%3Anull%2C%22source_url%22%3A%22%2Fsearch%2Fpins%2F%3Fq%3D${encodeURIComponent(judul)}%26rs%3Dtyped%22%2C%22top_pin_id%22%3Anull%2C%22top_pin_ids%22%3Anull%7D%2C%22context%22%3A%7B%7D%7D`;
-
-  const headers = {
-    'accept': 'application/json, text/javascript, */*; q=0.01',
-    'accept-language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
-    'priority': 'u=1, i',
-    'referer': 'https://id.pinterest.com/',
-    'screen-dpr': '1',
-    'sec-ch-ua': '"Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133")',
-    'sec-ch-ua-full-version-list': '"Not(A:Brand";v="99.0.0.0", "Google Chrome";v="133.0.6943.142", "Chromium";v="133.0.6943.142")',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-model': '""',
-    'sec-ch-ua-platform': '"Windows"',
-    'sec-ch-ua-platform-version': '"10.0.0"',
-    'sec-fetch-dest': 'empty',
-    'sec-fetch-mode': 'cors',
-    'sec-fetch-site': 'same-origin',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
-    'x-app-version': 'c056fb7',
-    'x-pinterest-appstate': 'active',
-    'x-pinterest-pws-handler': 'www/index.js',
-    'x-pinterest-source-url': '/',
-    'x-requested-with': 'XMLHttpRequest'
-  };
-
-  try {
-    const res = await axios.get(link, { headers });
-    if (res.data && res.data.resource_response && res.data.resource_response.data && res.data.resource_response.data.results) {
-      return res.data.resource_response.data.results.map(item => {
-        if (item.images) {
-          return {
-            image_large_url: item.images.orig?.url || null,
-            image_medium_url: item.images['564x']?.url || null,
-            image_small_url: item.images['236x']?.url || null
-          };
+🎭 *Alya 2026* 🎭`
+            
+            if (isVideo) {
+                await conn.sendMessage(m.chat, { video: { url: pin.url }, caption, mimetype: 'video/mp4' })
+            } else {
+                await conn.sendMessage(m.chat, { image: { url: pin.url }, caption })
+            }
+            await m.react('✅')
+            return
         }
-        return null;
-      }).filter(img => img !== null);
+        
+        // Búsqueda
+        await m.reply(`🎭 Buscando "${text}" en Pinterest...`)
+        const searchRes = await fetch(`https://dvlyonn.onrender.com/pinterest?query=${encodeURIComponent(text)}&limit=5`)
+        const searchData = await searchRes.json()
+        
+        if (!searchData.status || searchData.total_results === 0) {
+            throw new Error('No se encontraron resultados')
+        }
+        
+        // Enviar resultados con miniaturas y opción de selección
+        for (let i = 0; i < searchData.result.length; i++) {
+            const item = searchData.result[i]
+            const isVideo = item.type === 'video'
+            await conn.sendMessage(m.chat, {
+                image: { url: item.thumbnail },
+                caption: `🎭 *— ✧ 𝐑𝐄𝐒𝐔𝐋𝐓𝐀𝐃𝐎 ${i+1} ✧ —* 🎭
+                
+> 🎯 *Título:* ${item.title || 'Sin título'}
+> 🎭 *Tipo:* ${isVideo ? 'Video 📹' : 'Imagen 🖼️'}
+> 📌 *Responde con el número ${i+1} para descargar*
+
+🔗 *API oficial:* https://dvlyonn.onrender.com
+🎭 *Alya 2026* 🎭`
+            })
+            await new Promise(r => setTimeout(r, 600))
+        }
+        
+        await m.reply(`🎭 Responde con el número del resultado (1 al ${searchData.result.length}) para descargar.`)
+        
+        // Esperar respuesta del usuario (número)
+        let selectedNum = null
+        const start = Date.now()
+        const timeout = 30000
+        
+        while (!selectedNum && Date.now() - start < timeout) {
+            const msgs = await conn.loadMessage(m.chat, 10)
+            for (const msg of msgs) {
+                if (msg.key.fromMe) continue
+                const num = parseInt(msg.message?.conversation?.trim())
+                if (!isNaN(num) && num >= 1 && num <= searchData.result.length) {
+                    selectedNum = num
+                    break
+                }
+            }
+            await new Promise(r => setTimeout(r, 1000))
+        }
+        
+        if (!selectedNum) {
+            await m.reply(`🎭 Tiempo agotado. Usa #pinterest <url> para descargar manualmente.`)
+            return
+        }
+        
+        const selectedItem = searchData.result[selectedNum - 1]
+        await m.reply(`🎭 Descargando resultado ${selectedNum}...`)
+        
+        const downloadRes = await fetch(`https://dvlyonn.onrender.com/pinterest?url=${encodeURIComponent(selectedItem.link)}`)
+        const downloadData = await downloadRes.json()
+        
+        if (!downloadData.status || !downloadData.result) {
+            throw new Error('Error al descargar el pin')
+        }
+        
+        const pin = downloadData.result
+        const isVideo = pin.type === 'video'
+        const caption = `🎭 *— ✧ 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀 ✧ —* 🎭
+        
+> 🎯 *Título:* ${pin.title || selectedItem.title}
+> 🎭 *Tipo:* ${isVideo ? 'Video 📹' : 'Imagen 🖼️'}
+
+🎭 *Alya 2026* 🎭`
+        
+        if (isVideo) {
+            await conn.sendMessage(m.chat, { video: { url: pin.url }, caption, mimetype: 'video/mp4' })
+        } else {
+            await conn.sendMessage(m.chat, { image: { url: pin.url }, caption })
+        }
+        
+        await m.react('✅')
+        
+    } catch (error) {
+        console.error(error)
+        await m.reply(`🎭 *Error* 🎭\n> 📌 ${error.message}\n> 🔗 *API oficial:* https://dvlyonn.onrender.com`)
+        await m.react('❌')
     }
-    return [];
-  } catch (error) {
-    console.error('Error:', error);
-    return [];
-  }
-};
+}
+
+handler.help = ['pinterest <búsqueda|url>']
+handler.tags = ['downloader']
+handler.command = ['pinterest', 'pin']
+
+export default handler
