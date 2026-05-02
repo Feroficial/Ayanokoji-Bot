@@ -3,33 +3,29 @@ import fs from 'fs'
 import path from 'path'
 import fetch from 'node-fetch'
 
-const charset = { a:'ᴀ',b:'ʙ',c:'ᴄ',d:'ᴅ',e:'ᴇ',f:'ꜰ',g:'ɢ',h:'ʜ',i:'ɪ',j:'ᴊ',k:'ᴋ',l:'ʟ',m:'ᴍ',n:'ɴ',o:'ᴏ',p:'ᴘ',q:'ǫ',r:'ʀ',s:'ꜱ',t:'ᴛ',u:'ᴜ',v:'ᴠ',w:'ᴡ',x:'x',y:'ʏ',z:'ᴢ' }
-const textKawaii = t => t.toLowerCase().replace(/[a-z]/g, c => charset[c])
-
-const tags = {
-  main: textKawaii('principal'),
-  group: textKawaii('grupos'),
-  serbot: textKawaii('sub bots')
-}
-
 const defaultMenu = {
   before: `
-🌸 *— ✧ 𝐀𝐧𝐢𝐚 𝐁𝐨𝐭 ✧ —* 🌸
-> 🎀 𝐍𝐨𝐦𝐛𝐫𝐞   » %name
-> 💗 𝐍𝐢𝐯𝐞𝐥     » %level
-> ✨ 𝐄𝐱𝐩        » %exp / %maxexp
-> 🌸 𝐌𝐨𝐝𝐨      » %mode
-> ⏳ 𝐀𝐜𝐭𝐢𝐯𝐚   » %muptime
-> 👥 𝐔𝐬𝐮𝐚𝐫𝐢𝐚𝐬 » %totalreg
+ㅤ    ꒰  ㅤ 🕸️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ info 木 att ㅤ 性
 
-🌸 » 𝐌𝐄𝐍𝐔 𝐀𝐍𝐈𝐀 𝐁𝐎𝐓 «
-💗 » 𝐎𝐩𝐞𝐫𝐚𝐝𝐨𝐫𝐚: 🌸 𝐃𝐚𝐧𝐧𝐲 𝐘𝐮𝐥𝐢𝐞𝐭𝐡 🌸
+> ₊· hola *.* bienvenido al menu de *αℓуα - вσт*
+> ⫏⫏   ✿ canal  ›
+> » https://whatsapp.com/channel/0029VaeQcFXEFeXtNMHk0D0n
+‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎
 %readmore
 `.trimStart(),
-  header: '\n🎀 ⋆꙳•〔 💗 %category 〕⋆꙳•',
-  body: '> 🌸 %cmd',
-  footer: '╰⋆꙳•🌸‧*₊⋆꙳︎‧*💗₊⋆╯',
-  after: '\n🌸 𝐀𝐍𝐈𝐀 𝐁𝐎𝐓 🌸 - Sistema ejecutado con éxito. 💗'
+  header: '\nㅤ    ꒰  ㅤ ✿ ㅤ *%category* ㅤ ⫏⫏  ꒱\nㅤ    ⿻ ㅤ 性 ㅤ seccion ㅤ ✿',
+  body: '> ₊· ⫏⫏ ㅤ %cmd',
+  footer: 'ㅤ',
+  after: `
+ㅤ
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ 性 ㅤ Sistema ejecutado ㅤ ✿
+> ₊· ⫏⫏ ㅤ #ping ─ 📡 *Estado del bot*
+ㅤ
+ㅤ    ꒰  ㅤ 🕸️ ㅤ *ᴄʀᴇᴀᴅᴏ ᴘᴏʀ ʟʏᴏɴɴ* ㅤ ⫏⫏  ꒱
+> ₊· ⫏⫏ ㅤ ✿ 木 性 ㅤ @Lyonn
+`
 }
 
 const menuDir = './media/menu'
@@ -47,10 +43,11 @@ const loadMenuMedia = jid => {
 const fetchBuffer = async url =>
   Buffer.from(await (await fetch(url)).arrayBuffer())
 
-const defaultThumb = await fetchBuffer('https://files.catbox.moe/74aty6.jpg')
+// Foto de Alya
+const defaultThumb = await fetchBuffer('https://files.catbox.moe/z4qgf1.jpeg')
 
 let handler = async (m, { conn, usedPrefix }) => {
-  await conn.sendMessage(m.chat, { react: { text: '🌸', key: m.key } })
+  await conn.sendMessage(m.chat, { react: { text: '🕸️', key: m.key } })
 
   const botJid = conn.user.jid
   const menuMedia = loadMenuMedia(botJid)
@@ -78,9 +75,20 @@ let handler = async (m, { conn, usedPrefix }) => {
       prefix: 'customPrefix' in p
     }))
 
-  for (const { tags: tg } of help)
-    for (const t of tg)
-      if (t && !tags[t]) tags[t] = textKawaii(t)
+  const tags = {
+    main: 'princɨքαl',
+    group: 'ɢʀυքos',
+    downloader: 'dᦅwnlᦅαdᧉr',
+    search: 'sᧉαrch',
+    economy: 'ᧉcᦅnᦅmy',
+    game: 'ɢαcɦα',
+    nsfw: 'nsfw +18',
+    tools: 'łᦅᦅls',
+    owner: 'ᦅwnᧉr',
+    sticker: 'słickᧉrs',
+    reaction: 'rᧉαccꪱᦅnᧉs',
+    register: 'rᧉɢisᧉr'
+  }
 
   const text = [
     menu.before,
@@ -90,8 +98,9 @@ let handler = async (m, { conn, usedPrefix }) => {
         .flatMap(p => p.help.map(c =>
           menu.body.replace('%cmd', p.prefix ? c : usedPrefix + c)
         )).join('\n')
+      if (!cmds) return ''
       return `${menu.header.replace('%category', tags[tag])}\n${cmds}\n${menu.footer}`
-    }),
+    }).filter(v => v),
     menu.after
   ].join('\n').replace(/%(\w+)/g, (_, k) => replace[k] ?? '')
 
@@ -104,7 +113,11 @@ let handler = async (m, { conn, usedPrefix }) => {
   await conn.sendMessage(m.chat, {
     image: uniqueThumb,
     caption: text,
-    mentions: [m.sender]
+    mentions: [m.sender],
+    buttons: [
+      { buttonId: `${usedPrefix}ping`, buttonText: { displayText: '📡 PING' }, type: 1 }
+    ],
+    viewOnce: true
   }, { quoted: m })
 }
 
@@ -112,6 +125,7 @@ handler.help = ['menu', 'menú']
 handler.tags = ['main']
 handler.command = ['menu', 'menú', 'help', 'ayuda']
 handler.register = false
+
 export default handler
 
 const clockString = ms =>
