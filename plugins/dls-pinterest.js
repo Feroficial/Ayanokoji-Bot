@@ -25,19 +25,21 @@ let handler = async (m, { conn, text }) => {
             if (!data.status || !data.result) throw new Error('No se pudo obtener el pin')
             
             const pin = data.result
-            const isVideo = pin.type === 'video'
+            const isVideo = pin.type === 'video' || pin.url?.endsWith('.mp4')
             const caption = `🎭 *— ✧ 𝐏𝐈𝐍 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀𝐃𝐎 ✧ —* 🎭
             
 > 🎯 *Título:* ${pin.title || 'Sin título'}
 > 🎭 *Tipo:* ${isVideo ? 'Video 📹' : 'Imagen 🖼️'}
-> 🔗 *Fuente:* ${pin.source_url}
+> 🔗 *Fuente:* ${pin.source_url || pinUrl}
 
 🎭 *Alya 2026* 🎭`
             
-            if (isVideo) {
+            if (isVideo && pin.url) {
                 await conn.sendMessage(m.chat, { video: { url: pin.url }, caption, mimetype: 'video/mp4' })
-            } else {
+            } else if (pin.url) {
                 await conn.sendMessage(m.chat, { image: { url: pin.url }, caption })
+            } else {
+                throw new Error('No se encontró URL del contenido')
             }
             await m.react('✅')
             return
@@ -47,34 +49,46 @@ let handler = async (m, { conn, text }) => {
         const searchRes = await fetch(`https://dvlyonn.onrender.com/pinterest?query=${encodeURIComponent(text)}&limit=5`)
         const searchData = await searchRes.json()
         
-        if (!searchData.status || searchData.total_results === 0) {
+        if (!searchData.status || !searchData.result || searchData.result.length === 0) {
             throw new Error('No se encontraron resultados')
         }
         
+        let enviados = 0
         for (let i = 0; i < searchData.result.length; i++) {
             const item = searchData.result[i]
-            const isVideo = item.type === 'video'
-            const caption = `🎭 *— ✧ 𝐏𝐈𝐍𝐓𝐄𝐑𝐄𝐒𝐓 ${i+1}/5 ✧ —* 🎭
+            if (!item.url) continue
+            
+            const isVideo = item.type === 'video' || item.url?.endsWith('.mp4')
+            const caption = `🎭 *— ✧ 𝐏𝐈𝐍𝐓𝐄𝐑𝐄𝐒𝐓 ${enviados+1}/5 ✧ —* 🎭
             
 > 🎯 *Título:* ${item.title || 'Sin título'}
 > 🎭 *Tipo:* ${isVideo ? 'Video 📹' : 'Imagen 🖼️'}
 
 🎭 *Alya 2026* 🎭`
             
-            if (isVideo) {
-                await conn.sendMessage(m.chat, { video: { url: item.url }, caption, mimetype: 'video/mp4' })
-            } else {
-                await conn.sendMessage(m.chat, { image: { url: item.url }, caption })
+            try {
+                if (isVideo) {
+                    await conn.sendMessage(m.chat, { video: { url: item.url }, caption, mimetype: 'video/mp4' })
+                } else {
+                    await conn.sendMessage(m.chat, { image: { url: item.url }, caption })
+                }
+                enviados++
+                await new Promise(r => setTimeout(r, 800))
+            } catch (e) {
+                console.error(`Error enviando item ${i+1}:`, e.message)
             }
-            await new Promise(r => setTimeout(r, 1000))
         }
         
-        await m.reply(`🎭 *— ✧ 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀 ✧ —* 🎭\n> 📌 Se enviaron ${searchData.result.length} imágenes de "${text}"\n> 🔗 *API oficial:* https://dvlyonn.onrender.com\n\n🎭 *Alya 2026* 🎭`)
+        if (enviados === 0) {
+            throw new Error('No se pudo enviar ningún resultado')
+        }
+        
+        await m.reply(`🎭 *— ✧ 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀 ✧ —* 🎭\n> 📌 Se enviaron ${enviados} imágenes de "${text}"\n> 🔗 *API oficial:* https://dvlyonn.onrender.com\n\n🎭 *Alya 2026* 🎭`)
         await m.react('✅')
         
     } catch (error) {
         console.error(error)
-        await m.reply(`🎭 *Error* 🎭\n> 📌 ${error.message}\n> 🔗 *API oficial:* https://dvlyonn.onrender.com`)
+        await m.reply(`🎭 *Error* 🎭\n> 📌 ${error.message || 'No se pudo procesar la solicitud'}\n> 🔗 *API oficial:* https://dvlyonn.onrender.com`)
         await m.react('❌')
     }
 }
