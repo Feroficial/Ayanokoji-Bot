@@ -1,163 +1,139 @@
-import yts from "yt-search"
-import fetch from "node-fetch"
+let handler = async (m, { conn, text, command }) => {
+    if (!text) return m.reply(`🎭 *— ✧ 𝐘𝐎𝐔𝐓𝐔𝐁𝐄 𝐀𝐔𝐃𝐈𝐎 ✧ —* 🎭
+    
+> 🎯 *Comandos:*
+> • #play <búsqueda> - Buscar y enviar audio del primer resultado
+> • #play <url> - Descargar audio directo
 
-const handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) return m.reply(`
-🌸 *— ✧ 𝐏𝐋𝐀𝐘 ✧ —* 🌸
+> 📌 *Ejemplos:*
+> • #play Bad Bunny
+> • #play https://youtu.be/dQw4w9WgXcQ
 
-> 🎀 *Uso:* ${usedPrefix + command} <canción>
-> 💗 *Ejemplo:* ${usedPrefix + command} Bad Bunny
+🔗 *API oficial:* https://dvlyonn.onrender.com
 
-🌸 *"Ania Bot reproduce tu música favorita"* 🌸
-`)
+🎭 *Alya 2026* 🎭`)
 
-  await m.react('🌸')
+    await m.react('🎭')
+    
+    try {
+        if (text.includes('youtube.com') || text.includes('youtu.be')) {
+            let url = text
+            await m.reply(`🎭 Obteniendo información...`)
+            
+            const infoRes = await fetch(`https://dvlyonn.onrender.com/search/youtube?q=${encodeURIComponent(url)}`)
+            const infoData = await infoRes.json()
+            
+            let thumbnail = 'https://i.ytimg.com/vi/XXXXX/hqdefault.jpg'
+            let title = 'Sin título'
+            let channel = 'Desconocido'
+            
+            if (infoData.status && infoData.result.length > 0) {
+                thumbnail = infoData.result[0].thumbnail
+                title = infoData.result[0].title
+                channel = infoData.result[0].channel
+            }
+            
+            await conn.sendMessage(m.chat, {
+                image: { url: thumbnail },
+                caption: `🎭 *— ✧ 𝐈𝐍𝐅𝐎𝐑𝐌𝐀𝐂𝐈Ó𝐍 ✧ —* 🎭
+                
+> 🎯 *Título:* ${title}
+> 📌 *Canal:* ${channel}
+> 🎵 *Formato:* MP3
+> 🔗 *API oficial:* https://dvlyonn.onrender.com
+🎭 *Alya 2026*`
+            }, { quoted: m })
+            
+            await m.reply(`🎭 Descargando audio...`)
+            
+            const res = await fetch(`https://dvlyonn.onrender.com/download/ytaudio?url=${encodeURIComponent(url)}`)
+            const data = await res.json()
+            
+            if (!data.status || !data.result?.download_url) {
+                throw new Error('No se pudo obtener el audio')
+            }
+            
+            const audio = data.result
+            const captionAudio = `🎭 *— ✧ 𝐀𝐔𝐃𝐈𝐎 𝐋𝐈𝐒𝐓𝐎 ✧ —* 🎭
+            
+> 🎯 *Título:* ${audio.title || title}
+> 🎵 *Formato:* MP3
+> 📌 *Calidad:* Alta
 
-  try {
-    let url = text.trim()
-    let title = "Desconocido"
-    let authorName = "Desconocido"
-    let durationTimestamp = "Desconocida"
-    let views = 0
-    let thumbnail = ""
+🔗 *API oficial:* https://dvlyonn.onrender.com
+🎭 *Alya 2026* 🎭`
+            
+            await conn.sendMessage(m.chat, {
+                audio: { url: audio.download_url },
+                mimetype: 'audio/mpeg',
+                fileName: `${audio.title || 'audio'}.mp3`,
+                caption: captionAudio
+            }, { quoted: m })
+            
+            await m.react('✅')
+            return
+        }
+        
+        let query = text
+        await m.reply(`🎭 Buscando "${query}"...`)
+        
+        const searchRes = await fetch(`https://dvlyonn.onrender.com/search/youtube?q=${encodeURIComponent(query)}`)
+        const searchData = await searchRes.json()
+        
+        if (!searchData.status || searchData.total_results === 0) {
+            throw new Error('No se encontraron resultados')
+        }
+        
+        const primerVideo = searchData.result[0]
+        
+        await conn.sendMessage(m.chat, {
+            image: { url: primerVideo.thumbnail },
+            caption: `🎭 *— ✧ 𝐑𝐄𝐒𝐔𝐋𝐓𝐀𝐃𝐎 ✧ —* 🎭
+            
+> 🎯 *Título:* ${primerVideo.title}
+> 📌 *Canal:* ${primerVideo.channel}
+> 👁️ *Vistas:* ${primerVideo.views}
+> ⏱️ *Duración:* ${primerVideo.duration}
+> 🎵 *Formato:* MP3
 
-    const isUrl = /^https?:\/\/\S+/i.test(url)
+🎭 *Descargando audio...*`
+        }, { quoted: m })
+        
+        const downloadRes = await fetch(`https://dvlyonn.onrender.com/download/ytaudio?url=${encodeURIComponent(primerVideo.url)}`)
+        const downloadData = await downloadRes.json()
+        
+        if (!downloadData.status || !downloadData.result?.download_url) {
+            throw new Error('No se pudo descargar el audio')
+        }
+        
+        const audio = downloadData.result
+        const caption = `🎭 *— ✧ 𝐀𝐔𝐃𝐈𝐎 𝐋𝐈𝐒𝐓𝐎 ✧ —* 🎭
+        
+> 🎯 *Título:* ${audio.title || primerVideo.title}
+> 📌 *Canal:* ${primerVideo.channel}
+> 🎵 *Formato:* MP3
 
-    if (isUrl) {
-      if (!isYouTubeUrl(url)) return m.reply(`> 💗 *Enlace inválido*`)
-      const videoId = extractVideoId(url)
-      if (!videoId) return m.reply(`> 💗 *No se pudo extraer el ID*`)
-      const res = await yts({ videoId })
-      if (!res) return m.reply(`> 💗 *Información no disponible*`)
-      title = res.title || title
-      authorName = res.author?.name || authorName
-      durationTimestamp = res.timestamp || durationTimestamp
-      views = res.views || views
-      thumbnail = res.thumbnail || thumbnail
-      url = res.url || url
-    } else {
-      await m.reply(`
-🌸 *— ✧ 𝐁𝐔𝐒𝐂𝐀𝐍𝐃𝐎 ✧ —* 🌸
-
-> 🎀 *${text}*
-> 💗 *Buscando en YouTube...*
-
-🌸 *"Preparando tu música"* 🌸
-`)
-      const res = await yts(url)
-      if (!res?.videos?.length) return m.reply(`> 💗 *No se encontraron resultados*`)
-      const video = res.videos[0]
-      title = video.title || title
-      authorName = video.author?.name || authorName
-      durationTimestamp = video.timestamp || durationTimestamp
-      views = video.views || views
-      url = video.url || url
-      thumbnail = video.thumbnail || thumbnail
+🔗 *API oficial:* https://dvlyonn.onrender.com
+🎭 *Alya 2026* 🎭`
+        
+        await conn.sendMessage(m.chat, {
+            audio: { url: audio.download_url },
+            mimetype: 'audio/mpeg',
+            fileName: `${audio.title || primerVideo.title}.mp3`,
+            caption: caption
+        }, { quoted: m })
+        
+        await m.react('✅')
+        
+    } catch (error) {
+        console.error(error)
+        await m.reply(`🎭 *Error* 🎭\n> 📌 ${error.message || 'No se pudo procesar tu solicitud.'}\n> 🔗 *API oficial:* https://dvlyonn.onrender.com`)
+        await m.react('❌')
     }
-
-    const vistas = formatViews(views)
-    const fallbackThumb = await getFallbackThumb()
-
-    const caption = `
-🌸 *— ✧ 𝐎𝐁𝐉𝐄𝐓𝐈𝐕𝐎 𝐋𝐎𝐂𝐀𝐋𝐈𝐙𝐀𝐃𝐎 ✧ —* 🌸
-
-> 🎀 *Título:* ${title}
-> 💗 *Creador:* ${authorName}
-> ✨ *Vistas:* ${vistas}
-> 🧸 *Duración:* ${durationTimestamp}
-
-🌸 *"Reproduciendo..."* 🌸
-`
-
-    let thumb = fallbackThumb
-    if (thumbnail) {
-      try {
-        thumb = (await conn.getFile(thumbnail)).data
-      } catch { thumb = fallbackThumb }
-    }
-
-    await conn.sendMessage(m.chat, { image: thumb, caption }, { quoted: m })
-    await downloadMedia(conn, m, url)
-
-    await m.react('✅')
-    await m.reply(`
-🌸 *— ✧ 𝐀𝐔𝐃𝐈𝐎 𝐄𝐍𝐕𝐈𝐀𝐃𝐎 ✧ —* 🌸
-
-> 🎀 *${title}*
-> 💗 *¡Disfruta la música!*
-
-🌸 *Ania Bot siempre contigo* 🌸
-`)
-
-  } catch (e) {
-    console.error(e)
-    await m.react('❌')
-    await m.reply(`> 💗 *Error:* ${e.message}`)
-  }
 }
 
-const downloadMedia = async (conn, m, url) => {
-  try {
-    await m.reply(`
-🌸 *— ✧ 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀𝐍𝐃𝐎 ✧ —* 🌸
+handler.help = ['play <búsqueda|url>']
+handler.tags = ['downloader']
+handler.command = ['play', 'audio', 'mp3']
 
-> 🎀 *Procesando audio...*
-> 💗 *Un momento por favor*
-
-🌸 *"Preparando tu canción"* 🌸
-`)
-
-    const apiUrl = `https://api-gohan.onrender.com/download/ytaudio?url=${encodeURIComponent(url)}`
-    const r = await fetch(apiUrl)
-    if (!r.ok) throw new Error(`HTTP ${r.status}`)
-
-    const data = await r.json()
-    if (!data?.status || !data?.result?.download_url) throw new Error('Sin enlace de descarga')
-
-    const fileUrl = data.result.download_url
-    const fileTitle = cleanName(data.result.title || "audio")
-
-    await conn.sendMessage(m.chat, {
-      audio: { url: fileUrl },
-      mimetype: "audio/mpeg",
-      fileName: `${fileTitle}.mp3`
-    }, { quoted: m })
-
-  } catch (e) {
-    console.error(e)
-    await m.reply(`> 💗 *Error al descargar:* ${e.message}`)
-  }
-}
-
-const getFallbackThumb = async () => {
-  try {
-    const res = await fetch("https://files.catbox.moe/74aty6.jpg")
-    return Buffer.from(await res.arrayBuffer())
-  } catch {
-    return null
-  }
-}
-
-const cleanName = (name) => String(name).replace(/[^\w\s._-]/gi, "").substring(0, 50)
-
-const formatViews = (views) => {
-  const n = Number(views)
-  if (!n || isNaN(n)) return "N/A"
-  if (n >= 1e9) return `${(n / 1e9).toFixed(1)}B`
-  if (n >= 1e6) return `${(n / 1e6).toFixed(1)}M`
-  if (n >= 1e3) return `${(n / 1e3).toFixed(1)}K`
-  return n.toString()
-}
-
-const isYouTubeUrl = (url) => /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(url)
-
-const extractVideoId = (url) => {
-  const match = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})(?:[?&/]|\b)/) || url.match(/youtu\.be\/([0-9A-Za-z_-]{11})/)
-  return match?.[1] || null
-}
-
-handler.help = ["play"]
-handler.tags = ["downloader"]
-handler.command = ["play", "ytaudio", "yta", "audio"]
-handler.register = false
 export default handler
