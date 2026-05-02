@@ -18,7 +18,35 @@ let handler = async (m, { conn, text, command }) => {
     try {
         if (text.includes('youtube.com') || text.includes('youtu.be')) {
             let url = text
-            await m.reply(`🎭 Descargando video (360p)... un momento`)
+            await m.reply(`🎭 Obteniendo información del video...`)
+            
+            // Primero obtener información para la miniatura
+            const infoRes = await fetch(`https://dvlyonn.onrender.com/search/youtube?q=${encodeURIComponent(url)}`)
+            const infoData = await infoRes.json()
+            
+            let thumbnail = 'https://i.ytimg.com/vi/XXXXX/hqdefault.jpg'
+            let title = 'Sin título'
+            let channel = 'Desconocido'
+            
+            if (infoData.status && infoData.result.length > 0) {
+                thumbnail = infoData.result[0].thumbnail
+                title = infoData.result[0].title
+                channel = infoData.result[0].channel
+            }
+            
+            // Mostrar miniatura e información
+            await conn.sendMessage(m.chat, {
+                image: { url: thumbnail },
+                caption: `🎭 *— ✧ 𝐈𝐍𝐅𝐎𝐑𝐌𝐀𝐂𝐈Ó𝐍 ✧ —* 🎭
+                
+> 🎯 *Título:* ${title}
+> 📌 *Canal:* ${channel}
+> 💾 *Calidad:* 360p (peso liviano)
+> 🔗 *API oficial:* https://dvlyonn.onrender.com
+🎭 *Alya 2026*`
+            }, { quoted: m })
+            
+            await m.reply(`🎭 Descargando video... un momento`)
             
             const res = await fetch(`https://dvlyonn.onrender.com/download/ytvideo?url=${encodeURIComponent(url)}&quality=360`)
             const data = await res.json()
@@ -28,9 +56,9 @@ let handler = async (m, { conn, text, command }) => {
             }
             
             const video = data.result
-            const caption = `🎭 *— ✧ 𝐘𝐎𝐔𝐓𝐔𝐁𝐄 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃 ✧ —* 🎭
+            const captionVideo = `🎭 *— ✧ 𝐘𝐎𝐔𝐓𝐔𝐁𝐄 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃 ✧ —* 🎭
             
-> 🎯 *Título:* ${video.title || 'Sin título'}
+> 🎯 *Título:* ${video.title || title}
 > 📌 *Calidad:* ${video.quality || '360p'}
 > 💾 *Formato:* MP4
 
@@ -39,7 +67,7 @@ let handler = async (m, { conn, text, command }) => {
             
             await conn.sendMessage(m.chat, {
                 video: { url: video.download_url },
-                caption: caption,
+                caption: captionVideo,
                 mimetype: 'video/mp4'
             }, { quoted: m })
             
@@ -59,16 +87,19 @@ let handler = async (m, { conn, text, command }) => {
         
         const primerVideo = searchData.result[0]
         
-        const info = `🎭 *— ✧ 𝐑𝐄𝐒𝐔𝐋𝐓𝐀𝐃𝐎 ✧ —* 🎭
-        
+        // Enviar miniatura + info
+        await conn.sendMessage(m.chat, {
+            image: { url: primerVideo.thumbnail },
+            caption: `🎭 *— ✧ 𝐑𝐄𝐒𝐔𝐋𝐓𝐀𝐃𝐎 ✧ —* 🎭
+            
 > 🎯 *Título:* ${primerVideo.title}
 > 📌 *Canal:* ${primerVideo.channel}
 > 👁️ *Vistas:* ${primerVideo.views}
 > ⏱️ *Duración:* ${primerVideo.duration}
+> 💾 *Calidad:* 360p (peso liviano)
 
-🎭 *Descargando video (360p)...*`
-        
-        await m.reply(info)
+🎭 *Descargando video...*`
+        }, { quoted: m })
         
         const downloadRes = await fetch(`https://dvlyonn.onrender.com/download/ytvideo?url=${encodeURIComponent(primerVideo.url)}&quality=360`)
         const downloadData = await downloadRes.json()
