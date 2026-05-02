@@ -10,7 +10,7 @@ const defaultMenu = {
 
 > ₊· hola *.* bienvenido al menu de *αℓуα - вσт*
 > ⫏⫏   ✿ canal  ›
-> » https://whatsapp.com/channel/0029VaeQcFXEFeXtNMHk0D0n
+> » https://whatsapp.com/channel/0029VbCOTaJ9RZAQPdiZ4J1K
 ‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎
 %readmore
 `.trimStart(),
@@ -24,7 +24,7 @@ const defaultMenu = {
 > ₊· ⫏⫏ ㅤ #ping ─ 📡 *Estado del bot*
 ㅤ
 ㅤ    ꒰  ㅤ 🕸️ ㅤ *ᴄʀᴇᴀᴅᴏ ᴘᴏʀ ʟʏᴏɴɴ* ㅤ ⫏⫏  ꒱
-> ₊· ⫏⫏ ㅤ ✿ 木 性 ㅤ @Lyonn
+> ₊· ⫏⫏ ㅤ ✿ 木 性 ㅤ Alya
 `
 }
 
