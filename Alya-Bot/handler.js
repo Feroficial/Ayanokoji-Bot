@@ -389,16 +389,7 @@ export async function handler(chatUpdate) {
         };
 
         await this.sendMessage(m.chat, {
-          text: `
-ㅤ    ꒰  ㅤ ❓ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ ¢σмαη∂σ 木 ησ єη¢σηтяα∂σ ㅤ 性
-
-> ₊· ⫏⫏ ㅤ *📝 Comando:* ${m.text}
-> ₊· ⫏⫏ ㅤ *❌ Resultado:* No encontrado
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *Usa #menu para ver los comandos* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
-          `.trim(),
+          text: `❓ *${m.text}* no es un comando válido.\n📝 Usa *#menu* para ver la lista.`,
           contextInfo: contextInfo
         });
         await this.sendMessage(m.chat, { react: { text: '❓', key: m.key } });
