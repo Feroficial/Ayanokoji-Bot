@@ -139,8 +139,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     `.trim())
   }
 
-  const availableSlots = maxSubBots - subBotsCount
-
   let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
   let id = `${who.split('@')[0]}`
   let pathblackJadiBot = path.join(process.cwd(), 'Alya-Bot', 'subBot', id)
@@ -332,10 +330,10 @@ export async function alyaJadiBot(options) {
     }
   }, 60000)
 
-  let handler = await import('../handler.js')
+  let handler = await import('./handler.js')
   let creloadHandler = async function (restatConn) {
     try {
-      const Handler = await import(`../handler.js?update=${Date.now()}`).catch(console.error)
+      const Handler = await import(`./handler.js?update=${Date.now()}`).catch(console.error)
       if (Object.keys(Handler || {}).length) handler = Handler
     } catch (e) { }
     if (restatConn) {
