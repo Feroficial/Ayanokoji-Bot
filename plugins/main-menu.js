@@ -109,28 +109,27 @@ let handler = async (m, { conn, usedPrefix }) => {
 
   const uniqueThumb = Buffer.concat([thumb, Buffer.from(botJid)])
 
-  const buttons = [
-    { 
-      buttonId: `${usedPrefix}ping`, 
-      buttonText: { displayText: '📡 PING' }, 
-      type: 1 
-    },
-    { 
-      buttonId: `${usedPrefix}code`, 
-      buttonText: { displayText: '🔐 CODE' }, 
-      type: 1 
-    }
-  ]
+const buttons = [
+  { 
+    buttonId: '.ping', 
+    buttonText: { displayText: '📡 PING' }, 
+    type: 1 
+  },
+  { 
+    buttonId: '.code', 
+    buttonText: { displayText: '🔐 CODE' }, 
+    type: 1 
+  }
+]
 
-  await conn.sendMessage(m.chat, {
-    image: uniqueThumb,
-    caption: text,
-    mentions: [m.sender],
-    buttons: buttons,
-    footer: 'Alya Bot - Creado por Lyonn',
-    headerType: 1
-  }, { quoted: m })
-}
+await conn.sendMessage(m.chat, {
+  image: uniqueThumb,
+  caption: text,
+  mentions: [m.sender],
+  buttons: buttons,
+  footer: 'Alya Bot - Creado por Lyonn',
+  headerType: 1
+}, { quoted: m })
 
 handler.help = ['menu', 'menú']
 handler.tags = ['main']
