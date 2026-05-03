@@ -40,7 +40,7 @@ let handler = async (m, { conn }) => {
 ${mensaje}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🌸 Cяєα∂σя: Lʏᴏɴɴ
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
     `.trim() }, { quoted: m })
     
     await m.react(estado.includes('✅') ? '✅' : 'ℹ️')
