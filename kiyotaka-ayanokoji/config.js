@@ -34,8 +34,8 @@ global.languaje = 'Español';
 global.vs = '2.2.0';
 global.vsJB = '5.0';
 global.nameqr = '🌸 Ania Bot 🌸';
-global.sessions = 'aniaSession';
-global.jadi = 'aniaJadiBot';
+global.sessions = 'AlyaSesions';
+global.jadi = 'AlyaJadiBot';
 global.blackJadibts = true;
 
 //*─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─🌸─ׄ─ׅ─ׄ─*
