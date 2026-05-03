@@ -1,56 +1,61 @@
-
 import { exec } from 'child_process'
 import util from 'util'
 const execPromise = util.promisify(exec)
 
-let handler = async (m, { conn, usedPrefix, command }) => {
-  const texto = `
+let handler = async (m, { conn }) => {
+  await m.react('🔄')
+  
+  await conn.sendMessage(m.chat, { text: `
 ㅤ    ꒰  ㅤ 🔄 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ αρ∂αтє 木 ɢιт ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *єѕтα∂σ:* ᴄᴏᴍᴘʀᴏʙᴀɴᴅᴏ ᴀᴄᴛᴜᴀʟɪᴢᴀᴄɪᴏɴᴇs...
+> ₊· ⫏⫏ ㅤ *єѕтα∂σ:* Cσмρяσвαη∂σ α¢тυαℓιzα¢ισηєѕ...
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-`.trim()
-
-  await conn.sendMessage(m.chat, { text: texto }, { quoted: m })
+  `.trim() }, { quoted: m })
 
   try {
     const { stdout, stderr } = await execPromise('git pull')
+    const salida = (stdout + stderr).trim()
     
-    if (stderr) {
-      await conn.sendMessage(m.chat, { text: `
-ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 ɢιт ㅤ 性
+    let mensaje = ''
+    let estado = ''
 
-> ₊· ⫏⫏ ㅤ *єяяσя:* ${stderr}
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-      `.trim() }, { quoted: m })
-      return
+    if (salida.includes('Already up to date') || salida.includes('Ya está actualizado')) {
+      estado = '✅ αℓ 木 ∂íα'
+      mensaje = 'Yα єѕтαѕ єη ℓα úℓтιмα νєяѕíση'
+    } else if (salida.includes('Updating') || salida.includes('file changed') || salida.includes('cambiados')) {
+      estado = '✅ α¢тυαℓιzα∂σ'
+      mensaje = salida.length > 300 ? salida.substring(0, 300) + '...' : salida
+    } else {
+      estado = 'ℹ️ ѕαℓι∂α 木 ɢιт'
+      mensaje = salida.length > 300 ? salida.substring(0, 300) + '...' : (salida || 'Sin cambios detectados')
     }
 
     await conn.sendMessage(m.chat, { text: `
-ㅤ    ꒰  ㅤ ✅ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ α¢тυαℓιzα∂σ 木 🚀 ㅤ 性
+ㅤ    ꒰  ㅤ ${estado.includes('✅') ? '✅' : 'ℹ️'} ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ${estado.includes('✅') ? 'яєѕυℓтα∂σ' : 'ιηfσямα¢ιóη'} 木 git ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *яєѕυℓтα∂σ:*
-${stdout || 'Ya estás en la última versión'}
+> ₊· ⫏⫏ ㅤ *${estado.includes('✅') ? 'яєѕυℓтα∂σ:' : 'ιηfσ:'}*
+${mensaje}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ 🌸 Cяєα∂σя: Lʏᴏɴɴ
     `.trim() }, { quoted: m })
+    
+    await m.react(estado.includes('✅') ? '✅' : 'ℹ️')
 
   } catch (error) {
     await conn.sendMessage(m.chat, { text: `
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 ∂єѕ¢σησ¢ι∂σ ㅤ 性
+ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 ɢιт ㅤ 性
 
 > ₊· ⫏⫏ ㅤ *єяяσя:* ${error.message}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ
+> ₊· ⫏⫏ ㅤ 🌸 Cяєα∂σя: Lʏᴏɴɴ
     `.trim() }, { quoted: m })
+    await m.react('❌')
   }
 }
 
