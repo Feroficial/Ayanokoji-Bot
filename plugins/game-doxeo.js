@@ -1,15 +1,6 @@
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-    if (!text && !m.mentionedJid[0]) return m.reply(`
-ㅤ    ꒰  ㅤ 🔍 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ υѕσ 木 cσrrєctσ ㅤ 性
-
-> ₊· ⫏⫏ ㅤ *Uѕσ:* ${usedPrefix}${command} @usuario
-> ₊· ⫏⫏ ㅤ *Ejeмρℓσ:* ${usedPrefix}${command} @${m.sender.split('@')[0]}
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-    `.trim())
-
-    let user = m.mentionedJid?.[0] || text.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
+    let who = m.mentionedJid?.[0] || text || m.sender
+    let user = who.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
     let nombre = await conn.getName(user)
     let numero = user.split('@')[0]
     
