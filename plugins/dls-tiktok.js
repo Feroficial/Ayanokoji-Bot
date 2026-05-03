@@ -13,7 +13,11 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   `.trim())
 
   await m.react('🎵')
-  await conn.sendMessage(m.chat, { react: { text: '⏳', key: m.key } })
+
+  const newsletter = {
+    jid: "120363407253203904@newsletter",
+    nombre: "αℓуα - ¢нαηηєℓ"
+  }
 
   try {
     let videoUrl = null
@@ -22,6 +26,16 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     let likes = 0
     let comentarios = 0
     let vistas = 0
+
+    await conn.sendMessage(m.chat, { react: { text: '🔍', key: m.key } })
+    await m.reply(`
+ㅤ    ꒰  ㅤ 🔍 ㅤ *αℓуα - тιктσк* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ вυѕ¢αη∂σ 木 🎬 ㅤ 性
+
+> ₊· ⫏⫏ ㅤ *вυѕ¢αη∂σ:* ${text}
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+    `.trim())
 
     if (text.includes('tiktok.com')) {
       const downloadApiUrl = `https://dvlyonn.onrender.com/download/tiktok?url=${encodeURIComponent(text)}`
@@ -45,6 +59,16 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
       if (!data.status || !data.result?.length) throw new Error('No se encontraron resultados')
 
       const primerVideo = data.result[0]
+      
+      await m.reply(`
+ㅤ    ꒰  ㅤ 📥 ㅤ *αℓуα - тιктσк* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ∂єѕ¢αяgαη∂σ 木 💿 ㅤ 性
+
+> ₊· ⫏⫏ ㅤ *∂єѕ¢αяgαη∂σ:* ${primerVideo.title?.substring(0, 40) || text}...
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+      `.trim())
+
       const downloadApiUrl = `https://dvlyonn.onrender.com/download/tiktok?url=${encodeURIComponent(primerVideo.url)}`
       const resDescarga = await fetch(downloadApiUrl)
       const dataDescarga = await resDescarga.json()
@@ -73,13 +97,31 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 > ₊· ⫏⫏ ㅤ *αρι:* https://dvlyonn.onrender.com
     `.trim()
 
+    const contextInfo = {
+      mentionedJid: [m.sender],
+      forwardedNewsletterMessageInfo: {
+        newsletterJid: newsletter.jid,
+        newsletterName: newsletter.nombre,
+        serverMessageId: 1
+      }
+    }
+
     await conn.sendMessage(m.chat, {
       video: { url: videoUrl },
       caption: caption,
-      mimetype: 'video/mp4'
+      mimetype: 'video/mp4',
+      contextInfo: contextInfo
     }, { quoted: m })
 
     await m.react('✅')
+    await m.reply(`
+ㅤ    ꒰  ㅤ ✅ ㅤ *αℓуα - тιктσк* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ єηvíα∂σ 木 🎬 ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Vídєσ єηvíα∂σ cσrrєctαмєηтє
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+    `.trim())
 
   } catch (error) {
     console.error(error)
@@ -88,7 +130,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 тιктσк ㅤ 性
 
 > ₊· ⫏⫏ ㅤ *єяяσя:* ${error.message}
-> ₊· ⫏⫏ ㅤ *Pσѕιвℓє ѕσℓυ¢ιóη:* Vєяιƒι¢α єℓ єηℓα¢є σ тяα∂α υη тéямιησ ∂є вúsqυє∂α
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ *αρι:* https://dvlyonn.onrender.com
