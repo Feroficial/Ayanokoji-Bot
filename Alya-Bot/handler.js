@@ -373,28 +373,28 @@ export async function handler(chatUpdate) {
       }
     }
 
-    // ========== COMANDO NO ENCONTRADO CON NEWSLETTER ==========
-    if (m.text && !m.isBaileys && !comandoEncontrado && !m.isCommand) {
-      const primerCaracter = m.text[0];
-      const esPrefijo = global.prefix?.test(primerCaracter) || ['#', '.', '/', '!'].includes(primerCaracter);
-      
-      if (esPrefijo && m.text.length > 1) {
-        const contextInfo = {
-          mentionedJid: [m.sender],
-          forwardedNewsletterMessageInfo: {
-            newsletterJid: newsletterJid,
-            newsletterName: newsletterName,
-            serverMessageId: 1
-          }
-        };
-
-        await this.sendMessage(m.chat, {
-          text: `❓ *${m.text}* no es un comando válido.\n📝 Usa *#menu* para ver la lista.`,
-          contextInfo: contextInfo
-        });
-        await this.sendMessage(m.chat, { react: { text: '❓', key: m.key } });
+    // ========== COMANDO NO ENCONTRADO ==========
+if (m.text && !m.isBaileys && !comandoEncontrado && !m.isCommand) {
+  const prefijos = ['#', '.', '/', '!'];
+  const tienePrefijo = prefijos.some(p => m.text.startsWith(p));
+  
+  if (tienePrefijo && m.text.length > 1) {
+    const contextInfo = {
+      mentionedJid: [m.sender],
+      forwardedNewsletterMessageInfo: {
+        newsletterJid: "120363407253203904@newsletter",
+        newsletterName: "αℓуα - ¢нαηηєℓ",
+        serverMessageId: 1
       }
-    }
+    };
+
+    await this.sendMessage(m.chat, {
+      text: `❓ *${m.text}* no es un comando válido.\n📝 Usa *#menu* para ver la lista.`,
+      contextInfo: contextInfo
+    });
+    await this.sendMessage(m.chat, { react: { text: '❓', key: m.key } });
+  }
+}
 
   } catch (e) { console.error(e); } finally {
     if (opts['queque'] && m.text) {
