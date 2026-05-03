@@ -5,11 +5,13 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     const chatId = m.chat
     
     if (command === 'ttt' || command === 'tresraya') {
+        if (games[chatId] && games[chatId].active) {
+            return m.reply('🎮 Ya hay una partida en curso en este grupo. Espera a que termine o usa #endttt para cancelarla')
+        }
+        
         let opponent = m.mentionedJid?.[0]
         
         if (!opponent) {
-            if (games[chatId]) return m.reply('🎮 Ya hay una partida en curso')
-            
             games[chatId] = {
                 board: ['⬜', '⬜', '⬜', '⬜', '⬜', '⬜', '⬜', '⬜', '⬜'],
                 player1: m.sender,
@@ -17,10 +19,9 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 turn: m.sender,
                 active: true,
                 vsBot: true,
-                lastMove: Date.now()
+                lastMove: Date.now(),
+                timeout: null
             }
-            
-            iniciarTemporizador(m, chatId, games[chatId])
             
             await m.reply(`
 ㅤ    ꒰  ㅤ 🎮 ㅤ *TЯΣƧ ΣИ ЯΛYΛ* ㅤ ⫏⫏  ꒱
@@ -28,19 +29,17 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
 > ₊· ⫏⫏ ㅤ *❌ Tú:* @${m.sender.split('@')[0]}
 > ₊· ⫏⫏ ㅤ *🤖 Bot:* αℓуα - вσт
-> ₊· ⫏⫏ ㅤ *⏰ Tiempo:* 2 minutos por turno
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ Usα: #casilla <1-9>
             `.trim())
             
             await mostrarTablero(m, games[chatId])
+            iniciarTemporizador(m, chatId, games[chatId])
             return
         }
         
         if (opponent === m.sender) return m.reply('🎮 No puedes jugar contra ti mismo')
-        
-        if (games[chatId]) return m.reply('🎮 Ya hay una partida en curso en este grupo')
         
         games[chatId] = {
             board: ['⬜', '⬜', '⬜', '⬜', '⬜', '⬜', '⬜', '⬜', '⬜'],
@@ -49,10 +48,9 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             turn: m.sender,
             active: true,
             vsBot: false,
-            lastMove: Date.now()
+            lastMove: Date.now(),
+            timeout: null
         }
-        
-        iniciarTemporizador(m, chatId, games[chatId])
         
         await m.reply(`
 ㅤ    ꒰  ㅤ 🎮 ㅤ *TЯΣƧ ΣИ ЯΛYΛ* ㅤ ⫏⫏  ꒱
@@ -60,13 +58,21 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
 > ₊· ⫏⫏ ㅤ *❌:* @${m.sender.split('@')[0]}
 > ₊· ⫏⫏ ㅤ *⭕:* @${opponent.split('@')[0]}
-> ₊· ⫏⫏ ㅤ *⏰ Tiempo:* 2 minutos por turno
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ Usα: #casilla <1-9>
         `.trim())
         
         await mostrarTablero(m, games[chatId])
+        iniciarTemporizador(m, chatId, games[chatId])
+    }
+    
+    if (command === 'endttt' || command === 'cancelar') {
+        if (!games[chatId] || !games[chatId].active) return m.reply('🎮 No hay partida activa para cancelar')
+        
+        if (games[chatId].timeout) clearTimeout(games[chatId].timeout)
+        delete games[chatId]
+        return m.reply('🎮 Partida cancelada correctamente')
     }
     
     if (command === 'casilla' || command === 'pos') {
@@ -81,10 +87,11 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         
         if (games[chatId].turn !== m.sender) return m.reply(`🎮 No es tu turno. Turno de @${games[chatId].turn.split('@')[0]}`)
         
-        games[chatId].lastMove = Date.now()
+        if (games[chatId].timeout) clearTimeout(games[chatId].timeout)
         
         let simbolo = games[chatId].turn === games[chatId].player1 ? '❌' : '⭕'
         games[chatId].board[pos] = simbolo
+        games[chatId].lastMove = Date.now()
         
         let ganador = verificarGanador(games[chatId].board)
         
@@ -95,7 +102,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 ㅤ    ꒰  ㅤ 🏆 ㅤ *GΛПΛDӨЯ* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ єℓ 木 נυgα∂σя ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *👤:* 🤖 αℓуα - вσт (Modo Pro)
+> ₊· ⫏⫏ ㅤ *👤:* 🤖 αℓуα - вσт
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
                 `.trim())
@@ -129,7 +136,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             games[chatId].turn = games[chatId].turn === games[chatId].player1 ? games[chatId].player2 : games[chatId].player1
             await mostrarTablero(m, games[chatId])
             if (games[chatId].turn !== 'bot') {
-                await m.reply(`🎮 Turno de @${games[chatId].turn.split('@')[0]} - ⏰ 2 minutos`)
+                await m.reply(`🎮 Turno de @${games[chatId].turn.split('@')[0]}`)
+                iniciarTemporizador(m, chatId, games[chatId])
             } else {
                 await movimientoBotPro(m, games[chatId])
             }
@@ -138,23 +146,22 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 }
 
 function iniciarTemporizador(m, chatId, game) {
-    setTimeout(async () => {
+    if (game.timeout) clearTimeout(game.timeout)
+    
+    game.timeout = setTimeout(async () => {
         const juego = global.tresEnRaya[chatId]
         if (!juego || !juego.active) return
         
-        const tiempoInactivo = Date.now() - juego.lastMove
-        if (tiempoInactivo >= 120000) {
-            await m.reply(`
+        await m.reply(`
 ㅤ    ꒰  ㅤ ⏰ ㅤ *TIEMPO AGOTADO* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ ραятι∂α 木 ¢єяяα∂α ㅤ 性
 
-> ₊· ⫏⫏ ㅤ Lα ραятι∂α ѕє ¢єяró ροя ιηα¢тινι∂αd
+> ₊· ⫏⫏ ㅤ Lα ραятι∂α ѕє ¢єяró ροя ιηα¢тινι∂α∂
 > ₊· ⫏⫏ ㅤ (2 мιηυтσѕ ѕιη мσνιмιєηтσ)
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-            `.trim())
-            delete global.tresEnRaya[chatId]
-        }
+        `.trim())
+        delete global.tresEnRaya[chatId]
     }, 120000)
 }
 
@@ -192,7 +199,8 @@ async function movimientoBotPro(m, game) {
     
     game.turn = game.player1
     await mostrarTablero(m, game)
-    await m.reply(`🎮 Turno de @${game.turn.split('@')[0]} - ⏰ 2 minutos`)
+    await m.reply(`🎮 Turno de @${game.turn.split('@')[0]}`)
+    iniciarTemporizador(m, m.chat, game)
 }
 
 function obtenerMejorMovimiento(board, jugador) {
@@ -261,8 +269,8 @@ function verificarGanador(board) {
     return null
 }
 
-handler.help = ['ttt', 'casilla']
+handler.help = ['ttt', 'casilla', 'endttt']
 handler.tags = ['game']
-handler.command = ['ttt', 'tresraya', 'casilla', 'pos']
+handler.command = ['ttt', 'tresraya', 'casilla', 'pos', 'endttt', 'cancelar']
 
 export default handler
