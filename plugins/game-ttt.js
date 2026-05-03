@@ -1,5 +1,7 @@
+if (!global.tresEnRaya) global.tresEnRaya = {}
+
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-    const games = global.tresEnRaya || {}
+    const games = global.tresEnRaya
     const chatId = m.chat
     
     if (command === 'ttt' || command === 'tresraya') {
@@ -28,7 +30,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 > ₊· ⫏⫏ ㅤ Usα: #casilla <1-9>
             `.trim())
             
-            await mostrarTablero(conn, chatId, games[chatId], m)
+            await mostrarTablero(m, games[chatId])
             return
         }
         
@@ -56,7 +58,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 > ₊· ⫏⫏ ㅤ Usα: #casilla <1-9>
         `.trim())
         
-        await mostrarTablero(conn, chatId, games[chatId], m)
+        await mostrarTablero(m, games[chatId])
     }
     
     if (command === 'casilla' || command === 'pos') {
@@ -112,20 +114,21 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         
         if (games[chatId].vsBot && games[chatId].turn === games[chatId].player1) {
             games[chatId].turn = games[chatId].player2
-            await movimientoBot(conn, chatId, games[chatId], m)
+            await movimientoBot(m, games[chatId])
         } else {
             games[chatId].turn = games[chatId].turn === games[chatId].player1 ? games[chatId].player2 : games[chatId].player1
-            await mostrarTablero(conn, chatId, games[chatId], m)
+            await mostrarTablero(m, games[chatId])
             if (games[chatId].turn !== 'bot') {
                 await m.reply(`🎮 Turno de @${games[chatId].turn.split('@')[0]}`)
             } else {
-                await movimientoBot(conn, chatId, games[chatId], m)
+                await movimientoBot(m, games[chatId])
             }
         }
     }
 }
 
-async function movimientoBot(conn, chatId, game, m) {
+async function movimientoBot(m, game) {
+    await m.reply('🤖 Bot está pensando...')
     await new Promise(res => setTimeout(res, 1500))
     
     let casillasVacias = []
@@ -149,7 +152,7 @@ async function movimientoBot(conn, chatId, game, m) {
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
         `.trim())
-        delete global.tresEnRaya[chatId]
+        delete global.tresEnRaya[m.chat]
         return
     }
     
@@ -158,16 +161,16 @@ async function movimientoBot(conn, chatId, game, m) {
 ㅤ    ꒰  ㅤ 🤝 ㅤ *ΣMPΛTΣ* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ ѕιη 木 gαηα∂σя ㅤ 性
         `.trim())
-        delete global.tresEnRaya[chatId]
+        delete global.tresEnRaya[m.chat]
         return
     }
     
     game.turn = game.player1
-    await mostrarTablero(conn, chatId, game, m)
+    await mostrarTablero(m, game)
     await m.reply(`🎮 Turno de @${game.turn.split('@')[0]}`)
 }
 
-async function mostrarTablero(conn, chatId, game, m) {
+async function mostrarTablero(m, game) {
     const b = game.board
     const tablero = `
 ╭───┬───┬───╮
