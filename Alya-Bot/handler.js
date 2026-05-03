@@ -75,7 +75,7 @@ export async function handler(chatUpdate) {
         name: user.name || m.pushName || 'Anónimo',
         age: isNumber(user.age) ? user.age : -1,
         regTime: isNumber(user.regTime) ? user.regTime : -1,
-        role: user.role || '🌸 Aprendiz de Dulzura',
+        role: user.role || '🌱 Aprendiz',
         country: user.country || '',
         afinidad: user.afinidad || '',
         nivelMagico: isNumber(user.nivelMagico) ? user.nivelMagico : 1,
@@ -105,7 +105,6 @@ export async function handler(chatUpdate) {
         antiBot2: 'antiBot2' in chat ? chat.antiBot2 : true,
         modoadmin: 'modoadmin' in chat ? chat.modoadmin : false,
         antiLink: 'antiLink' in chat ? chat.antiLink : false,
-        antiInsultos: 'antiInsultos' in chat ? chat.antiInsultos : false,
         reaction: 'reaction' in chat ? chat.reaction : false,
         nsfw: 'nsfw' in chat ? chat.nsfw : false,
         antifake: 'antifake' in chat ? chat.antifake : false,
@@ -208,88 +207,38 @@ export async function handler(chatUpdate) {
             } catch (e) {}
 
             await this.sendMessage(m.chat, {
-              text: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 💗 *A N T I L I N K* 💗\n\n> 🌸 @${m.sender.split('@')[0]}\n> 🔗 *Enlace detectado*: ${linkEncontrado}\n> 🧸 *Los enlaces están prohibidos aquí*\n\n🌸 *Danny Yulieth* 🌸`,
+              text: `
+ㅤ    ꒰  ㅤ 🔗 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ αηтιℓιηк 木 🛡️ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ *👤 Usυαяισ:* @${m.sender.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *🔗 Enlace:* ${linkEncontrado}
+> ₊· ⫏⫏ ㅤ *⚡ Acción:* Eliminado y expulsado
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+              `.trim(),
               mentions: [m.sender]
             });
           } else {
             await this.sendMessage(m.chat, {
-              text: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 💗 *A N T I L I N K* 💗\n\n> 🌸 @${m.sender.split('@')[0]}\n> 🔗 *Enlace detectado*: ${linkEncontrado}\n> ⚠️ *El bot necesita ser admin*\n\n🌸 *Danny Yulieth* 🌸`,
+              text: `
+ㅤ    ꒰  ㅤ 🔗 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ αηтιℓιηк 木 🛡️ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ *👤 Usυαяισ:* @${m.sender.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *🔗 Enlace:* ${linkEncontrado}
+> ₊· ⫏⫏ ㅤ *⚠️ Error:* El bot necesita ser admin
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+              `.trim(),
               mentions: [m.sender]
             });
           }
         }
       }
     }
-
-    // ========== SISTEMA ANTI INSULTOS ==========
-    if (m.isGroup && m.text && !m.isBaileys && !isAdmin && !isRAdmin && !isOwner && !isROwner) {
-      const chat = global.db.data.chats[m.chat];
-
-      if (chat && chat.antiInsultos === true) {
-        const insultos = [
-          'puto', 'puta', 'pendejo', 'pendeja', 'mierda', 'verga', 'coño', 'carajo',
-          'imbecil', 'imbécil', 'estupido', 'estúpido', 'idiota', 'tarado', 'tarada',
-          'gilipollas', 'capullo', 'subnormal', 'retrasado', 'retrasada',
-          'hijodeputa', 'hijo de puta', 'malparido', 'malparida', 'gonorrea',
-          'careverga', 'carechimba', 'huevón', 'huevona', 'webón', 'webona',
-          'baboso', 'babosa', 'tonto', 'tonta', 'bruto', 'bruta', 'bestia',
-          'cerdo', 'cerda', 'zopenco', 'zoquete', 'menso', 'mensa', 'pendejada',
-          'cagon', 'cagón', 'cagona', 'culiao', 'culiado', 'weon', 'weona'
-        ];
-
-        let esInsulto = false;
-        let insultoEncontrado = '';
-        const textoLower = m.text.toLowerCase();
-
-        for (let insulto of insultos) {
-          if (textoLower.includes(insulto)) {
-            esInsulto = true;
-            insultoEncontrado = insulto;
-            break;
-          }
-        }
-
-        if (esInsulto) {
-          let userWarn = global.db.data.users[m.sender];
-          userWarn.warn = (userWarn.warn || 0) + 1;
-          let warns = userWarn.warn;
-          userWarn.warnReason = insultoEncontrado;
-
-          try {
-            await this.sendMessage(m.chat, { delete: m.key });
-          } catch(e) {}
-
-          if (warns >= 3) {
-            if (isBotAdmin) {
-              try {
-                await this.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
-                userWarn.warn = 0;
-                userWarn.warnReason = '';
-
-                await this.sendMessage(m.chat, {
-                  text: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🚫 *USUARIO EXPULSADO* 🚫\n\n> 👤 @${m.sender.split('@')[0]}\n> ⚠️ *3 advertencias por no ser amable*\n> 💗 *Recuerda ser dulce y respetuoso*\n\n🌸 *Danny Yulieth* 🌸`,
-                  mentions: [m.sender]
-                });
-              } catch(e) {}
-            } else {
-              await this.sendMessage(m.chat, {
-                text: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> ⚠️ *ADVERTENCIA #${warns}/3* ⚠️\n\n> 👤 @${m.sender.split('@')[0]}\n> 🌸 *Has llegado al límite de advertencias*\n> 💗 *El bot necesita ser admin para expulsar*\n\n🌸 *Danny Yulieth* 🌸`,
-                mentions: [m.sender]
-              });
-            }
-          } else {
-            await this.sendMessage(m.chat, {
-              text: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> ⚠️ *ADVERTENCIA #${warns}/3* ⚠️\n\n> 👤 @${m.sender.split('@')[0]}\n> 🔥 *Palabrita no tan linda*: "${insultoEncontrado}"\n> 💗 *Usa palabras dulces, por favor*\n> 🧸 *3 advertencias y te retiras*\n\n🌸 *Danny Yulieth* 🌸`,
-              mentions: [m.sender]
-            });
-          }
-        }
-      }
-    }
-
-    // ========== AUTO-RESPUESTAS ELIMINADAS ==========
-    // (No hay respuestas automáticas de "hola", "gracias", etc.)
-
 
     // ========== PROCESAR PLUGINS ==========
     const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), '../plugins');
@@ -332,35 +281,57 @@ export async function handler(chatUpdate) {
         let user = global.db.data.users[m.sender];
         if (!['grupo-unbanchat.js', 'owner-exec.js', 'owner-exec2.js'].includes(name) && chat?.isBanned && !isROwner) return;
         if (m.text && user.banned && !isROwner) { 
-          m.reply(`˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> ❌ *ESTÁS BANEAD@* ❌\n\n> 📌 Motivo: ${user.bannedReason || 'Sin especificar'}\n\n🌸 *Danny Yulieth* 🌸`);
+          m.reply(`
+ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ вαηєα∂σ 木 🚫 ㅤ 性
+
+> ₊· ⫏⫏ ㅤ *📌 Motivo:* ${user.bannedReason || 'Sin especificar'}
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+          `.trim());
           return;
         }
 
-
-          let adminMode = global.db.data.chats[m.chat].modoadmin;
+        let adminMode = global.db.data.chats[m.chat].modoadmin;
         let mini = `${plugin.botAdmin || plugin.admin || plugin.group || plugin || noPrefix}`;
         if (adminMode && !isOwner && !isROwner && m.isGroup && !isAdmin && mini) return;
 
-        if (plugin.rowner && !isROwner) { fail('rowner', m, this); continue; }
-        if (plugin.owner && !isOwner) { fail('owner', m, this); continue; }
-        if (plugin.mods && !isMods) { fail('mods', m, this); continue; }
-        if (plugin.premium && !isPrems) { fail('premium', m, this); continue; }
-        if (plugin.group && !m.isGroup) { fail('group', m, this); continue; }
-        if (plugin.botAdmin && !isBotAdmin) { fail('botAdmin', m, this); continue; }
-        if (plugin.admin && !isAdmin) { fail('admin', m, this); continue; }
-        if (plugin.private && m.isGroup) { fail('private', m, this); continue; }
+        if (plugin.rowner && !isROwner) { fail('rowner', m, this, usedPrefix); continue; }
+        if (plugin.owner && !isOwner) { fail('owner', m, this, usedPrefix); continue; }
+        if (plugin.mods && !isMods) { fail('mods', m, this, usedPrefix); continue; }
+        if (plugin.premium && !isPrems) { fail('premium', m, this, usedPrefix); continue; }
+        if (plugin.group && !m.isGroup) { fail('group', m, this, usedPrefix); continue; }
+        if (plugin.botAdmin && !isBotAdmin) { fail('botAdmin', m, this, usedPrefix); continue; }
+        if (plugin.admin && !isAdmin) { fail('admin', m, this, usedPrefix); continue; }
+        if (plugin.private && m.isGroup) { fail('private', m, this, usedPrefix); continue; }
         if (plugin.register && !_user.registered) { fail('unreg', m, this, usedPrefix); continue; }
 
         m.isCommand = true;
         let xp = 'exp' in plugin ? parseInt(plugin.exp) : 10;
         m.exp += xp;
         if (!isPrems && plugin.monedas && _user.monedas < plugin.monedas) {
-          this.reply(m.chat, `🌸 *No tienes suficientes moneditas* 🌸\n> Necesitas ${plugin.monedas} para usar esto`, m);
+          this.reply(m.chat, `
+ㅤ    ꒰  ㅤ 💰 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ мσηє∂αѕ 木 ιηѕυƒι¢ιєηтєѕ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Necesitas ${plugin.monedas} monedas
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+          `.trim(), m);
           continue;
         }
 
         if (plugin.level > _user.level) {
-          this.reply(m.chat, `🌸 *Nivel insuficiente* 🌸\n> Necesitas nivel *${plugin.level}*\n> Tu nivel actual: *${_user.level}*`, m);
+          this.reply(m.chat, `
+ㅤ    ꒰  ㅤ 📊 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ηινєℓ 木 ιηѕυƒι¢ιєηтє ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Necesitas nivel *${plugin.level}*
+> ₊· ⫏⫏ ㅤ Tu nivel actual: *${_user.level}*
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+          `.trim(), m);
           continue;
         }
 
@@ -375,7 +346,14 @@ export async function handler(chatUpdate) {
           m.reply(text);
         } finally {
           if (typeof plugin.after === 'function') await plugin.after.call(this, m, extra).catch(console.error);
-          if (m.monedas) this.reply(m.chat, `🌸 *Usaste ${+m.monedas} moneditas* 🌸`, m);
+          if (m.monedas) this.reply(m.chat, `
+ㅤ    ꒰  ㅤ 💰 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ gαѕтσ 木 мσηє∂αѕ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Usaste *${+m.monedas} monedas*
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+          `.trim(), m);
         }
         break;
       }
@@ -414,15 +392,88 @@ export async function handler(chatUpdate) {
 
 global.dfail = (type, m, conn, usedPrefix) => {
   const msg = {
-    rowner: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🛑 *ACCESO RESTRINGIDO* 🛑\n\n> 👑 Solo *la Creadora* puede usar esto\n\n🌸 *Danny Yulieth* 🌸`,
-    owner: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🔒 *SOLO LA DUEÑA* 🔒\n\n> 📌 Solo *la dueña del bot* puede usar este comando\n\n🌸 *Danny Yulieth* 🌸`,
-    premium: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 💎 *REQUIERE PREMIUM* 💎\n\n> 📌 Este comando es solo para usuarios *Premium*\n\n🌸 *Danny Yulieth* 🌸`,
-    private: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🔒 *SOLO CHAT PRIVADO* 🔒\n\n> 📌 Este comando solo funciona en privado\n\n🌸 *Danny Yulieth* 🌸`,
-    group: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 👥 *SOLO GRUPOS* 👥\n\n> 📌 Este comando solo funciona en grupos\n\n🌸 *Danny Yulieth* 🌸`,
-    admin: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🛡️ *SOLO ADMINISTRADORAS* 🛡️\n\n> 📌 Solo *las administradoras* pueden usar esto\n\n🌸 *Danny Yulieth* 🌸`,
-    botAdmin: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🤖 *EL BOT NO ES ADMIN* 🤖\n\n> 📌 El bot necesita ser *admin del grupo*\n\n🌸 *Danny Yulieth* 🌸`,
-    unreg: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 📜 *NO REGISTRAD@* 📜\n\n> 📌 Usa *${usedPrefix || '#'}registrar Nombre.Edad*\n> 🎯 *Ejemplo:* ${usedPrefix || '#'}registrar Yulieth.17\n\n🌸 *Danny Yulieth* 🌸`,
-    mods: `˚₊‧ 𓍢ִ໋ 🎀  ✧  𝐀𝐧𝐢𝐚 𝐁𝐨𝐭  ✧  🎀 ˚₊·\n> 🛡️ *SOLO MODERADORAS* 🛡️\n\n> 📌 Solo *las moderadoras* pueden usar esto\n\n🌸 *Danny Yulieth* 🌸`
+    rowner: `
+ㅤ    ꒰  ㅤ 👑 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ α¢¢єѕσ 木 яєѕтяιηgι∂σ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Solo *el creador* puede usar esto
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+    `,
+    owner: `
+ㅤ    ꒰  ㅤ 🔒 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ѕσℓσ 木 σωηєя ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Solo *el dueño del bot* puede usar esto
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+    `,
+    premium: `
+ㅤ    ꒰  ㅤ 💎 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ρяємιυм 木 яєqυιєяє∂ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Solo para usuarios *Premium*
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+    `,
+    private: `
+ㅤ    ꒰  ㅤ 🔒 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ρяινα∂σ 木 σηℓу ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Este comando solo funciona en privado
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+    `,
+    group: `
+ㅤ    ꒰  ㅤ 👥 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ɢяυρσ 木 σηℓу ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Este comando solo funciona en grupos
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+    `,
+    admin: `
+ㅤ    ꒰  ㅤ 🛡️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ α∂мιη 木 яєqυιяє∂ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Solo *administradores* pueden usar esto
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+    `,
+    botAdmin: `
+ㅤ    ꒰  ㅤ 🤖 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 α∂мιη ㅤ 性
+
+> ₊· ⫏⫏ ㅤ El bot necesita ser *administrador* del grupo
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+    `,
+    unreg: `
+ㅤ    ꒰  ㅤ 📜 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ѕιη 木 яєgιѕтяαя ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Usa: *${usedPrefix || '#'}registrar <Nombre.Edad>*
+> ₊· ⫏⫏ ㅤ Ejemplo: *${usedPrefix || '#'}registrar Lyonn.17*
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+    `,
+    mods: `
+ㅤ    ꒰  ㅤ 🛡️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ мσ∂ 木 σηℓу ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Solo *moderadores* pueden usar esto
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+    `
   };
   if (msg[type]) return m.reply(msg[type]).then(() => m.react('❌'));
 };
@@ -430,7 +481,7 @@ global.dfail = (type, m, conn, usedPrefix) => {
 let file = global.__filename(import.meta.url, true);
 watchFile(file, async () => {
   unwatchFile(file);
-  console.log(chalk.magenta("🔄 Se actualizó 'handler.js'"));
+  console.log(chalk.magenta("🔄 Sє α¢тυαℓízσ 'handℓєr.נѕ' ∂є αℓуα - вσт"));
   if (global.conns && global.conns.length > 0) {
     const users = [...new Set([...global.conns.filter((conn) => conn.user && conn.ws.socket && conn.ws.socket.readyState !== ws.CLOSED).map((conn) => conn)])];
     for (const userr of users) {
