@@ -1,3 +1,4 @@
+
 {
   "name": "ania-bot",
   "version": "1.0.0",
@@ -39,7 +40,7 @@
   },
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "@whiskeysockets/baileys": "github:dvwilker/DvwilkerBail",
+    "@dvyer/baileys": "^6.5.0",
     "@adiwajshing/keyed-db": "^0.2.4",
     "@bochilteam/scraper": "^4.2.4",
     "@bochilteam/scraper-sosmed": "^1.0.5",
