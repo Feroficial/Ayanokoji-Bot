@@ -1,13 +1,6 @@
-let handler = async (m, { conn, text, isOwner, usedPrefix, command }) => {
-  if (!isOwner) return m.reply(`
-ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ σωηєя 木 σηℓу ㅤ 性
+let linkRegex = /chat.whatsapp.com\/([0-9A-Za-z]{20,24})( [0-9]{1,3})?/i
 
-> ₊· ⫏⫏ ㅤ Sσℓσ єℓ ¢яєα∂σя ρυє∂є υѕαя єѕтє ¢σмαη∂σ
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-  `.trim())
-
+let handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) return m.reply(`
 ㅤ    ꒰  ㅤ 📝 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ υѕσ 木 cσrrєctσ ㅤ 性
@@ -19,21 +12,17 @@ let handler = async (m, { conn, text, isOwner, usedPrefix, command }) => {
   `.trim())
 
   try {
-    let link = text.trim()
-    if (!link.includes('https://chat.whatsapp.com/')) {
-      return m.reply(`
+    let [_, code] = text.match(linkRegex) || []
+    if (!code) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ ℓιηк 木 ιηváℓι∂σ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ Eѕє ησ єѕ υη єηℓα¢є ∂є gяυρσ ∂є WhatsApp
+> ₊· ⫏⫏ ㅤ Eℓ єηℓα¢є ησ єѕ νáℓι∂σ
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-      `.trim())
-    }
-
-    let code = link.split('https://chat.whatsapp.com/')[1]
-    await conn.groupAcceptInvite(code)
+    `.trim())
     
+    let res = await conn.groupAcceptInvite(code)
     await m.reply(`
 ㅤ    ꒰  ㅤ ✅ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ υηι∂σ 木 gяυρσ ㅤ 性
@@ -42,23 +31,22 @@ let handler = async (m, { conn, text, isOwner, usedPrefix, command }) => {
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
     `.trim())
-    
-  } catch (error) {
+  } catch {
     await m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 υηιя ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *єяяσя:* ${error.message}
-> ₊· ⫏⫏ ㅤ Pσ∂яíα ѕєя qυє єℓ ℓιηк єѕтé ∂єѕ∂є ʟᴇ ᴠᴀʟɪᴅσ σ yα єхριяó
+> ₊· ⫏⫏ ㅤ Nσ ρυ∂є υηιямє αℓ gяυρσ
+> ₊· ⫏⫏ ㅤ Vєяιƒι¢α qυє єℓ єηℓα¢є ѕєα νáℓι∂σ
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
     `.trim())
   }
 }
 
-handler.help = ['join']
+handler.help = ['join <link>']
 handler.tags = ['owner']
-handler.command = ['join', 'unirse']
+handler.command = ['join', 'entrar', 'unirse']
 handler.rowner = true
 
 export default handler
