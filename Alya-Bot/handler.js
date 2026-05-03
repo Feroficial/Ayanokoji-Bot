@@ -13,6 +13,8 @@ const isNumber = x => typeof x === 'number' && !isNaN(x);
 const delay = ms => isNumber(ms) && new Promise(resolve => setTimeout(() => resolve(), ms));
 
 const dbPath = './src/database/aniadb.json';
+const newsletterJid = "120363407253203904@newsletter";
+const newsletterName = "αℓуα - ¢нαηηєℓ";
 
 export async function handler(chatUpdate) {
   this.msgqueque ||= [];
@@ -168,7 +170,7 @@ export async function handler(chatUpdate) {
     const isAdmin = isRAdmin || user.admin === 'admin';
     const isBotAdmin = !!bot.admin;
 
-    // ========== SISTEMA ANTILINK ==========
+    // ========== SISTEMA ANTILINK CON NEWSLETTER ==========
     if (m.isGroup && m.text && !m.isBaileys) {
       const chat = global.db.data.chats[m.chat];
 
@@ -201,6 +203,15 @@ export async function handler(chatUpdate) {
             await this.sendMessage(m.chat, { delete: m.key });
           } catch (e) {}
 
+          const contextInfo = {
+            mentionedJid: [m.sender],
+            forwardedNewsletterMessageInfo: {
+              newsletterJid: newsletterJid,
+              newsletterName: newsletterName,
+              serverMessageId: 1
+            }
+          };
+
           if (isBotAdmin) {
             try {
               await this.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
@@ -218,7 +229,7 @@ export async function handler(chatUpdate) {
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
               `.trim(),
-              mentions: [m.sender]
+              contextInfo: contextInfo
             });
           } else {
             await this.sendMessage(m.chat, {
@@ -233,7 +244,7 @@ export async function handler(chatUpdate) {
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
               `.trim(),
-              mentions: [m.sender]
+              contextInfo: contextInfo
             });
           }
         }
@@ -362,12 +373,21 @@ export async function handler(chatUpdate) {
       }
     }
 
-    // ========== COMANDO NO ENCONTRADO ==========
+    // ========== COMANDO NO ENCONTRADO CON NEWSLETTER ==========
     if (m.text && !m.isBaileys && !comandoEncontrado && !m.isCommand) {
       const primerCaracter = m.text[0];
       const esPrefijo = global.prefix?.test(primerCaracter) || ['#', '.', '/', '!'].includes(primerCaracter);
       
       if (esPrefijo && m.text.length > 1) {
+        const contextInfo = {
+          mentionedJid: [m.sender],
+          forwardedNewsletterMessageInfo: {
+            newsletterJid: newsletterJid,
+            newsletterName: newsletterName,
+            serverMessageId: 1
+          }
+        };
+
         await this.sendMessage(m.chat, {
           text: `
 ㅤ    ꒰  ㅤ ❓ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
@@ -379,7 +399,7 @@ export async function handler(chatUpdate) {
 ㅤ    ꒰  ㅤ ✿ ㅤ *Usa #menu para ver los comandos* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
           `.trim(),
-          mentions: [m.sender]
+          contextInfo: contextInfo
         });
         await this.sendMessage(m.chat, { react: { text: '❓', key: m.key } });
       }
