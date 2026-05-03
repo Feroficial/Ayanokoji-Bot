@@ -9,8 +9,9 @@ const defaultMenu = {
 ㅤ    ⿻ ㅤ ✿ ㅤ ιηƒσ 木 αтт ㅤ 性
 
 > ₊· нσℓα *.* вιєηνєηι∂σ αℓ мєηυ ∂є *αℓуα - вσт*
-> ⫏⫏   
-
+> ⫏⫏   ✿ ¢αηαℓ  ›
+> » https://whatsapp.com/channel/0029VbCOTaJ9RZAQPdiZ4J1K
+‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎
 %readmore
 `.trimStart(),
   header: '\nㅤ    ꒰  ㅤ ✿ ㅤ *%¢αтєgσяу* ㅤ ⫏⫏  ꒱\nㅤ    ⿻ ㅤ 性 ㅤ ѕє¢¢ιση ㅤ ✿',
@@ -109,10 +110,9 @@ let handler = async (m, { conn, usedPrefix }) => {
     ? fs.readFileSync(menuMedia.thumbnail)
     : defaultThumb
 
-  const uniqueThumb = Buffer.concat([thumb, Buffer.from(botJid)])
-
+  // Enviar imagen con caption usando reply (el newsletter se agrega automáticamente desde simple.js)
   await conn.sendMessage(m.chat, {
-    image: uniqueThumb,
+    image: thumb,
     caption: text,
     mentions: [m.sender]
   }, { quoted: m })
