@@ -36,7 +36,7 @@ ${subBotsActivos.map((sub, i) => `
 `}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-> ₊· ⫏⫏ ㅤ 🌸 Cяєα∂σя: Lʏᴏɴɴ
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
   `.trim()
 
   await conn.sendMessage(m.chat, { text: texto }, { quoted: m })
