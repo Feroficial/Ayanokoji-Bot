@@ -240,6 +240,28 @@ export async function handler(chatUpdate) {
       }
     }
 
+// ========== COMANDO NO ENCONTRADO ==========
+if (m.text && !m.isBaileys && !comandoEncontrado && !m.isCommand) {
+  const primerCaracter = m.text[0];
+  const esPrefijo = global.prefix?.test(primerCaracter) || ['#', '.', '/', '!'].includes(primerCaracter);
+  
+  if (esPrefijo && m.text.length > 1) {
+    await this.sendMessage(m.chat, {
+      text: `
+ㅤ    ꒰  ㅤ ❓ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ¢σмαη∂σ 木 ησ єη¢σηтяα∂σ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ *📝 Cσмαη∂σ:* ${m.text}
+> ₊· ⫏⫏ ㅤ *❌ Rєѕυℓтα∂σ:* Nσ єη¢σηтяα∂σ
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *Usα #menu para ver los comandos* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+      `.trim(),
+      mentions: [m.sender]
+    });
+    await this.sendMessage(m.chat, { react: { text: '❓', key: m.key } });
+  }
+}
     // ========== PROCESAR PLUGINS ==========
     const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), '../plugins');
     for (let name in global.plugins) {
