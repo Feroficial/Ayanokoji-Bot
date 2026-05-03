@@ -9,7 +9,9 @@ const defaultMenu = {
 ㅤ    ⿻ ㅤ ✿ ㅤ info 木 att ㅤ 性
 
 > ₊· hola *.* bienvenido al menu de *αℓуα - вσт*
-> ⫏⫏   
+> ⫏⫏   ✿ canal  ›
+> » https://whatsapp.com/channel/0029VbCOTaJ9RZAQPdiZ4J1K
+‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎
 ‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎
 %readmore
 `.trimStart(),
