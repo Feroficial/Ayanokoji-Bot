@@ -211,12 +211,12 @@ export async function handler(chatUpdate) {
 ㅤ    ꒰  ㅤ 🔗 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ αηтιℓιηк 木 🛡️ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *👤 Usυαяισ:* @${m.sender.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *👤 Usuario:* @${m.sender.split('@')[0]}
 > ₊· ⫏⫏ ㅤ *🔗 Enlace:* ${linkEncontrado}
 > ₊· ⫏⫏ ㅤ *⚡ Acción:* Eliminado y expulsado
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
               `.trim(),
               mentions: [m.sender]
             });
@@ -226,12 +226,12 @@ export async function handler(chatUpdate) {
 ㅤ    ꒰  ㅤ 🔗 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ αηтιℓιηк 木 🛡️ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *👤 Usυαяισ:* @${m.sender.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *👤 Usuario:* @${m.sender.split('@')[0]}
 > ₊· ⫏⫏ ㅤ *🔗 Enlace:* ${linkEncontrado}
 > ₊· ⫏⫏ ㅤ *⚠️ Error:* El bot necesita ser admin
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
               `.trim(),
               mentions: [m.sender]
             });
@@ -240,30 +240,10 @@ export async function handler(chatUpdate) {
       }
     }
 
-// ========== COMANDO NO ENCONTRADO ==========
-if (m.text && !m.isBaileys && !comandoEncontrado && !m.isCommand) {
-  const primerCaracter = m.text[0];
-  const esPrefijo = global.prefix?.test(primerCaracter) || ['#', '.', '/', '!'].includes(primerCaracter);
-  
-  if (esPrefijo && m.text.length > 1) {
-    await this.sendMessage(m.chat, {
-      text: `
-ㅤ    ꒰  ㅤ ❓ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ ¢σмαη∂σ 木 ησ єη¢σηтяα∂σ ㅤ 性
-
-> ₊· ⫏⫏ ㅤ *📝 Cσмαη∂σ:* ${m.text}
-> ₊· ⫏⫏ ㅤ *❌ Rєѕυℓтα∂σ:* Nσ єη¢σηтяα∂σ
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *Usα #menu para ver los comandos* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
-      `.trim(),
-      mentions: [m.sender]
-    });
-    await this.sendMessage(m.chat, { react: { text: '❓', key: m.key } });
-  }
-}
     // ========== PROCESAR PLUGINS ==========
+    let comandoEncontrado = false;
     const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), '../plugins');
+    
     for (let name in global.plugins) {
       let plugin = global.plugins[name];
       if (!plugin || plugin.disabled) continue;
@@ -298,6 +278,7 @@ if (m.text && !m.isBaileys && !comandoEncontrado && !m.isCommand) {
         if ((m.id.startsWith('NJX-') || (m.id.startsWith('BAE5') && m.id.length === 16) || (m.id.startsWith('B24E') && m.id.length === 20))) return;
         if (!isAccept) continue;
 
+        comandoEncontrado = true;
         m.plugin = name;
         let chat = global.db.data.chats[m.chat];
         let user = global.db.data.users[m.sender];
@@ -310,7 +291,7 @@ if (m.text && !m.isBaileys && !comandoEncontrado && !m.isCommand) {
 > ₊· ⫏⫏ ㅤ *📌 Motivo:* ${user.bannedReason || 'Sin especificar'}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
           `.trim());
           return;
         }
@@ -381,6 +362,29 @@ if (m.text && !m.isBaileys && !comandoEncontrado && !m.isCommand) {
       }
     }
 
+    // ========== COMANDO NO ENCONTRADO ==========
+    if (m.text && !m.isBaileys && !comandoEncontrado && !m.isCommand) {
+      const primerCaracter = m.text[0];
+      const esPrefijo = global.prefix?.test(primerCaracter) || ['#', '.', '/', '!'].includes(primerCaracter);
+      
+      if (esPrefijo && m.text.length > 1) {
+        await this.sendMessage(m.chat, {
+          text: `
+ㅤ    ꒰  ㅤ ❓ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ¢σмαη∂σ 木 ησ єη¢σηтяα∂σ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ *📝 Comando:* ${m.text}
+> ₊· ⫏⫏ ㅤ *❌ Resultado:* No encontrado
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *Usa #menu para ver los comandos* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
+          `.trim(),
+          mentions: [m.sender]
+        });
+        await this.sendMessage(m.chat, { react: { text: '❓', key: m.key } });
+      }
+    }
+
   } catch (e) { console.error(e); } finally {
     if (opts['queque'] && m.text) {
       const quequeIndex = this.msgqueque.indexOf(m.id || m.key.id);
@@ -421,7 +425,7 @@ global.dfail = (type, m, conn, usedPrefix) => {
 > ₊· ⫏⫏ ㅤ Solo *el creador* puede usar esto
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
     `,
     owner: `
 ㅤ    ꒰  ㅤ 🔒 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
@@ -430,7 +434,7 @@ global.dfail = (type, m, conn, usedPrefix) => {
 > ₊· ⫏⫏ ㅤ Solo *el dueño del bot* puede usar esto
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
     `,
     premium: `
 ㅤ    ꒰  ㅤ 💎 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
@@ -439,7 +443,7 @@ global.dfail = (type, m, conn, usedPrefix) => {
 > ₊· ⫏⫏ ㅤ Solo para usuarios *Premium*
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
     `,
     private: `
 ㅤ    ꒰  ㅤ 🔒 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
@@ -448,7 +452,7 @@ global.dfail = (type, m, conn, usedPrefix) => {
 > ₊· ⫏⫏ ㅤ Este comando solo funciona en privado
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
     `,
     group: `
 ㅤ    ꒰  ㅤ 👥 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
@@ -457,7 +461,7 @@ global.dfail = (type, m, conn, usedPrefix) => {
 > ₊· ⫏⫏ ㅤ Este comando solo funciona en grupos
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
     `,
     admin: `
 ㅤ    ꒰  ㅤ 🛡️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
@@ -466,7 +470,7 @@ global.dfail = (type, m, conn, usedPrefix) => {
 > ₊· ⫏⫏ ㅤ Solo *administradores* pueden usar esto
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
     `,
     botAdmin: `
 ㅤ    ꒰  ㅤ 🤖 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
@@ -475,7 +479,7 @@ global.dfail = (type, m, conn, usedPrefix) => {
 > ₊· ⫏⫏ ㅤ El bot necesita ser *administrador* del grupo
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
     `,
     unreg: `
 ㅤ    ꒰  ㅤ 📜 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
@@ -485,7 +489,7 @@ global.dfail = (type, m, conn, usedPrefix) => {
 > ₊· ⫏⫏ ㅤ Ejemplo: *${usedPrefix || '#'}registrar Lyonn.17*
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
     `,
     mods: `
 ㅤ    ꒰  ㅤ 🛡️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
@@ -494,7 +498,7 @@ global.dfail = (type, m, conn, usedPrefix) => {
 > ₊· ⫏⫏ ㅤ Solo *moderadores* pueden usar esto
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
     `
   };
   if (msg[type]) return m.reply(msg[type]).then(() => m.react('❌'));
@@ -503,7 +507,7 @@ global.dfail = (type, m, conn, usedPrefix) => {
 let file = global.__filename(import.meta.url, true);
 watchFile(file, async () => {
   unwatchFile(file);
-  console.log(chalk.magenta("🔄 Sє α¢тυαℓízσ 'handℓєr.נѕ' ∂є αℓуα - вσт"));
+  console.log(chalk.magenta("🔄 Se actualizó 'handler.js' de αℓуα - вσт"));
   if (global.conns && global.conns.length > 0) {
     const users = [...new Set([...global.conns.filter((conn) => conn.user && conn.ws.socket && conn.ws.socket.readyState !== ws.CLOSED).map((conn) => conn)])];
     for (const userr of users) {
