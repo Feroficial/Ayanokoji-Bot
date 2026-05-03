@@ -2,7 +2,6 @@ import { xpRange } from '../lib/levelling.js'
 import fs from 'fs'
 import path from 'path'
 import fetch from 'node-fetch'
-import * as ws from 'ws'
 
 const defaultMenu = {
   before: `
@@ -23,9 +22,7 @@ const defaultMenu = {
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ 性 ㅤ Sistema ejecutado ㅤ ✿
 > ₊· ⫏⫏ ㅤ #ping ─ 📡 *Estado del bot*
->
-> ₊· ⫏⫏ ㅤ 🤖 *Tipo:* %tipousuario
->
+ㅤ
 ㅤ    ꒰  ㅤ 🕸️ ㅤ *ᴄʀᴇᴀᴅᴏ ᴘᴏʀ ʟʏᴏɴɴ* ㅤ ⫏⫏  ꒱
 > ₊· ⫏⫏ ㅤ ✿ 木 性 ㅤ Alya
 `
@@ -48,27 +45,6 @@ const fetchBuffer = async url =>
 
 const defaultThumb = await fetchBuffer('https://files.catbox.moe/z4qgf1.jpeg')
 
-// Función para detectar si un número es sub-bot
-function esSubBot(jid) {
-  const subBots = global.conns || []
-  const esSubBotActivo = subBots.some(sub => 
-    sub.user && sub.user.jid === jid
-  )
-  
-  if (esSubBotActivo) return true
-  
-  try {
-    const subBotPath = path.join(process.cwd(), 'kiyotaka-ayanokoji', 'subBot')
-    if (fs.existsSync(subBotPath)) {
-      const carpetas = fs.readdirSync(subBotPath)
-      const numero = jid.split('@')[0]
-      return carpetas.includes(numero)
-    }
-  } catch (e) {}
-  
-  return false
-}
-
 let handler = async (m, { conn, usedPrefix }) => {
   await conn.sendMessage(m.chat, { react: { text: '🕸️', key: m.key } })
 
@@ -79,16 +55,6 @@ let handler = async (m, { conn, usedPrefix }) => {
   const user = global.db.data.users[m.sender] || { level: 0, exp: 0 }
   const { min, xp } = xpRange(user.level, global.multiplier)
 
-  // Detectar si el usuario es sub-bot
-  const usuarioEsSubBot = esSubBot(m.sender)
-  const tipoUsuario = usuarioEsSubBot ? '🤖 ѕυв-вσт' : '👤 υѕυαяισ иσямαℓ'
-
-  const subBots = global.conns || []
-  const subBotsActivos = subBots.filter(c => 
-    c.user && c.ws?.socket && c.ws.socket.readyState !== ws.CLOSED
-  )
-  const totalSubBots = subBotsActivos.length
-
   const replace = {
     name: await conn.getName(m.sender),
     level: user.level,
@@ -97,9 +63,7 @@ let handler = async (m, { conn, usedPrefix }) => {
     totalreg: Object.keys(global.db.data.users).length,
     mode: global.opts.self ? 'Privado' : 'Público',
     muptime: clockString(process.uptime() * 1000),
-    readmore: String.fromCharCode(8206).repeat(4001),
-    tipousuario: tipoUsuario,
-    subbots: totalSubBots
+    readmore: String.fromCharCode(8206).repeat(4001)
   }
 
   const help = Object.values(global.plugins || {})
