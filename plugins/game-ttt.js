@@ -3,7 +3,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     const chatId = m.chat
     
     if (command === 'ttt' || command === 'tresraya') {
-        let opponent = m.mentionedJid[0]
+        let opponent = m.mentionedJid?.[0]
         
         if (!opponent) {
             if (games[chatId]) return m.reply('🎮 Ya hay una partida en curso')
@@ -26,9 +26,9 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ Usα: #casilla <1-9>
-            `.trim(), { mentions: [m.sender] })
+            `.trim())
             
-            await mostrarTablero(conn, chatId, games[chatId])
+            await mostrarTablero(conn, chatId, games[chatId], m)
             return
         }
         
@@ -45,7 +45,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             vsBot: false
         }
         
-        await conn.sendMessage(chatId, { text: `
+        await m.reply(`
 ㅤ    ꒰  ㅤ 🎮 ㅤ *TЯΣƧ ΣИ ЯΛYΛ* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ נυєgσ 木 vs נυgα∂σя ㅤ 性
 
@@ -54,9 +54,9 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ Usα: #casilla <1-9>
-        `.trim(), mentions: [m.sender, opponent] })
+        `.trim())
         
-        await mostrarTablero(conn, chatId, games[chatId])
+        await mostrarTablero(conn, chatId, games[chatId], m)
     }
     
     if (command === 'casilla' || command === 'pos') {
@@ -78,45 +78,55 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         
         if (ganador) {
             let winnerName = ganador === '❌' ? games[chatId].player1 : games[chatId].player2
-            if (winnerName === 'bot') winnerName = 'αℓуα - вσт'
-            await conn.sendMessage(chatId, { text: `
+            if (winnerName === 'bot') {
+                await m.reply(`
 ㅤ    ꒰  ㅤ 🏆 ㅤ *GΛПΛDӨЯ* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ єℓ 木 נυgα∂σя ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *👤:* ${winnerName === 'αℓуα - вσт' ? '🤖 αℓуα - вσт' : `@${winnerName.split('@')[0]}`}
+> ₊· ⫏⫏ ㅤ *👤:* 🤖 αℓуα - вσт
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-            `.trim(), mentions: winnerName !== 'αℓуα - вσт' ? [winnerName] : [] })
+                `.trim())
+            } else {
+                await m.reply(`
+ㅤ    ꒰  ㅤ 🏆 ㅤ *GΛПΛDӨЯ* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ єℓ 木 נυgα∂σя ㅤ 性
+
+> ₊· ⫏⫏ ㅤ *👤:* @${winnerName.split('@')[0]}
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+                `.trim())
+            }
             delete games[chatId]
             return
         }
         
         if (!games[chatId].board.includes('⬜')) {
-            await conn.sendMessage(chatId, { text: `
+            await m.reply(`
 ㅤ    ꒰  ㅤ 🤝 ㅤ *ΣMPΛTΣ* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ ѕιη 木 gαηα∂σя ㅤ 性
-            `.trim() })
+            `.trim())
             delete games[chatId]
             return
         }
         
         if (games[chatId].vsBot && games[chatId].turn === games[chatId].player1) {
             games[chatId].turn = games[chatId].player2
-            await movimientoBot(conn, chatId, games[chatId])
+            await movimientoBot(conn, chatId, games[chatId], m)
         } else {
             games[chatId].turn = games[chatId].turn === games[chatId].player1 ? games[chatId].player2 : games[chatId].player1
-            await mostrarTablero(conn, chatId, games[chatId])
+            await mostrarTablero(conn, chatId, games[chatId], m)
             if (games[chatId].turn !== 'bot') {
-                await conn.sendMessage(chatId, { text: `🎮 Turno de @${games[chatId].turn.split('@')[0]}`, mentions: [games[chatId].turn] })
+                await m.reply(`🎮 Turno de @${games[chatId].turn.split('@')[0]}`)
             } else {
-                await movimientoBot(conn, chatId, games[chatId])
+                await movimientoBot(conn, chatId, games[chatId], m)
             }
         }
     }
 }
 
-async function movimientoBot(conn, chatId, game) {
-    await new Promise(res => setTimeout(res, 1000))
+async function movimientoBot(conn, chatId, game, m) {
+    await new Promise(res => setTimeout(res, 1500))
     
     let casillasVacias = []
     for (let i = 0; i < game.board.length; i++) {
@@ -131,33 +141,33 @@ async function movimientoBot(conn, chatId, game) {
     let ganador = verificarGanador(game.board)
     
     if (ganador) {
-        await conn.sendMessage(chatId, { text: `
+        await m.reply(`
 ㅤ    ꒰  ㅤ 🏆 ㅤ *GΛПΛDӨЯ* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ єℓ 木 נυgα∂σя ㅤ 性
 
 > ₊· ⫏⫏ ㅤ *👤:* 🤖 αℓуα - вσт
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-        `.trim() })
+        `.trim())
         delete global.tresEnRaya[chatId]
         return
     }
     
     if (!game.board.includes('⬜')) {
-        await conn.sendMessage(chatId, { text: `
+        await m.reply(`
 ㅤ    ꒰  ㅤ 🤝 ㅤ *ΣMPΛTΣ* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ ѕιη 木 gαηα∂σя ㅤ 性
-        `.trim() })
+        `.trim())
         delete global.tresEnRaya[chatId]
         return
     }
     
     game.turn = game.player1
-    await mostrarTablero(conn, chatId, game)
-    await conn.sendMessage(chatId, { text: `🎮 Turno de @${game.turn.split('@')[0]}`, mentions: [game.turn] })
+    await mostrarTablero(conn, chatId, game, m)
+    await m.reply(`🎮 Turno de @${game.turn.split('@')[0]}`)
 }
 
-async function mostrarTablero(conn, chatId, game) {
+async function mostrarTablero(conn, chatId, game, m) {
     const b = game.board
     const tablero = `
 ╭───┬───┬───╮
@@ -172,7 +182,7 @@ async function mostrarTablero(conn, chatId, game) {
 > 4 5 6
 > 7 8 9
 `
-    await conn.sendMessage(chatId, { text: tablero })
+    await m.reply(tablero)
 }
 
 function verificarGanador(board) {
