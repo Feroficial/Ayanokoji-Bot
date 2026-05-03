@@ -8,16 +8,23 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
   `.trim())
 
-  // Verificar si es admin correctamente
-  const groupMetadata = await conn.groupMetadata(m.chat)
-  const isAdmin = groupMetadata.participants.some(p => p.id === m.sender && p.admin !== null)
+  let groupMetadata = await conn.groupMetadata(m.chat)
+  let isAdmin = false
   
-  if (!isAdmin && !m.isOwner) return m.reply(`
+  for (let participant of groupMetadata.participants) {
+    if (participant.id === m.sender) {
+      if (participant.admin === 'admin' || participant.admin === 'superadmin') {
+        isAdmin = true
+      }
+      break
+    }
+  }
+  
+  if (!isAdmin) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ α∂мιη 木 яєqυєяι∂σ ㅤ 性
 
 > ₊· ⫏⫏ ㅤ Nєcєѕιтαѕ ѕєя α∂мιηιѕтяα∂σя
-> ₊· ⫏⫏ ㅤ *Tυ ιD:* ${m.sender.split('@')[0]}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
   `.trim())
@@ -27,34 +34,21 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 ㅤ    ⿻ ㅤ ✿ ㅤ υѕσ 木 cσrrєctσ ㅤ 性
 
 > ₊· ⫏⫏ ㅤ *Uѕσ:* ${usedPrefix + command} <тєхтσ>
-> ₊· ⫏⫏ ㅤ *Vαяιαвℓєѕ ∂ιѕρσníвℓєѕ:*
-> ₊· ⫏⫏ ㅤ @user - Nσмвяє ∂єℓ υѕυαяισ
-> ₊· ⫏⫏ ㅤ @level - Nινєℓ ∂єℓ υѕυαяισ
-> ₊· ⫏⫏ ㅤ @role - Rσℓ ∂єℓ υѕυαяισ
-> ₊· ⫏⫏ ㅤ @count - Cαηтι∂α∂ ∂є мιємвяяσѕ
-> ₊· ⫏⫏ ㅤ @group - Nσмвяє ∂єℓ gяυρσ
-
-> ₊· ⫏⫏ ㅤ *Ejeмρℓσ:*
-${usedPrefix + command} Bienvenid@ @user al grupo @group
+> ₊· ⫏⫏ ㅤ *Vαяιαвℓєѕ:* @user, @level, @role, @count, @group
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
   `.trim())
 
-  const chat = global.db.data.chats[m.chat]
-  if (!chat) global.db.data.chats[m.chat] = {}
-  
+  if (!global.db.data.chats[m.chat]) global.db.data.chats[m.chat] = {}
   global.db.data.chats[m.chat].welcomeMessage = text
   
   await m.reply(`
 ㅤ    ꒰  ㅤ ✅ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ cσηfιgυяα∂σ 木 єχιтσ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *Mєηѕαנє ∂є вιєηνєηι∂α:*
-${text.substring(0, 200)}
+> ₊· ⫏⫏ ㅤ Mєηѕαנє ∂є вιєηνєηι∂α gυαя∂α∂α
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
   `.trim())
 }
 
