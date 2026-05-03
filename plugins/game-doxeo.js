@@ -1,9 +1,10 @@
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-    if (!text) return m.reply(`
+    if (!text && !m.mentionedJid[0]) return m.reply(`
 ㅤ    ꒰  ㅤ 🔍 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ υѕσ 木 cσrrєctσ ㅤ 性
 
 > ₊· ⫏⫏ ㅤ *Uѕσ:* ${usedPrefix}${command} @usuario
+> ₊· ⫏⫏ ㅤ *Ejeмρℓσ:* ${usedPrefix}${command} @${m.sender.split('@')[0]}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
     `.trim())
@@ -37,14 +38,19 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         '595': '🇵🇾 Paraguay'
     }
     
-    let codigo = ''
+    let codigoPais = ''
+    let pais = ''
     for (let [key, value] of Object.entries(codigosPais)) {
         if (numero.startsWith(key)) {
-            codigo = value
+            codigoPais = key
+            pais = value
             break
         }
     }
-    if (!codigo) codigo = '🌍 Desconocido'
+    if (!pais) {
+        codigoPais = '??'
+        pais = '🌍 Desconocido'
+    }
 
     await m.react('🔍')
     
@@ -72,8 +78,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 ㅤ    ⿻ ㅤ ✿ ㅤ ∂αтσѕ 木 υѕυαяισ ㅤ 性
 
 > ₊· ⫏⫏ ㅤ *👤 Usυαяισ:* ${nombre}
-> ₊· ⫏⫏ ㅤ *📱 Núмєяσ:* ${numero}
-> ₊· ⫏⫏ ㅤ *🌍 Pαíѕ:* ${codigo}
+> ₊· ⫏⫏ ㅤ *📱 Núмєяσ:* +${codigoPais} ${numero.slice(codigoPais.length)}
+> ₊· ⫏⫏ ㅤ *🌍 Pαíѕ:* ${pais}
 > ₊· ⫏⫏ ㅤ *📡 Oρєяα∂σя:* ${operador}
 > ₊· ⫏⫏ ㅤ *🌐 IP:* ${ipFalsa}
 > ₊· ⫏⫏ ㅤ *📱 Dιѕρσѕιтινσ:* ${dispositivo}
@@ -83,7 +89,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
     `.trim())
     
-    await m.react('🎭')
+    await m.react('✅')
 }
 
 handler.help = ['doxeo']
