@@ -76,6 +76,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 
   const tags = {
     main: 'ρяιη¢ιραℓ',
+    fun: 'ƒυη',
     group: 'ɢяυρσѕ',
     downloader: '∂σωηℓσα∂єя',
     search: 'ѕєαя¢н',
@@ -90,7 +91,7 @@ let handler = async (m, { conn, usedPrefix }) => {
     register: 'яєgιѕтєя',
     anime: 'αηιмє',
     info: 'ιηƒσ'
-  }
+}
 
   const text = [
     menu.before,
