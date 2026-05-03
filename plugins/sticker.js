@@ -25,6 +25,8 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
   try {
     let media = await q.download()
+    if (!media) throw new Error('No se pudo descargar el media')
+    
     let isVideo = /video/.test(mime)
     
     await conn.sendMessage(m.chat, {
@@ -36,11 +38,13 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     
     await m.react('✅')
   } catch (error) {
+    console.error(error)
     await m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 ѕтι¢кєя ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *єяяσя:* ${error.message}
+> ₊· ⫏⫏ ㅤ *¢αυѕα:* ${error.message || 'Mє∂ια ησ ∂ιѕρσηιвℓє'}
+> ₊· ⫏⫏ ㅤ *Sσℓυ¢ιón:* Iηтєηтα cση υηα ιмαgєη máѕ ѕєη¢ιℓℓα
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
     `.trim())
