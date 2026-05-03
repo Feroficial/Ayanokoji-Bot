@@ -51,7 +51,7 @@ let rtx2 = `
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
 `
 
-const maxSubBots = 10
+const maxSubBots = 500
 
 let blackJBOptions = {}
 
@@ -141,7 +141,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
   let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
   let id = `${who.split('@')[0]}`
-  let pathblackJadiBot = path.join(process.cwd(), 'subBot', id)
+  let pathblackJadiBot = path.join(process.cwd(), 'Alya-Bot', 'subBot', id)
 
   if (!fs.existsSync(pathblackJadiBot)) {
     fs.mkdirSync(pathblackJadiBot, { recursive: true })
@@ -301,7 +301,9 @@ export async function alyaJadiBot(options) {
         await conn.sendMessage(
           m.chat,
           {
-            text: `
+            text: args[0]
+              ? `@${m.sender.split('@')[0]}, yα єѕтαѕ ¢σηє¢тα∂σ, ℓєуєη∂σ мєηѕαנєѕ єηтяαηтєѕ...`
+              : `
 ㅤ    ꒰  ㅤ ✅ ㅤ *αℓуα - ѕυв вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ ¢σηє¢тα∂σ 木 ✨ ㅤ 性
 
