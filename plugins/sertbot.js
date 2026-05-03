@@ -46,7 +46,7 @@ let rtx2 = `
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
 `
 
-const maxSubBots = 5
+const maxSubBots = 10
 
 let blackJBOptions = {}
 
