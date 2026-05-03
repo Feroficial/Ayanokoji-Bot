@@ -42,7 +42,7 @@ ${subBotsActivos.map((sub, i) => `
   await conn.sendMessage(m.chat, { text: texto }, { quoted: m })
 }
 
-handler.help = ['bots', 'listbots', 'subbots']
+handler.help = ['bots']
 handler.tags = ['serbot']
 handler.command = ['bots']
 
