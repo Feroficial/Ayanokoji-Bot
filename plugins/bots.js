@@ -44,6 +44,6 @@ ${subBotsActivos.map((sub, i) => `
 
 handler.help = ['bots', 'listbots', 'subbots']
 handler.tags = ['serbot']
-handler.command = ['bots', 'listbots', 'subbots', 'listasubbots']
+handler.command = ['bots']
 
 export default handler
