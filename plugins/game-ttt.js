@@ -3,18 +3,35 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     const chatId = m.chat
     
     if (command === 'ttt' || command === 'tresraya') {
-        if (!text) return m.reply(`
+        let opponent = m.mentionedJid[0]
+        
+        if (!opponent) {
+            if (games[chatId]) return m.reply('🎮 Ya hay una partida en curso')
+            
+            games[chatId] = {
+                board: ['⬜', '⬜', '⬜', '⬜', '⬜', '⬜', '⬜', '⬜', '⬜'],
+                player1: m.sender,
+                player2: 'bot',
+                turn: m.sender,
+                active: true,
+                vsBot: true
+            }
+            
+            await m.reply(`
 ㅤ    ꒰  ㅤ 🎮 ㅤ *TЯΣƧ ΣИ ЯΛYΛ* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ υѕσ 木 cσrrєctσ ㅤ 性
+ㅤ    ⿻ ㅤ ✿ ㅤ נυєgσ 木 vs вσт ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *Uѕσ:* ${usedPrefix}ttt @oponente
-> ₊· ⫏⫏ ㅤ *Ejeмρℓσ:* ${usedPrefix}ttt @${m.sender.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *❌ Tú:* @${m.sender.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *🤖 Bot:* αℓуα - вσт
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-        `.trim())
+> ₊· ⫏⫏ ㅤ Usα: #casilla <1-9>
+            `.trim(), { mentions: [m.sender] })
+            
+            await mostrarTablero(conn, chatId, games[chatId])
+            return
+        }
         
-        let opponent = m.mentionedJid?.[0]
-        if (!opponent) return m.reply('🎮 Menciona al oponente con @')
         if (opponent === m.sender) return m.reply('🎮 No puedes jugar contra ti mismo')
         
         if (games[chatId]) return m.reply('🎮 Ya hay una partida en curso en este grupo')
@@ -24,25 +41,28 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             player1: m.sender,
             player2: opponent,
             turn: m.sender,
-            active: true
+            active: true,
+            vsBot: false
         }
         
-        await m.reply(`
+        await conn.sendMessage(chatId, { text: `
 ㅤ    ꒰  ㅤ 🎮 ㅤ *TЯΣƧ ΣИ ЯΛYΛ* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ נυєgσ 木 ιηι¢ια∂σ ㅤ 性
+ㅤ    ⿻ ㅤ ✿ ㅤ נυєgσ 木 vs נυgα∂σя ㅤ 性
 
 > ₊· ⫏⫏ ㅤ *❌:* @${m.sender.split('@')[0]}
 > ₊· ⫏⫏ ㅤ *⭕:* @${opponent.split('@')[0]}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ Usα: #cαѕιℓℓα <1-9> (3x3)
-        `.trim(), { mentions: [m.sender, opponent] })
+> ₊· ⫏⫏ ㅤ Usα: #casilla <1-9>
+        `.trim(), mentions: [m.sender, opponent] })
         
         await mostrarTablero(conn, chatId, games[chatId])
     }
     
     if (command === 'casilla' || command === 'pos') {
         if (!games[chatId] || !games[chatId].active) return m.reply('🎮 No hay partida activa. Usa #ttt')
+        
+        if (!text) return m.reply('🎮 Usa: #casilla <1-9>')
         
         let pos = parseInt(text) - 1
         if (isNaN(pos) || pos < 0 || pos > 8) return m.reply('🎮 Usa un número del 1 al 9')
@@ -58,31 +78,83 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         
         if (ganador) {
             let winnerName = ganador === '❌' ? games[chatId].player1 : games[chatId].player2
+            if (winnerName === 'bot') winnerName = 'αℓуα - вσт'
             await conn.sendMessage(chatId, { text: `
 ㅤ    ꒰  ㅤ 🏆 ㅤ *GΛПΛDӨЯ* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ єℓ 木 נυgα∂σя ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *👤:* @${winnerName.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *👤:* ${winnerName === 'αℓуα - вσт' ? '🤖 αℓуα - вσт' : `@${winnerName.split('@')[0]}`}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-            `.trim(), mentions: [winnerName] })
+            `.trim(), mentions: winnerName !== 'αℓуα - вσт' ? [winnerName] : [] })
             delete games[chatId]
             return
         }
         
         if (!games[chatId].board.includes('⬜')) {
-            await m.reply(`
+            await conn.sendMessage(chatId, { text: `
 ㅤ    ꒰  ㅤ 🤝 ㅤ *ΣMPΛTΣ* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ ѕιη 木 gαηα∂σя ㅤ 性
-            `)
+            `.trim() })
             delete games[chatId]
             return
         }
         
-        games[chatId].turn = games[chatId].turn === games[chatId].player1 ? games[chatId].player2 : games[chatId].player1
-        await mostrarTablero(conn, chatId, games[chatId])
-        await m.reply(`🎮 Turno de @${games[chatId].turn.split('@')[0]}`, { mentions: [games[chatId].turn] })
+        if (games[chatId].vsBot && games[chatId].turn === games[chatId].player1) {
+            games[chatId].turn = games[chatId].player2
+            await movimientoBot(conn, chatId, games[chatId])
+        } else {
+            games[chatId].turn = games[chatId].turn === games[chatId].player1 ? games[chatId].player2 : games[chatId].player1
+            await mostrarTablero(conn, chatId, games[chatId])
+            if (games[chatId].turn !== 'bot') {
+                await conn.sendMessage(chatId, { text: `🎮 Turno de @${games[chatId].turn.split('@')[0]}`, mentions: [games[chatId].turn] })
+            } else {
+                await movimientoBot(conn, chatId, games[chatId])
+            }
+        }
     }
+}
+
+async function movimientoBot(conn, chatId, game) {
+    await new Promise(res => setTimeout(res, 1000))
+    
+    let casillasVacias = []
+    for (let i = 0; i < game.board.length; i++) {
+        if (game.board[i] === '⬜') casillasVacias.push(i)
+    }
+    
+    if (casillasVacias.length === 0) return
+    
+    let pos = casillasVacias[Math.floor(Math.random() * casillasVacias.length)]
+    game.board[pos] = '⭕'
+    
+    let ganador = verificarGanador(game.board)
+    
+    if (ganador) {
+        await conn.sendMessage(chatId, { text: `
+ㅤ    ꒰  ㅤ 🏆 ㅤ *GΛПΛDӨЯ* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ єℓ 木 נυgα∂σя ㅤ 性
+
+> ₊· ⫏⫏ ㅤ *👤:* 🤖 αℓуα - вσт
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+        `.trim() })
+        delete global.tresEnRaya[chatId]
+        return
+    }
+    
+    if (!game.board.includes('⬜')) {
+        await conn.sendMessage(chatId, { text: `
+ㅤ    ꒰  ㅤ 🤝 ㅤ *ΣMPΛTΣ* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ѕιη 木 gαηα∂σя ㅤ 性
+        `.trim() })
+        delete global.tresEnRaya[chatId]
+        return
+    }
+    
+    game.turn = game.player1
+    await mostrarTablero(conn, chatId, game)
+    await conn.sendMessage(chatId, { text: `🎮 Turno de @${game.turn.split('@')[0]}`, mentions: [game.turn] })
 }
 
 async function mostrarTablero(conn, chatId, game) {
