@@ -1,4 +1,4 @@
-let handler = async (m, { conn, text, usedPrefix, command }) => {
+let handler = async (m, { conn, text, usedPrefix, command, isAdmin }) => {
   if (!m.isGroup) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 ɢяυρσ ㅤ 性
@@ -8,18 +8,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
   `.trim())
 
-  let groupMetadata = await conn.groupMetadata(m.chat)
-  let isAdmin = false
-  
-  for (let participant of groupMetadata.participants) {
-    if (participant.id === m.sender) {
-      if (participant.admin === 'admin' || participant.admin === 'superadmin') {
-        isAdmin = true
-      }
-      break
-    }
-  }
-  
   if (!isAdmin) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ α∂мιη 木 яєqυєяι∂σ ㅤ 性
