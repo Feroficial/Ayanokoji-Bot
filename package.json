@@ -40,7 +40,7 @@
   },
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "@dvyer/baileys": "^6.5.0",
+    "@whiskeysockets/baileys": "github:dvwilker/DvwilkerBail",
     "@adiwajshing/keyed-db": "^0.2.4",
     "@bochilteam/scraper": "^4.2.4",
     "@bochilteam/scraper-sosmed": "^1.0.5",
