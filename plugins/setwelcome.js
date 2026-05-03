@@ -8,13 +8,18 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
   `.trim())
 
-  if (!m.isAdmin) return m.reply(`
+  // Verificar si es admin correctamente
+  const groupMetadata = await conn.groupMetadata(m.chat)
+  const isAdmin = groupMetadata.participants.some(p => p.id === m.sender && p.admin !== null)
+  
+  if (!isAdmin && !m.isOwner) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ α∂мιη 木 яєqυєяι∂σ ㅤ 性
 
 > ₊· ⫏⫏ ㅤ Nєcєѕιтαѕ ѕєя α∂мιηιѕтяα∂σя
+> ₊· ⫏⫏ ㅤ *Tυ ιD:* ${m.sender.split('@')[0]}
 
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⏐꒱
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
   `.trim())
 
   if (!text) return m.reply(`
@@ -23,11 +28,11 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
 > ₊· ⫏⫏ ㅤ *Uѕσ:* ${usedPrefix + command} <тєхтσ>
 > ₊· ⫏⫏ ㅤ *Vαяιαвℓєѕ ∂ιѕρσníвℓєѕ:*
-> ₊· ⫏⫏ ㅤ @user - Nσмвяяє ∂єℓ υѕυαяισ
+> ₊· ⫏⫏ ㅤ @user - Nσмвяє ∂єℓ υѕυαяισ
 > ₊· ⫏⫏ ㅤ @level - Nινєℓ ∂єℓ υѕυαяισ
 > ₊· ⫏⫏ ㅤ @role - Rσℓ ∂єℓ υѕυαяισ
 > ₊· ⫏⫏ ㅤ @count - Cαηтι∂α∂ ∂є мιємвяяσѕ
-> ₊· ⫏⫏ ㅤ @group - Nσмвяяє ∂єℓ gяυρσ
+> ₊· ⫏⫏ ㅤ @group - Nσмвяє ∂єℓ gяυρσ
 
 > ₊· ⫏⫏ ㅤ *Ejeмρℓσ:*
 ${usedPrefix + command} Bienvenid@ @user al grupo @group
@@ -37,7 +42,9 @@ ${usedPrefix + command} Bienvenid@ @user al grupo @group
   `.trim())
 
   const chat = global.db.data.chats[m.chat]
-  chat.welcomeMessage = text
+  if (!chat) global.db.data.chats[m.chat] = {}
+  
+  global.db.data.chats[m.chat].welcomeMessage = text
   
   await m.reply(`
 ㅤ    ꒰  ㅤ ✅ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
@@ -55,6 +62,5 @@ handler.help = ['setwelcome']
 handler.tags = ['group']
 handler.command = ['setwelcome', 'setbienvenida']
 handler.group = true
-handler.admin = true
 
 export default handler
