@@ -33,6 +33,29 @@ const preguntas = [
     { pregunta: "¿Qué fuerza mantiene los planetas en órbita?", respuesta: "gravedad", opciones: ["Magnetismo", "Gravedad", "Fricción", "Inercia"] }
 ]
 
+function normalizarRespuesta(texto) {
+    return texto.toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[.,!?;:()\[\]{}'"]/g, "")
+        .trim()
+}
+
+function esRespuestaCorrecta(respuestaUsuario, respuestaCorrecta) {
+    const normalizada = normalizarRespuesta(respuestaUsuario)
+    const correctaNormalizada = normalizarRespuesta(respuestaCorrecta)
+    
+    if (normalizada === correctaNormalizada) return true
+    
+    const palabrasUsuario = normalizada.split(/\s+/)
+    const palabrasCorrectas = correctaNormalizada.split(/\s+/)
+    
+    for (let palabra of palabrasCorrectas) {
+        if (palabrasUsuario.includes(palabra)) return true
+    }
+    
+    return false
+}
+
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     const games = global.triviaGames
     const chatId = m.chat
@@ -105,7 +128,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         
         let respuestaUser = text.toLowerCase().trim()
         let respuestaCorrecta = games[chatId].pregunta.respuesta
-        let esCorrecto = respuestaUser === respuestaCorrecta
+        let esCorrecto = esRespuestaCorrecta(respuestaUser, respuestaCorrecta)
         
         let puntos = esCorrecto ? 1 : 0
         let mensaje = ''
