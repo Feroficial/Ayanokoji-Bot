@@ -6,7 +6,7 @@ import { existsSync, writeFileSync } from 'fs'
 import cfonts from 'cfonts'
 import chalk from 'chalk'
 
-console.log(chalk.bold.hex('#FF69B4')('\n🌸─ Iniciando Ania Bot ─🌸'))
+console.log(chalk.bold.hex('#FF69B4')('\n🌸─ Iɴɪᴄɪᴀɴᴅᴏ αℓуα - вσт ─🌸'))
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const require = createRequire(__dirname)
@@ -14,11 +14,11 @@ require(join(__dirname, './package.json'))
 
 async function iniciarBot() {
   console.clear()
-  console.log(chalk.bold.hex('#FF69B4')('\n⟦ 🌸 ANIA BOT V.1.0 🌸 ⟧'))
-  console.log(chalk.gray('🎀 Iniciando sistema...'))
+  console.log(chalk.bold.hex('#FF69B4')('\n⟦ 🌸 αℓуα - вσт V.1.0 🌸 ⟧'))
+  console.log(chalk.gray('🎀 Iɴɪᴄɪᴀʟɪᴢᴀɴᴅᴏ sɪsᴛᴇᴍᴀ...'))
   await new Promise(res => setTimeout(res, 600))
 
-  cfonts.say('ANIA', {
+  cfonts.say('ALYA', {
     font: 'block',
     align: 'center',
     colors: ['#FF69B4', '#FFB6C1', '#FF1493'],
@@ -26,18 +26,17 @@ async function iniciarBot() {
   })
 
   console.log(chalk.bold.hex('#FF69B4')(`
-█▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█
-█░░╦─╦╔╗╦─╔╗╔╗╔╦╗╔╗░░█
-█░░║║║╠─║─║─║║║║║╠─░░█
-█░░╚╩╝╚╝╚╝╚╝╚╝╩─╩╚╝░░█
-█▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█
-        [ ANIA BOT - KAWAI VERSION ]
+ㅤ    ꒰  ㅤ 🌸 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ єη αíяє 木 🚀 ㅤ 性
+
+> ₊· ⫏⫏ ㅤ *Vᴇʀsɪóɴ:* 1.0
+> ₊· ⫏⫏ ㅤ *Cʀᴇᴀᴅᴏʀ:* Lʏᴏɴɴ
   `))
 
   await new Promise(res => setTimeout(res, 800))
 
   console.log(chalk.bold.hex('#FF69B4')('\n⌬═════════════════════⌬'))
-  console.log(chalk.bold.white('      BOT CREADO POR: ') + chalk.bold.hex('#FFB6C1')('🌸 DANNY YULIETH 🌸'))
+  console.log(chalk.bold.white('      BOT CREADO POR: ') + chalk.bold.hex('#FFB6C1')('🌸 LYONN 🌸'))
   console.log(chalk.bold.hex('#FF69B4')('⌬═══════════════════════⌬\n'))
 
   await new Promise(res => setTimeout(res, 1200))
@@ -59,7 +58,7 @@ function start(file) {
 const archivoArranque = './.arranque-ok'
 if (!existsSync(archivoArranque)) {
   await iniciarBot()
-  writeFileSync(archivoArranque, 'DANNY_YULIETH_FINAL')
+  writeFileSync(archivoArranque, 'LYONN_FINAL')
 }
 
 start('start.js')
