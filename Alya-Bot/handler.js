@@ -175,7 +175,6 @@ export async function handler(chatUpdate) {
     if (m.isGroup && !m.isBaileys) {
       const chat = global.db.data.chats[m.chat]
       if (chat && chat.botEnabled === false && !isOwner && !isROwner) {
-        // El bot está apagado en este grupo, no procesa comandos
         return
       }
     }
@@ -385,10 +384,10 @@ export async function handler(chatUpdate) {
 
     // ========== COMANDO NO ENCONTRADO CON NEWSLETTER ==========
     if (m.text && !m.isBaileys && !comandoEncontrado && !m.isCommand) {
-      const prefijos = ['#', '.', '/', '!'];
-      const tienePrefijo = prefijos.some(p => m.text.startsWith(p));
+      const primerCaracter = m.text[0];
+      const esPrefijo = ['#', '.', '/', '!'].includes(primerCaracter);
       
-      if (tienePrefijo && m.text.length > 1) {
+      if (esPrefijo && m.text.length > 1) {
         const contextInfo = {
           mentionedJid: [m.sender],
           forwardedNewsletterMessageInfo: {
@@ -437,91 +436,102 @@ export async function handler(chatUpdate) {
   }
 }
 
-let handler = async (m, { conn, isAdmin, isOwner, args }) => {
-  if (!m.isGroup) return m.reply(`
-ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 ɢяυρσ ㅤ 性
+global.dfail = (type, m, conn, usedPrefix) => {
+  const msg = {
+    rowner: `
+ㅤ    ꒰  ㅤ 👑 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ α¢¢єѕσ 木 яєѕтяιηgι∂σ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ Sσℓσ єη gяυρσѕ
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-  `.trim())
-
-  if (!isAdmin && !isOwner) return m.reply(`
-ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ α∂мιη 木 яєqυєяι∂σ ㅤ 性
-
-> ₊· ⫏⫏ ㅤ Nєcєѕιтαѕ ѕєя α∂мιη
+> ₊· ⫏⫏ ㅤ Solo *el creador* puede usar esto
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-  `.trim())
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
+    `,
+    owner: `
+ㅤ    ꒰  ㅤ 🔒 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ѕσℓσ 木 σωηєя ㅤ 性
 
-  const chat = global.db.data.chats[m.chat]
-  if (!chat) global.db.data.chats[m.chat] = {}
-
-  const opcion = args[0]?.toLowerCase()
-  const grupoNombre = await conn.getName(m.chat)
-
-  if (opcion === 'on') {
-    if (chat.botEnabled === true) return m.reply(`
-ㅤ    ꒰  ㅤ ⚠️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ ¢σηє¢тα∂σ 木 yα ㅤ 性
-
-> ₊· ⫏⫏ ㅤ Eℓ вσт yα єѕтá α¢тινσ єη *${grupoNombre}*
+> ₊· ⫏⫏ ㅤ Solo *el dueño del bot* puede usar esto
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-    `.trim())
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
+    `,
+    premium: `
+ㅤ    ꒰  ㅤ 💎 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ρяємιυм 木 яєqυιєяє∂ ㅤ 性
 
-    chat.botEnabled = true
-    await m.reply(`
-ㅤ    ꒰  ㅤ ✅ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 ση ㅤ 性
-
-> ₊· ⫏⫏ ㅤ Eℓ вσт ѕє α¢тινó єη *${grupoNombre}*
-> ₊· ⫏⫏ ㅤ Yα ρυє∂єη υѕαя ℓσѕ ¢σмαη∂σѕ
+> ₊· ⫏⫏ ㅤ Solo para usuarios *Premium*
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
-    `.trim())
-  } 
-  else if (opcion === 'off') {
-    if (chat.botEnabled === false) return m.reply(`
-ㅤ    ꒰  ㅤ ⚠️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ αραgα∂σ 木 yα ㅤ 性
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
+    `,
+    private: `
+ㅤ    ꒰  ㅤ 🔒 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ρяινα∂σ 木 σηℓу ㅤ 性
 
-> ₊· ⫏⫏ ㅤ Eℓ вσт yα єѕтá αραgα∂σ єη *${grupoNombre}*
+> ₊· ⫏⫏ ㅤ Este comando solo funciona en privado
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-    `.trim())
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
+    `,
+    group: `
+ㅤ    ꒰  ㅤ 👥 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ɢяυρσ 木 σηℓу ㅤ 性
 
-    chat.botEnabled = false
-    await m.reply(`
-ㅤ    ꒰  ㅤ 🚫 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 σƒƒ ㅤ 性
-
-> ₊· ⫏⫏ ㅤ Eℓ вσт ѕє αραgó єη *${grupoNombre}*
-> ₊· ⫏⫏ ㅤ Usα *#вσт ση* ραяα α¢тιναяℓσ
+> ₊· ⫏⫏ ㅤ Este comando solo funciona en grupos
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
-    `.trim())
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
+    `,
+    admin: `
+ㅤ    ꒰  ㅤ 🛡️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ α∂мιη 木 яєqυιяє∂ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Solo *administradores* pueden usar esto
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
+    `,
+    botAdmin: `
+ㅤ    ꒰  ㅤ 🤖 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 α∂мιη ㅤ 性
+
+> ₊· ⫏⫏ ㅤ El bot necesita ser *administrador* del grupo
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
+    `,
+    unreg: `
+ㅤ    ꒰  ㅤ 📜 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ѕιη 木 яєgιѕтяαя ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Usa: *${usedPrefix || '#'}registrar <Nombre.Edad>*
+> ₊· ⫏⫏ ㅤ Ejemplo: *${usedPrefix || '#'}registrar Lyonn.17*
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
+    `,
+    mods: `
+ㅤ    ꒰  ㅤ 🛡️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ мσ∂ 木 σηℓу ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Solo *moderadores* pueden usar esto
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
+    `
+  };
+  if (msg[type]) return m.reply(msg[type]).then(() => m.react('❌'));
+};
+
+let file = global.__filename(import.meta.url, true);
+watchFile(file, async () => {
+  unwatchFile(file);
+  console.log(chalk.magenta("🔄 Se actualizó 'handler.js' de αℓуα - вσт"));
+  if (global.conns && global.conns.length > 0) {
+    const users = [...new Set([...global.conns.filter((conn) => conn.user && conn.ws.socket && conn.ws.socket.readyState !== ws.CLOSED).map((conn) => conn)])];
+    for (const userr of users) {
+      userr.subreloadHandler(false);
+    }
   }
-  else {
-    await m.reply(`
-ㅤ    ꒰  ㅤ 📝 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ υѕσ 木 cσrrєctσ ㅤ 性
-
-> ₊· ⫏⫏ ㅤ *Uѕσ:* #вσт ση/σƒƒ
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
-    `.trim())
-  }
-}
-
-handler.help = ['bot']
-handler.tags = ['group']
-handler.command = ['bot']
-handler.group = true
-
-export default handler
+});
