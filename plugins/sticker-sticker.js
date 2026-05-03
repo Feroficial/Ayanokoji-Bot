@@ -100,35 +100,18 @@ let handler = async (m, { conn, args }) => {
   
   if (stiker) {
     try {
-      const imgFolder = path.join('./src/img')
-      const imgFiles = fs.existsSync(imgFolder) ? fs.readdirSync(imgFolder).filter(f => /\.(jpe?g|png|webp)$/i.test(f)) : []
-      let contextInfo = {}
-      if (imgFiles.length > 0) {
-        const randomImg = path.join(imgFolder, imgFiles[Math.floor(Math.random() * imgFiles.length)])
-        const thumb = fs.existsSync(randomImg) ? fs.readFileSync(randomImg) : null
-        if (thumb) {
-          contextInfo = {
-            externalAdReply: {
-              title: 'αℓуα - вσт',
-              body: 'ℓʏσηη',
-              mediaType: 2,
-              thumbnail: thumb
-            }
-          }
+      const contextInfo = {
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: "120363407253203904@newsletter",
+          newsletterName: "αℓуα - ¢нαηηєℓ",
+          serverMessageId: 1
         }
       }
+      
       if (Buffer.isBuffer(stiker)) {
-        await conn.sendMessage(
-          m.chat,
-          { sticker: stiker, contextInfo },
-          { quoted: m }
-        )
+        await conn.sendMessage(m.chat, { sticker: stiker, contextInfo }, { quoted: m })
       } else if (typeof stiker === 'string') {
-        await conn.sendMessage(
-          m.chat,
-          { sticker: { url: stiker }, contextInfo },
-          { quoted: m }
-        )
+        await conn.sendMessage(m.chat, { sticker: { url: stiker }, contextInfo }, { quoted: m })
       } else {
         throw new Error('Formato de sticker no válido')
       }
@@ -159,7 +142,7 @@ handler.help = ['sticker', 'stiker', 's'].map(v => v + ' <imagen|video|url>')
 handler.tags = ['sticker']
 handler.command = ['s', 'sticker', 'stiker']
 handler.group = false
-handler.register = false
+handler.register = true
 
 export default handler
 
