@@ -432,6 +432,68 @@ Object.freeze(global.reload)
 watch(pluginFolder, global.reload)
 await global.reloadHandler()
 
+// ========== RECONECTAR SUB-BOTS GUARDADOS ==========
+async function reconectarSubBots() {
+    const subBotPath = path.join(process.cwd(), 'αℓуα•¢σяє', 'subBot')
+    if (!fs.existsSync(subBotPath)) {
+        console.log(chalk.yellow('📁 No hay carpeta de sub-bots para reconectar'))
+        return
+    }
+    
+    const carpetas = fs.readdirSync(subBotPath)
+    if (carpetas.length === 0) {
+        console.log(chalk.yellow('📁 No hay sub-bots guardados'))
+        return
+    }
+    
+    console.log(chalk.cyan(`🔄 Intentando reconectar ${carpetas.length} sub-bot(s)...`))
+    
+    for (let carpeta of carpetas) {
+        const credsPath = path.join(subBotPath, carpeta, 'creds.json')
+        if (!fs.existsSync(credsPath)) continue
+        
+        try {
+            console.log(chalk.yellow(`🔄 Reconectando sub-bot: ${carpeta}`))
+            
+            const { alyaJadiBot } = await import('./plugins/serbot.js')
+            
+            const options = {
+                pathblackJadiBot: path.join(subBotPath, carpeta),
+                m: null,
+                conn: global.conn,
+                args: [],
+                usedPrefix: '#',
+                command: 'qr',
+                fromCommand: false
+            }
+            
+            setTimeout(() => {
+                alyaJadiBot(options).catch(err => {
+                    console.log(chalk.red(`❌ Error reconectando sub-bot ${carpeta}:`, err.message))
+                })
+            }, 2000)
+            
+        } catch (e) {
+            console.log(chalk.red(`❌ Error al reconectar ${carpeta}:`, e.message))
+        }
+    }
+}
+
+setTimeout(() => {
+    if (global.conn && global.conn.user) {
+        reconectarSubBots()
+    } else {
+        console.log(chalk.yellow('⏳ Esperando conexión principal para reconectar sub-bots...'))
+        const interval = setInterval(() => {
+            if (global.conn && global.conn.user) {
+                clearInterval(interval)
+                reconectarSubBots()
+            }
+        }, 5000)
+    }
+}, 10000)
+// ===================================================
+
 function clearTmp() {
     const tmpDir = join(process.cwd(), 'tmp')
     if (!existsSync(tmpDir)) mkdirSync(tmpDir, { recursive: true })
