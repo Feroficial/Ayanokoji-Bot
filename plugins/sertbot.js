@@ -327,7 +327,7 @@ export async function blackJadiBot(options) {
     }
   }, 60000)
 
-  let handler = await import('../kiyotaka-ayanokoji/handler.js')
+  let handler = await import('../Alya-Bot/handler.js')
   let creloadHandler = async function (restatConn) {
     try {
       const Handler = await import(`../kiyotaka-ayanokoji/handler.js?update=${Date.now()}`).catch(console.error)
