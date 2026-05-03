@@ -110,11 +110,22 @@ let handler = async (m, { conn, usedPrefix }) => {
     ? fs.readFileSync(menuMedia.thumbnail)
     : defaultThumb
 
-  // Enviar imagen con caption usando reply (el newsletter se agrega automáticamente desde simple.js)
+  // ContextInfo con el newsletter para que aparezca el botón "Ver canal"
+  const contextInfo = {
+    mentionedJid: [m.sender],
+    isForwarded: true,
+    forwardingScore: 999,
+    forwardedNewsletterMessageInfo: {
+      newsletterJid: "120363407253203904@newsletter",
+      newsletterName: "αℓуα - ¢нαηηєℓ",
+      serverMessageId: 1
+    }
+  }
+
   await conn.sendMessage(m.chat, {
     image: thumb,
     caption: text,
-    mentions: [m.sender]
+    contextInfo: contextInfo
   }, { quoted: m })
 }
 
