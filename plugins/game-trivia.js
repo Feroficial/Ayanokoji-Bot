@@ -118,9 +118,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         if (!text) return m.reply('🎮 Usa: #r <tu respuesta>')
         
         if (games[chatId].turn !== m.sender) {
-            let turnoNombre = games[chatId].turn === 'bot' ? '🤖 αℓуα - вσт' : `@${games[chatId].turn.split('@')[0]}`
-            let mention = games[chatId].turn === 'bot' ? [] : [games[chatId].turn]
-            return m.reply(`🎮 No es tu turno. Turno de ${turnoNombre}`, { mentions: mention })
+            let turnoNombre = games[chatId].turn === 'bot' ? '🤖 αℓуα - вσт' : games[chatId].turn.split('@')[0]
+            return m.reply(`🎮 No es tu turno. Turno de ${turnoNombre}`)
         }
         
         if (!games[chatId].waitingAnswer) return m.reply('🎮 Ya respondiste esta pregunta. Espera la siguiente ronda')
@@ -159,8 +158,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         
         if (games[chatId].score1 >= 3 || games[chatId].score2 >= 3) {
             let ganador = games[chatId].score1 >= 3 ? games[chatId].player1 : games[chatId].player2
-            let ganadorNombre = ganador === 'bot' ? '🤖 αℓуα - вσт' : `@${ganador.split('@')[0]}`
-            let mentionGanador = ganador === 'bot' ? [] : [ganador]
+            let ganadorNombre = ganador === 'bot' ? '🤖 αℓуα - вσт' : ganador.split('@')[0]
             
             await m.reply(`
 ㅤ    ꒰  ㅤ 🏆 ㅤ *GANADOR* ㅤ ⫏⫏  ꒱
@@ -170,7 +168,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 > ₊· ⫏⫏ ㅤ *🎯 Resultado final:* ${games[chatId].score1} - ${games[chatId].score2}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-            `, { mentions: mentionGanador })
+            `)
             
             delete games[chatId]
             return
@@ -178,8 +176,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         
         if (games[chatId].round > games[chatId].maxRounds) {
             let ganador = games[chatId].score1 > games[chatId].score2 ? games[chatId].player1 : games[chatId].player2
-            let ganadorNombre = ganador === 'bot' ? '🤖 αℓуα - вσт' : `@${ganador.split('@')[0]}`
-            let mentionGanador = ganador === 'bot' ? [] : [ganador]
+            let ganadorNombre = ganador === 'bot' ? '🤖 αℓуα - вσт' : ganador.split('@')[0]
             
             await m.reply(`
 ㅤ    ꒰  ㅤ 🏆 ㅤ *FIN DEL JUEGO* ㅤ ⫏⫏  ꒱
@@ -189,7 +186,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 > ₊· ⫏⫏ ㅤ *🎯 Marcador final:* ${games[chatId].score1} - ${games[chatId].score2}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-            `, { mentions: mentionGanador })
+            `)
             
             delete games[chatId]
             return
@@ -237,8 +234,7 @@ async function turnoBot(m, game) {
     
     if (game.score1 >= 3 || game.score2 >= 3) {
         let ganador = game.score1 >= 3 ? game.player1 : 'bot'
-        let ganadorNombre = ganador === 'bot' ? '🤖 αℓуα - вσт' : `@${ganador.split('@')[0]}`
-        let mentionGanador = ganador === 'bot' ? [] : [ganador]
+        let ganadorNombre = ganador === 'bot' ? '🤖 αℓуα - вσт' : ganador.split('@')[0]
         
         await m.reply(`
 ㅤ    ꒰  ㅤ 🏆 ㅤ *GANADOR* ㅤ ⫏⫏  ꒱
@@ -248,7 +244,7 @@ async function turnoBot(m, game) {
 > ₊· ⫏⫏ ㅤ *🎯 Resultado final:* ${game.score1} - ${game.score2}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-        `, { mentions: mentionGanador })
+        `)
         
         delete global.triviaGames[m.chat]
         return
@@ -256,8 +252,7 @@ async function turnoBot(m, game) {
     
     if (game.round > game.maxRounds) {
         let ganador = game.score1 > game.score2 ? game.player1 : 'bot'
-        let ganadorNombre = ganador === 'bot' ? '🤖 αℓуα - вσт' : `@${ganador.split('@')[0]}`
-        let mentionGanador = ganador === 'bot' ? [] : [ganador]
+        let ganadorNombre = ganador === 'bot' ? '🤖 αℓуα - вσт' : ganador.split('@')[0]
         
         await m.reply(`
 ㅤ    ꒰  ㅤ 🏆 ㅤ *FIN DEL JUEGO* ㅤ ⫏⫏  ꒱
@@ -267,7 +262,7 @@ async function turnoBot(m, game) {
 > ₊· ⫏⫏ ㅤ *🎯 Marcador final:* ${game.score1} - ${game.score2}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-        `, { mentions: mentionGanador })
+        `)
         
         delete global.triviaGames[m.chat]
         return
@@ -282,9 +277,7 @@ async function turnoBot(m, game) {
 }
 
 async function enviarPregunta(m, game) {
-    let esBot = game.turn === 'bot'
-    let turnoNombre = esBot ? '🤖 αℓуα - вσт' : game.turn.split('@')[0]
-    let turnoMencion = esBot ? '🤖 αℓуα - вσт' : `@${game.turn.split('@')[0]}`
+    let turnoNombre = game.turn === 'bot' ? '🤖 αℓуα - вσт' : game.turn.split('@')[0]
     
     let opcionesTexto = ''
     game.pregunta.opciones.forEach((op, i) => {
@@ -295,7 +288,7 @@ async function enviarPregunta(m, game) {
 ㅤ    ꒰  ㅤ ❓ ㅤ *NUEVA PREGUNTA* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ яση∂α 木 ${game.round}/${game.maxRounds} ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *🎲 Turno:* ${turnoMencion}
+> ₊· ⫏⫏ ㅤ *🎲 Turno:* ${turnoNombre}
 > ₊· ⫏⫏ ㅤ *📝 Pregunta:* ${game.pregunta.pregunta}
 > ₊· ⫏⫏ ㅤ *💡 Opciones:*
 ${opcionesTexto}
@@ -305,11 +298,7 @@ ${opcionesTexto}
 > ₊· ⫏⫏ ㅤ Usα: #r <respuesta>
     `
     
-    if (esBot) {
-        await m.reply(mensaje)
-    } else {
-        await m.reply(mensaje, { mentions: [game.turn] })
-    }
+    await m.reply(mensaje)
 }
 
 function iniciarTemporizadorTrivia(m, chatId, game) {
