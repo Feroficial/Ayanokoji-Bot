@@ -36,7 +36,7 @@ async function iniciarBot() {
   await new Promise(res => setTimeout(res, 800))
 
   console.log(chalk.bold.hex('#FF69B4')('\n⌬═════════════════════⌬'))
-  console.log(chalk.bold.white('      BOT CREADO POR: ') + chalk.bold.hex('#FFB6C1')('🌸 LYONN 🌸'))
+  console.log(chalk.bold.white('      BOT CREADO POR: ') + chalk.bold.hex('#FFB6C1')('🔖 LYONN 🔖'))
   console.log(chalk.bold.hex('#FF69B4')('⌬═══════════════════════⌬\n'))
 
   await new Promise(res => setTimeout(res, 1200))
@@ -46,7 +46,7 @@ let isRunning = false
 function start(file) {
   if (isRunning) return
   isRunning = true
-  let args = [join(__dirname, 'kiyotaka-ayanokoji', file), ...process.argv.slice(2)]
+  let args = [join(__dirname, 'Alya-Bot', file), ...process.argv.slice(2)]
   setupMaster({ exec: args[0], args: args.slice(1) })
   let p = fork()
   p.on('exit', (_, code) => {
