@@ -111,7 +111,8 @@ export async function handler(chatUpdate) {
         nsfw: 'nsfw' in chat ? chat.nsfw : false,
         antifake: 'antifake' in chat ? chat.antifake : false,
         delete: 'delete' in chat ? chat.delete : false,
-        expired: isNumber(chat.expired) ? chat.expired : 0
+        expired: isNumber(chat.expired) ? chat.expired : 0,
+        botEnabled: 'botEnabled' in chat ? chat.botEnabled : true
       });
 
       if (!global.db.data.settings[this.user.jid]) {
@@ -169,6 +170,15 @@ export async function handler(chatUpdate) {
     const isRAdmin = user.admin === 'superadmin';
     const isAdmin = isRAdmin || user.admin === 'admin';
     const isBotAdmin = !!bot.admin;
+
+    // ========== VERIFICAR SI EL BOT ESTÁ APAGADO EN EL GRUPO ==========
+    if (m.isGroup && !m.isBaileys) {
+      const chat = global.db.data.chats[m.chat]
+      if (chat && chat.botEnabled === false && !isOwner && !isROwner) {
+        // El bot está apagado en este grupo, no procesa comandos
+        return
+      }
+    }
 
     // ========== SISTEMA ANTILINK CON NEWSLETTER ==========
     if (m.isGroup && m.text && !m.isBaileys) {
@@ -373,28 +383,28 @@ export async function handler(chatUpdate) {
       }
     }
 
-    // ========== COMANDO NO ENCONTRADO ==========
-if (m.text && !m.isBaileys && !comandoEncontrado && !m.isCommand) {
-  const prefijos = ['#', '.', '/', '!'];
-  const tienePrefijo = prefijos.some(p => m.text.startsWith(p));
-  
-  if (tienePrefijo && m.text.length > 1) {
-    const contextInfo = {
-      mentionedJid: [m.sender],
-      forwardedNewsletterMessageInfo: {
-        newsletterJid: "120363407253203904@newsletter",
-        newsletterName: "αℓуα - ¢нαηηєℓ",
-        serverMessageId: 1
-      }
-    };
+    // ========== COMANDO NO ENCONTRADO CON NEWSLETTER ==========
+    if (m.text && !m.isBaileys && !comandoEncontrado && !m.isCommand) {
+      const prefijos = ['#', '.', '/', '!'];
+      const tienePrefijo = prefijos.some(p => m.text.startsWith(p));
+      
+      if (tienePrefijo && m.text.length > 1) {
+        const contextInfo = {
+          mentionedJid: [m.sender],
+          forwardedNewsletterMessageInfo: {
+            newsletterJid: newsletterJid,
+            newsletterName: newsletterName,
+            serverMessageId: 1
+          }
+        };
 
-    await this.sendMessage(m.chat, {
-      text: `❓ *${m.text}* no es un comando válido.\n📝 Usa *#menu* para ver la lista.`,
-      contextInfo: contextInfo
-    });
-    await this.sendMessage(m.chat, { react: { text: '❓', key: m.key } });
-  }
-}
+        await this.sendMessage(m.chat, {
+          text: `❓ *${m.text}* no es un comando válido.\n📝 Usa *#menu* para ver la lista.`,
+          contextInfo: contextInfo
+        });
+        await this.sendMessage(m.chat, { react: { text: '❓', key: m.key } });
+      }
+    }
 
   } catch (e) { console.error(e); } finally {
     if (opts['queque'] && m.text) {
@@ -427,102 +437,91 @@ if (m.text && !m.isBaileys && !comandoEncontrado && !m.isCommand) {
   }
 }
 
-global.dfail = (type, m, conn, usedPrefix) => {
-  const msg = {
-    rowner: `
-ㅤ    ꒰  ㅤ 👑 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ α¢¢єѕσ 木 яєѕтяιηgι∂σ ㅤ 性
+let handler = async (m, { conn, isAdmin, isOwner, args }) => {
+  if (!m.isGroup) return m.reply(`
+ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 ɢяυρσ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ Solo *el creador* puede usar esto
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
-    `,
-    owner: `
-ㅤ    ꒰  ㅤ 🔒 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ ѕσℓσ 木 σωηєя ㅤ 性
-
-> ₊· ⫏⫏ ㅤ Solo *el dueño del bot* puede usar esto
+> ₊· ⫏⫏ ㅤ Sσℓσ єη gяυρσѕ
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
-    `,
-    premium: `
-ㅤ    ꒰  ㅤ 💎 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ ρяємιυм 木 яєqυιєяє∂ ㅤ 性
+  `.trim())
 
-> ₊· ⫏⫏ ㅤ Solo para usuarios *Premium*
+  if (!isAdmin && !isOwner) return m.reply(`
+ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ α∂мιη 木 яєqυєяι∂σ ㅤ 性
 
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
-    `,
-    private: `
-ㅤ    ꒰  ㅤ 🔒 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ ρяινα∂σ 木 σηℓу ㅤ 性
-
-> ₊· ⫏⫏ ㅤ Este comando solo funciona en privado
+> ₊· ⫏⫏ ㅤ Nєcєѕιтαѕ ѕєя α∂мιη
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
-    `,
-    group: `
-ㅤ    ꒰  ㅤ 👥 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ ɢяυρσ 木 σηℓу ㅤ 性
+  `.trim())
 
-> ₊· ⫏⫏ ㅤ Este comando solo funciona en grupos
+  const chat = global.db.data.chats[m.chat]
+  if (!chat) global.db.data.chats[m.chat] = {}
 
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
-    `,
-    admin: `
-ㅤ    ꒰  ㅤ 🛡️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ α∂мιη 木 яєqυιяє∂ ㅤ 性
+  const opcion = args[0]?.toLowerCase()
+  const grupoNombre = await conn.getName(m.chat)
 
-> ₊· ⫏⫏ ㅤ Solo *administradores* pueden usar esto
+  if (opcion === 'on') {
+    if (chat.botEnabled === true) return m.reply(`
+ㅤ    ꒰  ㅤ ⚠️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ¢σηє¢тα∂σ 木 yα ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Eℓ вσт yα єѕтá α¢тινσ єη *${grupoNombre}*
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
-    `,
-    botAdmin: `
-ㅤ    ꒰  ㅤ 🤖 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 α∂мιη ㅤ 性
+    `.trim())
 
-> ₊· ⫏⫏ ㅤ El bot necesita ser *administrador* del grupo
+    chat.botEnabled = true
+    await m.reply(`
+ㅤ    ꒰  ㅤ ✅ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 ση ㅤ 性
 
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
-    `,
-    unreg: `
-ㅤ    ꒰  ㅤ 📜 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ ѕιη 木 яєgιѕтяαя ㅤ 性
-
-> ₊· ⫏⫏ ㅤ Usa: *${usedPrefix || '#'}registrar <Nombre.Edad>*
-> ₊· ⫏⫏ ㅤ Ejemplo: *${usedPrefix || '#'}registrar Lyonn.17*
+> ₊· ⫏⫏ ㅤ Eℓ вσт ѕє α¢тινó єη *${grupoNombre}*
+> ₊· ⫏⫏ ㅤ Yα ρυє∂єη υѕαя ℓσѕ ¢σмαη∂σѕ
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
-    `,
-    mods: `
-ㅤ    ꒰  ㅤ 🛡️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ мσ∂ 木 σηℓу ㅤ 性
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+    `.trim())
+  } 
+  else if (opcion === 'off') {
+    if (chat.botEnabled === false) return m.reply(`
+ㅤ    ꒰  ㅤ ⚠️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ αραgα∂σ 木 yα ㅤ 性
 
-> ₊· ⫏⫏ ㅤ Solo *moderadores* pueden usar esto
+> ₊· ⫏⫏ ㅤ Eℓ вσт yα єѕтá αραgα∂σ єη *${grupoNombre}*
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
-    `
-  };
-  if (msg[type]) return m.reply(msg[type]).then(() => m.react('❌'));
-};
+    `.trim())
 
-let file = global.__filename(import.meta.url, true);
-watchFile(file, async () => {
-  unwatchFile(file);
-  console.log(chalk.magenta("🔄 Se actualizó 'handler.js' de αℓуα - вσт"));
-  if (global.conns && global.conns.length > 0) {
-    const users = [...new Set([...global.conns.filter((conn) => conn.user && conn.ws.socket && conn.ws.socket.readyState !== ws.CLOSED).map((conn) => conn)])];
-    for (const userr of users) {
-      userr.subreloadHandler(false);
-    }
+    chat.botEnabled = false
+    await m.reply(`
+ㅤ    ꒰  ㅤ 🚫 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 σƒƒ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Eℓ вσт ѕє αραgó єη *${grupoNombre}*
+> ₊· ⫏⫏ ㅤ Usα *#вσт ση* ραяα α¢тιναяℓσ
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+    `.trim())
   }
-});
+  else {
+    await m.reply(`
+ㅤ    ꒰  ㅤ 📝 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ υѕσ 木 cσrrєctσ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ *Uѕσ:* #вσт ση/σƒƒ
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+    `.trim())
+  }
+}
+
+handler.help = ['bot']
+handler.tags = ['group']
+handler.command = ['bot']
+handler.group = true
+
+export default handler
