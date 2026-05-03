@@ -75,20 +75,22 @@ let handler = async (m, { conn, usedPrefix }) => {
     }))
 
   const tags = {
-    main: 'princɨքαl',
-    group: 'ɢʀυքos',
-    downloader: 'dᦅwnlᦅαdᧉr',
-    search: 'sᧉαrch',
-    economy: 'ᧉcᦅnᦅmy',
-    game: 'ɢαcɦα',
-    nsfw: 'nsfw +18',
-    tools: 'łᦅᦅls',
-    serbot: 'ѕєявσт',
-    owner: 'ᦅwnᧉr',
-    sticker: 'słickᧉrs',
-    reaction: 'rᧉαccꪱᦅnᧉs',
-    register: 'rᧉɢisᧉr'
-  }
+  main: 'princɨքαl',
+  group: 'ɢʀυքos',
+  downloader: 'dᦅwnlᦅαdᧉr',
+  search: 'sᧉαrch',
+  economy: 'ᧉcᦅnᦅmy',
+  game: 'ɢαcɦα',
+  nsfw: 'nsfw +18',
+  tools: 'łᦅᦅls',
+  serbot: 'ѕєявσт',
+  owner: 'ᦅwnᧉr',
+  sticker: 'słickᧉrs',
+  reaction: 'rᧉαccꪱᦅnᧉs',
+  register: 'rᧉɢisᧉr',
+  anime: 'αηιмє',
+  info: 'ιηƒσ'
+}
 
   const text = [
     menu.before,
