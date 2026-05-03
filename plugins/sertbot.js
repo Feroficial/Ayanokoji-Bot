@@ -28,8 +28,11 @@ let rtx = `
 ㅤ    ꒰  ㅤ 📱 ㅤ *αℓуα - ѕυв вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ ѕ¢αηєα 木 qя ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *Eѕ¢αηєα єℓ QR dєѕdє:* WнαтѕAρρ > Dιѕρσѕιтινσѕ Vιη¢υℓα∂σѕ
-> ₊· ⫏⫏ ㅤ *Tιємρσ:* 45 ѕєgυη∂σѕ
+> ₊· ⫏⫏ ㅤ *📌 CÓMO VINCULARSE:*
+> ₊· ⫏⫏ ㅤ 1. Abre WhatsApp > Dispositivos vinculados
+> ₊· ⫏⫏ ㅤ 2. Toca "Vincular un dispositivo"
+> ₊· ⫏⫏ ㅤ 3. Escanea el código QR que aparece aquí
+> ₊· ⫏⫏ ㅤ 4. ⏱️ Tiempo: 45 segundos
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
@@ -39,8 +42,10 @@ let rtx2 = `
 ㅤ    ꒰  ㅤ 🔐 ㅤ *αℓуα - ѕυв вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ ¢ó∂ιgσ 木 ѕє¢яєтσ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *Uѕα єѕтє ¢ó∂ιgσ dє 8 dígιтσѕ*
-> ₊· ⫏⫏ ㅤ *⚠️ Nσ υѕєѕ тυ ¢υєηтα ρяιη¢ιραℓ*
+> ₊· ⫏⫏ ㅤ *📌 CÓMO VINCULARSE:*
+> ₊· ⫏⫏ ㅤ 1. Abre WhatsApp > Dispositivos vinculados
+> ₊· ⫏⫏ ㅤ 2. Toca "Vincular con código de 8 dígitos"
+> ₊· ⫏⫏ ㅤ 3. Ingresa el código que aparece aquí
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
@@ -133,17 +138,17 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
     `.trim())
   }
-  
+
   const availableSlots = maxSubBots - subBotsCount
 
   let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
   let id = `${who.split('@')[0]}`
-  let pathblackJadiBot = path.join(process.cwd(), 'kiyotaka-ayanokoji', 'subBot', id)
+  let pathblackJadiBot = path.join(process.cwd(), 'Alya-Bot', 'subBot', id)
 
   if (!fs.existsSync(pathblackJadiBot)) {
     fs.mkdirSync(pathblackJadiBot, { recursive: true })
   }
-  
+
   blackJBOptions.pathblackJadiBot = pathblackJadiBot
   blackJBOptions.m = m
   blackJBOptions.conn = conn
@@ -152,7 +157,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   blackJBOptions.command = command
   blackJBOptions.fromCommand = true
 
-  await blackJadiBot(blackJBOptions)
+  await alyaJadiBot(blackJBOptions)
 
   global.db.data.users[m.sender].Subs = new Date() * 1
 }
@@ -163,7 +168,7 @@ handler.command = ['qr', 'code', 'subbot']
 
 export default handler
 
-export async function blackJadiBot(options) {
+export async function alyaJadiBot(options) {
   let { pathblackJadiBot, m, conn, args, usedPrefix, command } = options
   if (command === 'code') {
     command = 'qr'
@@ -283,10 +288,10 @@ export async function blackJadiBot(options) {
           `\n❒────────────【• SUB-BOT •】────────────❒\n│\n│ 🟢 ${userName} (+${path.basename(pathblackJadiBot)}) cσηєcтα∂σ.\n│\n❒────────────【• CONECTADO •】────────────❒`
         )
       )
-      
+
       await updateSubBotProfilePicture(sock, 'https://files.catbox.moe/z4qgf1.jpeg')
       await updateSubBotName(sock, 'Alya-Sub-Bot')
-      
+
       sock.isInit = true
       global.conns.push(sock)
 
@@ -327,10 +332,10 @@ export async function blackJadiBot(options) {
     }
   }, 60000)
 
-  let handler = await import('../Alya-Bot/handler.js')
+  let handler = await import('./handler.js')
   let creloadHandler = async function (restatConn) {
     try {
-      const Handler = await import(`../kiyotaka-ayanokoji/handler.js?update=${Date.now()}`).catch(console.error)
+      const Handler = await import(`./handler.js?update=${Date.now()}`).catch(console.error)
       if (Object.keys(Handler || {}).length) handler = Handler
     } catch (e) { }
     if (restatConn) {
