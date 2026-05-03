@@ -30,7 +30,7 @@ let handler = async (m, { conn, usedPrefix, text, args, command }) => {
 > ₊· ⫏⫏ ㅤ 🌐 https://dvlyonn.onrender.com
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🌸 Cяєα∂σя: ℓʏσηη
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: ℓʏσηη
   `.trim()
 
   await conn.sendMessage(m.chat, { text: texto, mentions: [m.sender] }, { quoted: m })
