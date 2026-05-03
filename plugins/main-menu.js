@@ -21,6 +21,7 @@ const defaultMenu = {
 ㅤ
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ 性 ㅤ Sistema ejecutado ㅤ ✿
+> ₊· ⫏⫏ ㅤ #ping ─ 📡 *Estado del bot*
 ㅤ
 ㅤ    ꒰  ㅤ 🕸️ ㅤ *ᴄʀᴇᴀᴅᴏ ᴘᴏʀ ʟʏᴏɴɴ* ㅤ ⫏⫏  ꒱
 > ₊· ⫏⫏ ㅤ ✿ 木 性 ㅤ Alya
@@ -109,27 +110,12 @@ let handler = async (m, { conn, usedPrefix }) => {
 
   const uniqueThumb = Buffer.concat([thumb, Buffer.from(botJid)])
 
-const buttons = [
-  { 
-    buttonId: '.ping', 
-    buttonText: { displayText: '📡 PING' }, 
-    type: 1 
-  },
-  { 
-    buttonId: '.code', 
-    buttonText: { displayText: '🔐 CODE' }, 
-    type: 1 
-  }
-]
-
-await conn.sendMessage(m.chat, {
-  image: uniqueThumb,
-  caption: text,
-  mentions: [m.sender],
-  buttons: buttons,
-  footer: 'Alya Bot - Creado por Lyonn',
-  headerType: 1
-}, { quoted: m })
+  await conn.sendMessage(m.chat, {
+    image: uniqueThumb,
+    caption: text,
+    mentions: [m.sender]
+  }, { quoted: m })
+}
 
 handler.help = ['menu', 'menú']
 handler.tags = ['main']
