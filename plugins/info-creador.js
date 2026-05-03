@@ -36,7 +36,7 @@ let handler = async (m, { conn, usedPrefix, text, args, command }) => {
   await conn.sendMessage(m.chat, { text: texto, mentions: [m.sender] }, { quoted: m })
 }
 
-handler.help = ["creador", "owner"]
+handler.help = ["creador"]
 handler.tags = ["info"]
 handler.command = ['owner', 'creador', 'dueño']
 
