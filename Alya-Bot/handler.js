@@ -111,7 +111,8 @@ export async function handler(chatUpdate) {
         nsfw: 'nsfw' in chat ? chat.nsfw : false,
         antifake: 'antifake' in chat ? chat.antifake : false,
         delete: 'delete' in chat ? chat.delete : false,
-        expired: isNumber(chat.expired) ? chat.expired : 0
+        expired: isNumber(chat.expired) ? chat.expired : 0,
+        botEnabled: 'botEnabled' in chat ? chat.botEnabled : true
       });
 
       if (!global.db.data.settings[this.user.jid]) {
@@ -124,8 +125,7 @@ export async function handler(chatUpdate) {
         jadibotmd: 'jadibotmd' in settings ? settings.jadibotmd : true,
         antiPrivate: 'antiPrivate' in settings ? settings.antiPrivate : false,
         autoread: 'autoread' in settings ? settings.autoread : false,
-        status: settings.status || 0,
-        primary: 'primary' in settings ? settings.primary : true
+        status: settings.status || 0
       });
 
     } catch (e) { console.error('Error inicializando datos:', e); }
@@ -138,14 +138,6 @@ export async function handler(chatUpdate) {
     const isOwner = isROwner || m.fromMe;
     const isPrems = isROwner || (global.db.data.users[m.sender]?.premiumTime || 0) > 0;
     const isMods = isROwner || (global.mods || []).includes(m.sender.split('@')[0]);
-
-    // ========== VERIFICAR SI ESTE BOT ES EL PRINCIPAL ==========
-    const botSettings = global.db.data.settings[this.user.jid]
-    const isPrimary = botSettings?.primary !== false
-
-    if (!isPrimary && !isOwner && !isROwner) {
-      return
-    }
 
     if (opts["queque"] && m.text && !isMods) {
       const queque = this.msgqueque;
@@ -178,6 +170,14 @@ export async function handler(chatUpdate) {
     const isRAdmin = user.admin === 'superadmin';
     const isAdmin = isRAdmin || user.admin === 'admin';
     const isBotAdmin = !!bot.admin;
+
+    // ========== VERIFICAR SI EL BOT ESTÁ ACTIVO EN EL GRUPO ==========
+    if (m.isGroup) {
+      const chatGroup = global.db.data.chats[m.chat]
+      if (chatGroup && chatGroup.botEnabled === false && !isOwner && !isROwner) {
+        return
+      }
+    }
 
     // ========== SISTEMA ANTILINK CON NEWSLETTER ==========
     if (m.isGroup && m.text && !m.isBaileys) {
