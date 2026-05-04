@@ -47,7 +47,7 @@ let handler = async (m, { conn, args }) => {
   `.trim())
   
   let targetUser = mention
-  let targetName = await conn.getName(targetUser)
+  let nombreDestino = targetUser.split('@')[0]
   
   if (!global.db.data.users[targetUser]) {
     global.db.data.users[targetUser] = {}
@@ -60,14 +60,14 @@ let handler = async (m, { conn, args }) => {
 ㅤ    ꒰  ㅤ 💸 ㅤ *αℓуα - ραу* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ єηvíσ 木 єχιтσѕσ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *👤 De:* @${m.sender.split('@')[0]}
-> ₊· ⫏⫏ ㅤ *👤 Para:* @${targetUser.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *👤 De:* ${m.sender.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *👤 Para:* ${nombreDestino}
 > ₊· ⫏⫏ ㅤ *💰 Cantidad:* ${cantidad} USD
 > ₊· ⫏⫏ ㅤ *💵 Saldo restante:* ${user.USD} USD
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
-  `.trim(), { mentions: [m.sender, targetUser] })
+  `.trim())
 }
 
 handler.help = ['pay']
