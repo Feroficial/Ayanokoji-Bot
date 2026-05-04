@@ -1,4 +1,5 @@
-let handler = async (m, { conn, isAdmin, isOwner, isROwner, text, usedPrefix, command }) => {
+// kick.js - Expulsar usuario mencionando o respondiendo a un mensaje (anti owners)
+let handler = async (m, { conn, isAdmin, isOwner, isROwner, text }) => {
   if (!m.isGroup) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 ɢяυρσ ㅤ 性
@@ -8,7 +9,7 @@ let handler = async (m, { conn, isAdmin, isOwner, isROwner, text, usedPrefix, co
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
   `.trim())
 
-  if (!isAdmin && !isOwner) return m.reply(`
+  if (!isAdmin && !isOwner && !isROwner) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ α∂мιη 木 яєqυєяι∂σ ㅤ 性
 
@@ -17,23 +18,25 @@ let handler = async (m, { conn, isAdmin, isOwner, isROwner, text, usedPrefix, co
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
   `.trim())
 
-  let user = null
-  let nombre = ''
+  if (!conn.isBotAdmin) return m.reply(`
+ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 ѕιη α∂мιη ㅤ 性
 
+> ₊· ⫏⫏ ㅤ Eℓ вσт ηє¢єѕιтα ѕєя α∂мιη
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+  `.trim())
+
+  let user = null
+  
   if (m.quoted) {
     user = m.quoted.sender
-    nombre = await conn.getName(user)
+  } else if (m.mentionedJid && m.mentionedJid[0]) {
+    user = m.mentionedJid[0]
   } else if (text) {
-    let mention = m.mentionedJid[0]
-    if (mention) {
-      user = mention
-      nombre = await conn.getName(user)
-    } else {
-      let numeros = text.match(/\d+/g)
-      if (numeros) {
-        user = numeros[0] + '@s.whatsapp.net'
-        nombre = await conn.getName(user)
-      }
+    let numeros = text.match(/\d+/g)
+    if (numeros) {
+      user = numeros[0] + '@s.whatsapp.net'
     }
   }
 
@@ -41,13 +44,14 @@ let handler = async (m, { conn, isAdmin, isOwner, isROwner, text, usedPrefix, co
 ㅤ    ꒰  ㅤ 📝 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ υѕσ 木 cσrrєctσ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *Uѕσ 1:* Rєѕρση∂є αℓ мєηѕαנє ∂єℓ υѕυαяισ
+> ₊· ⫏⫏ ㅤ *Uѕσ 1:* Rєѕρση∂є αℓ мєηѕαנє
 > ₊· ⫏⫏ ㅤ *Uѕσ 2:* #кι¢к @υѕυαяισ
 > ₊· ⫏⫏ ㅤ *Uѕσ 3:* #кι¢к +59177474230
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
   `.trim())
 
+  // Verificar si el usuario es owner (anti-owner)
   const detectwhat = user.includes('@lid') ? '@lid' : '@s.whatsapp.net'
   const isROwnerTarget = global.owner ? [...global.owner.map(([number]) => number)].map(v => v.replace(/\D/g, "") + detectwhat).includes(user) : false
   const isOwnerTarget = isROwnerTarget || user === conn.user.jid
@@ -59,16 +63,10 @@ let handler = async (m, { conn, isAdmin, isOwner, isROwner, text, usedPrefix, co
 > ₊· ⫏⫏ ㅤ Nσ ρυє∂єѕ єχρυℓѕαя αℓ *¢яєα∂σя* σ *σωηєя*
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
   `.trim())
 
-  if (!isBotAdmin) return m.reply(`
-ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 ѕιη α∂мιη ㅤ 性
-
-> ₊· ⫏⫏ ㅤ Eℓ вσт ηє¢єѕιтα ѕєя α∂мιη
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-  `.trim())
+  let nombre = await conn.getName(user).catch(() => user.split('@')[0])
 
   try {
     await conn.groupParticipantsUpdate(m.chat, [user], 'remove')
