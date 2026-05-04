@@ -381,21 +381,6 @@ global.reloadHandler = async function (restatConn) {
     global.conn.ev.on('messages.upsert', async (m) => {
         if (m.messages && m.messages[0] && m.messages[0].key && m.messages[0].key.remoteJid) {
             const jid = m.messages[0].key.remoteJid
-            const msg = m.messages[0]
-            
-            // ========== VERIFICAR SI EL BOT ESTÁ DESACTIVADO EN EL GRUPO ==========
-            if (jid.endsWith('@g.us')) {
-                if (!global.db.data.chats[jid]) global.db.data.chats[jid] = {}
-                const chatGroup = global.db.data.chats[jid]
-                const sender = msg.key.participant || msg.key.remoteJid
-                const isOwner = global.owner ? global.owner.some(own => own[0] === sender?.split('@')[0]) : false
-                const isROwner = global.owner ? global.owner.some(own => own[0] === sender?.split('@')[0]) : false
-                
-                if (chatGroup && chatGroup.botEnabled === false && !isOwner && !isROwner) {
-                    return
-                }
-            }
-            
             await global.conn.sendPresenceUpdate('composing', jid)
             await global.conn.handler(m)
             await global.conn.readMessages([m.messages[0].key])
