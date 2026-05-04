@@ -9,7 +9,7 @@ let handler = async (m, { conn }) => {
 ㅤ    ꒰  ㅤ 🏦 ㅤ *αℓуα - вαηк* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ єѕтα∂σ 木 ¢υєηтα ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *👤 Usuario:* @${m.sender.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *👤 Usuario:* ${m.sender.split('@')[0]}
 > ₊· ⫏⫏ ㅤ *💵 Efectivo:* ${USD} USD
 > ₊· ⫏⫏ ㅤ *🏦 Banco:* ${bank} USD
 > ₊· ⫏⫏ ㅤ *💰 Total:* ${USD + bank} USD
@@ -18,9 +18,9 @@ let handler = async (m, { conn }) => {
 > ₊· ⫏⫏ ㅤ *Comandos útiles:*
 > ₊· ⫏⫏ ㅤ #depositar <cantidad>
 > ₊· ⫏⫏ ㅤ #retirar <cantidad>
-> ₊· ⫏⫏ ㅤ #pay @usuario <cantidad>
+> ₊· ⫏⫏ ㅤ #pay <cantidad> @usuario
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
-  `.trim(), { mentions: [m.sender] })
+  `.trim())
 }
 
 handler.help = ['bank']
