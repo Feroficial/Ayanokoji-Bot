@@ -128,27 +128,18 @@ let handler = async (m, { conn }) => {
     { nombre: "🧸 Romper algo", accion: "rompiste material de trabajo", perdida: [2, 7] }
   ]
   
-  // 70% probabilidad de ganar, 30% de perder
   let esGanar = Math.random() < 0.7
   
-  let trabajo
-  let ganancia = 0
-  let perdida = 0
-  let mensajeAccion = ""
-  let bonusMonto = 0
-  let multaMonto = 0
-  let bonusTexto = ""
-  let multaTexto = ""
-  
   if (esGanar) {
-    trabajo = trabajosGanar[Math.floor(Math.random() * trabajosGanar.length)]
-    ganancia = Math.floor(Math.random() * (trabajo.ganancia[1] - trabajo.ganancia[0] + 1) + trabajo.ganancia[0])
+    let trabajo = trabajosGanar[Math.floor(Math.random() * trabajosGanar.length)]
+    let ganancia = Math.floor(Math.random() * (trabajo.ganancia[1] - trabajo.ganancia[0] + 1) + trabajo.ganancia[0])
     
-    let tieneBonus = Math.random() < 0.25 // 25% de probabilidad de bonus extra
+    let tieneBonus = Math.random() < 0.25
+    let bonusTexto = ""
     
     if (tieneBonus) {
       let bonus = bonusExtra[Math.floor(Math.random() * bonusExtra.length)]
-      bonusMonto = Math.floor(Math.random() * (bonus.ganancia[1] - bonus.ganancia[0] + 1) + bonus.ganancia[0])
+      let bonusMonto = Math.floor(Math.random() * (bonus.ganancia[1] - bonus.ganancia[0] + 1) + bonus.ganancia[0])
       ganancia += bonusMonto
       bonusTexto = `\n> ₊· ⫏⫏ ㅤ *🎁 ${bonus.nombre}:* +${bonusMonto} USD`
     }
@@ -162,16 +153,14 @@ let handler = async (m, { conn }) => {
       `🎀 Después de ${trabajo.accion}, recibió su sueldo.`,
       `🧸 *${trabajo.nombre}* ${trabajo.accion}. El jefe está feliz!`
     ]
-    mensajeAccion = mensajesBase[Math.floor(Math.random() * mensajesBase.length)]
+    let mensajeAccion = mensajesBase[Math.floor(Math.random() * mensajesBase.length)]
     
-    if (bonusMonto > 0) {
-      mensajeAccion += ` Además, ${bonus.accion}.`
-    }
+    if (tieneBonus) mensajeAccion += ` Además, recibió un bono extra.`
     
     await m.reply(`
 ㅤ    ꒰  ㅤ 💼 ㅤ *αℓуα - ωσяк* ㅤ ✅ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *🧑‍💼 Empleado:* @${m.sender.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *🧑‍💼 Empleado:* ${m.sender.split('@')[0]}
 > ₊· ⫏⫏ ㅤ *📋 Reporte:* ${mensajeAccion}
 > ₊· ⫏⫏ ㅤ *💰 Paga:* +${ganancia} USD
 ${bonusTexto}
@@ -179,17 +168,18 @@ ${bonusTexto}
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ *💵 Total en cuenta:* ${user.USD} USD
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
-    `.trim(), { mentions: [m.sender] })
+    `.trim())
     
   } else {
-    trabajo = trabajosPerder[Math.floor(Math.random() * trabajosPerder.length)]
-    perdida = Math.floor(Math.random() * (trabajo.perdida[1] - trabajo.perdida[0] + 1) + trabajo.perdida[0])
+    let trabajo = trabajosPerder[Math.floor(Math.random() * trabajosPerder.length)]
+    let perdida = Math.floor(Math.random() * (trabajo.perdida[1] - trabajo.perdida[0] + 1) + trabajo.perdida[0])
     
-    let tieneMulta = Math.random() < 0.25 // 25% de probabilidad de multa extra
+    let tieneMulta = Math.random() < 0.25
+    let multaTexto = ""
     
     if (tieneMulta) {
       let multa = multaExtra[Math.floor(Math.random() * multaExtra.length)]
-      multaMonto = Math.floor(Math.random() * (multa.perdida[1] - multa.perdida[0] + 1) + multa.perdida[0])
+      let multaMonto = Math.floor(Math.random() * (multa.perdida[1] - multa.perdida[0] + 1) + multa.perdida[0])
       perdida += multaMonto
       multaTexto = `\n> ₊· ⫏⫏ ㅤ *⚠️ ${multa.nombre}:* -${multaMonto} USD`
     }
@@ -203,16 +193,14 @@ ${bonusTexto}
       `🎀 ${trabajo.accion} y por eso le quitaron parte de su paga.`,
       `🧸 *${trabajo.nombre}* ${trabajo.accion}. Hoy no fue su día.`
     ]
-    mensajeAccion = mensajesBase[Math.floor(Math.random() * mensajesBase.length)]
+    let mensajeAccion = mensajesBase[Math.floor(Math.random() * mensajesBase.length)]
     
-    if (multaMonto > 0) {
-      mensajeAccion += ` Además, ${multa.accion}.`
-    }
+    if (tieneMulta) mensajeAccion += ` Además, recibió una multa adicional.`
     
     await m.reply(`
 ㅤ    ꒰  ㅤ 💼 ㅤ *αℓуα - ωσяк* ㅤ ❌ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *🧑‍💼 Empleado:* @${m.sender.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *🧑‍💼 Empleado:* ${m.sender.split('@')[0]}
 > ₊· ⫏⫏ ㅤ *📋 Reporte:* ${mensajeAccion}
 > ₊· ⫏⫏ ㅤ *💸 Descuento:* -${perdida} USD
 ${multaTexto}
@@ -220,7 +208,7 @@ ${multaTexto}
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ *💵 Total en cuenta:* ${user.USD} USD
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
-    `.trim(), { mentions: [m.sender] })
+    `.trim())
   }
   
   user.lastwork = Date.now()
