@@ -168,21 +168,11 @@ export default handler
 
 export async function alyaJadiBot(options) {
   let { pathblackJadiBot, m, conn, args, usedPrefix, command } = options
-  if (command === 'code') {
-    command = 'qr'
-    args.unshift('code')
-  }
-  const mcode = args[0] && (/--code|code/.test(args[0].trim()))
-    ? true
-    : args[1] && (/--code|code/.test(args[1].trim()))
-      ? true
-      : false
+  
+  // Detectar si es QR o CODE
+  let isCode = (command === 'code')
+  
   let txtCode, codeBot, txtQR
-  if (mcode) {
-    args[0] = args[0].replace(/^--code$|^code$/, "").trim()
-    if (args[1]) args[1] = args[1].replace(/^--code$|^code$/, "").trim()
-    if (args[0] == "") args[0] = undefined
-  }
   const pathCreds = path.join(pathblackJadiBot, "creds.json")
   if (!fs.existsSync(pathblackJadiBot)) {
     fs.mkdirSync(pathblackJadiBot, { recursive: true })
@@ -209,7 +199,7 @@ export async function alyaJadiBot(options) {
     auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' })) },
     msgRetry,
     msgRetryCache,
-    browser: mcode ? Browsers.macOS("Chrome") : Browsers.macOS("Desktop"),
+    browser: isCode ? Browsers.macOS("Chrome") : Browsers.macOS("Desktop"),
     version: version,
     generateHighQualityLinkPreview: false
   }
@@ -221,7 +211,7 @@ export async function alyaJadiBot(options) {
   async function connectionUpdate(update) {
     const { connection, lastDisconnect, isNewLogin, qr } = update
     if (isNewLogin) sock.isInit = false
-    if (qr && !mcode) {
+    if (qr && !isCode) {
       if (m?.chat) {
         txtQR = await conn.sendMessage(m.chat, { image: await qrcode.toBuffer(qr, { scale: 8 }), caption: rtx.trim() }, { quoted: m })
       } else {
@@ -232,12 +222,13 @@ export async function alyaJadiBot(options) {
       }
       return
     }
-    if (qr && mcode) {
+    if (qr && isCode) {
       let secret = await sock.requestPairingCode((m.sender?.split('@')[0]))
       secret = secret.match(/.{1,4}/g)?.join("-")
       txtCode = await conn.sendMessage(m.chat, { text: rtx2 }, { quoted: m })
       codeBot = await m.reply(secret)
       console.log(secret)
+      return
     }
     if (txtCode && txtCode.key) {
       setTimeout(() => { conn.sendMessage(m.sender, { delete: txtCode.key }) }, 30000)
@@ -332,11 +323,10 @@ export async function alyaJadiBot(options) {
     }
   }, 60000)
 
-  // 🔧 IMPORTANTE: Ruta corregida al handler.js que está en Alya-Bot/
-  let handler = await import('../Alya-Bot/handler.js')
+  let handler = await import('../handler.js')
   let creloadHandler = async function (restatConn) {
     try {
-      const Handler = await import(`../Alya-Bot/handler.js?update=${Date.now()}`).catch(console.error)
+      const Handler = await import(`../handler.js?update=${Date.now()}`).catch(console.error)
       if (Object.keys(Handler || {}).length) handler = Handler
     } catch (e) { }
     if (restatConn) {
