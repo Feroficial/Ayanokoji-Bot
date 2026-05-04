@@ -26,7 +26,8 @@ let handler = async (m, { conn, isAdmin, isOwner, args }) => {
 
   if (opcion === 'on') {
     chat.botEnabled = true
-    await m.reply(`
+    await conn.sendMessage(m.chat, { 
+      text: `
 ㅤ    ꒰  ㅤ ✅ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 α¢тινα∂σ ㅤ 性
 
@@ -35,11 +36,13 @@ let handler = async (m, { conn, isAdmin, isOwner, args }) => {
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
-    `.trim())
+      `.trim()
+    })
   } 
   else if (opcion === 'off') {
     chat.botEnabled = false
-    await m.reply(`
+    await conn.sendMessage(m.chat, { 
+      text: `
 ㅤ    ꒰  ㅤ 🚫 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 ∂єѕα¢тινα∂σ ㅤ 性
 
@@ -48,18 +51,22 @@ let handler = async (m, { conn, isAdmin, isOwner, args }) => {
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
-    `.trim())
+      `.trim()
+    })
   }
   else {
-    await m.reply(`
-ㅤ    ꒰  ㅤ 📝 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ υѕσ 木 cσrrєctσ ㅤ 性
+    let estado = chat.botEnabled !== false ? '✅ ACTIVADO' : '❌ DESACTIVADO'
+    await conn.sendMessage(m.chat, { 
+      text: `
+ㅤ    ꒰  ㅤ 📊 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ єѕтα∂σ 木 вσт ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *Uѕσ:* #вσт ση/σƒƒ
+> ₊· ⫏⫏ ㅤ *📌 Estado en ${grupoNombre}:* ${estado}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
-    `.trim())
+      `.trim()
+    })
   }
 }
 
