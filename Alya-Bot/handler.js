@@ -111,8 +111,7 @@ export async function handler(chatUpdate) {
         nsfw: 'nsfw' in chat ? chat.nsfw : false,
         antifake: 'antifake' in chat ? chat.antifake : false,
         delete: 'delete' in chat ? chat.delete : false,
-        expired: isNumber(chat.expired) ? chat.expired : 0,
-        botEnabled: 'botEnabled' in chat ? chat.botEnabled : true
+        expired: isNumber(chat.expired) ? chat.expired : 0
       });
 
       if (!global.db.data.settings[this.user.jid]) {
