@@ -1,5 +1,5 @@
 // kick.js - Expulsar usuario mencionando o respondiendo a un mensaje (anti owners)
-let handler = async (m, { conn, isAdmin, isOwner, isROwner, text }) => {
+let handler = async (m, { conn, isAdmin, isOwner, isROwner, isBotAdmin, text }) => {
   if (!m.isGroup) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 ɢяυρσ ㅤ 性
@@ -18,7 +18,7 @@ let handler = async (m, { conn, isAdmin, isOwner, isROwner, text }) => {
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
   `.trim())
 
-  if (!conn.isBotAdmin) return m.reply(`
+  if (!isBotAdmin) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 ѕιη α∂мιη ㅤ 性
 
@@ -60,13 +60,12 @@ let handler = async (m, { conn, isAdmin, isOwner, isROwner, text }) => {
 ㅤ    ꒰  ㅤ 🛡️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ ησ 木 ρυє∂єѕ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ Nσ ρυє∂єѕ єχρυℓѕαя αℓ *¢яєα∂σя* σ *σωηєя*
+> ₊· ⫏⫏ ㅤ Nσ ρυє∂єѕ єχρυℓѕαя αℓ *¢яєα∂σя*
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
   `.trim())
 
-  let nombre = await conn.getName(user).catch(() => user.split('@')[0])
+  let nombre = user.split('@')[0]
 
   try {
     await conn.groupParticipantsUpdate(m.chat, [user], 'remove')
@@ -78,7 +77,6 @@ let handler = async (m, { conn, isAdmin, isOwner, isROwner, text }) => {
 > ₊· ⫏⫏ ㅤ *⚡ Acción:* Expulsado del grupo
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
     `.trim())
   } catch (e) {
     await m.reply(`
@@ -88,7 +86,6 @@ let handler = async (m, { conn, isAdmin, isOwner, isROwner, text }) => {
 > ₊· ⫏⫏ ㅤ *єяяσя:* ${e.message}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
     `.trim())
   }
 }
