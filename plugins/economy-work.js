@@ -135,16 +135,16 @@ let handler = async (m, { conn }) => {
   let ganancia = 0
   let perdida = 0
   let mensajeAccion = ""
-  let textoResultado = ""
-  let emoji = ""
+  let bonusMonto = 0
+  let multaMonto = 0
+  let bonusTexto = ""
+  let multaTexto = ""
   
   if (esGanar) {
     trabajo = trabajosGanar[Math.floor(Math.random() * trabajosGanar.length)]
     ganancia = Math.floor(Math.random() * (trabajo.ganancia[1] - trabajo.ganancia[0] + 1) + trabajo.ganancia[0])
     
     let tieneBonus = Math.random() < 0.25 // 25% de probabilidad de bonus extra
-    let bonusMonto = 0
-    let bonusTexto = ""
     
     if (tieneBonus) {
       let bonus = bonusExtra[Math.floor(Math.random() * bonusExtra.length)]
@@ -154,8 +154,6 @@ let handler = async (m, { conn }) => {
     }
     
     user.USD = (user.USD || 0) + ganancia
-    textoResultado = `💰 *Ganaste +${ganancia} USD*`
-    emoji = "✅"
     
     let mensajesBase = [
       `🌸 *${trabajo.nombre}* ${trabajo.accion} y recibió su paga.`,
@@ -170,13 +168,24 @@ let handler = async (m, { conn }) => {
       mensajeAccion += ` Además, ${bonus.accion}.`
     }
     
+    await m.reply(`
+ㅤ    ꒰  ㅤ 💼 ㅤ *αℓуα - ωσяк* ㅤ ✅ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ *🧑‍💼 Empleado:* @${m.sender.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *📋 Reporte:* ${mensajeAccion}
+> ₊· ⫏⫏ ㅤ *💰 Paga:* +${ganancia} USD
+${bonusTexto}
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ *💵 Total en cuenta:* ${user.USD} USD
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+    `.trim(), { mentions: [m.sender] })
+    
   } else {
     trabajo = trabajosPerder[Math.floor(Math.random() * trabajosPerder.length)]
     perdida = Math.floor(Math.random() * (trabajo.perdida[1] - trabajo.perdida[0] + 1) + trabajo.perdida[0])
     
     let tieneMulta = Math.random() < 0.25 // 25% de probabilidad de multa extra
-    let multaMonto = 0
-    let multaTexto = ""
     
     if (tieneMulta) {
       let multa = multaExtra[Math.floor(Math.random() * multaExtra.length)]
@@ -186,8 +195,6 @@ let handler = async (m, { conn }) => {
     }
     
     user.USD = Math.max(0, (user.USD || 0) - perdida)
-    textoResultado = `💸 *Perdiste -${perdida} USD*`
-    emoji = "❌"
     
     let mensajesBase = [
       `🌸 *${trabajo.nombre}* ${trabajo.accion} y le descontaron del sueldo.`,
@@ -201,24 +208,22 @@ let handler = async (m, { conn }) => {
     if (multaMonto > 0) {
       mensajeAccion += ` Además, ${multa.accion}.`
     }
-  }
-  
-  user.lastwork = Date.now()
-  
-  await m.reply(`
-ㅤ    ꒰  ㅤ 💼 ㅤ *αℓуα - ωσяк* ㅤ ${emoji} ㅤ 性
+    
+    await m.reply(`
+ㅤ    ꒰  ㅤ 💼 ㅤ *αℓуα - ωσяк* ㅤ ❌ ㅤ 性
 
 > ₊· ⫏⫏ ㅤ *🧑‍💼 Empleado:* @${m.sender.split('@')[0]}
 > ₊· ⫏⫏ ㅤ *📋 Reporte:* ${mensajeAccion}
-${esGanar ? `> ₊· ⫏⫏ ㅤ *💰 Paga base:* +${ganancia - (bonusExtra.find(b => b.accion.includes('propina'))?.ganancia || 0) - (bonusExtra.find(b => b.accion.includes('bono'))?.ganancia || 0) - (bonusExtra.find(b => b.accion.includes('horas'))?.ganancia || 0)} USD` : `> ₊· ⫏⫏ ㅤ *💸 Descuento base:* -${perdida - (multaExtra.find(m => m.accion.includes('tarde'))?.perdida || 0) - (multaExtra.find(m => m.accion.includes('error'))?.perdida || 0) - (multaExtra.find(m => m.accion.includes('queja'))?.perdida || 0)} USD`}
-${esGanar && (bonusExtra.find(b => b.accion.includes('propina'))?.ganancia || 0) > 0 ? `> ₊· ⫏⫏ ㅤ *🎁 Bonos extras:* +${(bonusExtra.find(b => b.accion.includes('propina'))?.ganancia || 0) + (bonusExtra.find(b => b.accion.includes('bono'))?.ganancia || 0) + (bonusExtra.find(b => b.accion.includes('horas'))?.ganancia || 0)} USD` : ''}
-${!esGanar && (multaExtra.find(m => m.accion.includes('tarde'))?.perdida || 0) > 0 ? `> ₊· ⫏⫏ ㅤ *⚠️ Multas extras:* -${(multaExtra.find(m => m.accion.includes('tarde'))?.perdida || 0) + (multaExtra.find(m => m.accion.includes('error'))?.perdida || 0) + (multaExtra.find(m => m.accion.includes('queja'))?.perdida || 0)} USD` : ''}
-${esGanar ? bonusTexto : multaTexto}
+> ₊· ⫏⫏ ㅤ *💸 Descuento:* -${perdida} USD
+${multaTexto}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ *💵 Total en cuenta:* ${user.USD} USD
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
-  `.trim(), { mentions: [m.sender] })
+    `.trim(), { mentions: [m.sender] })
+  }
+  
+  user.lastwork = Date.now()
 }
 
 handler.help = ['work']
