@@ -1,5 +1,5 @@
-// setprimary.js - Elegir qué bot es el principal (con mención)
-let handler = async (m, { conn, isOwner, args }) => {
+// setprimary.js - Alternar bot principal con solo mención
+let handler = async (m, { conn, isOwner }) => {
   if (!isOwner) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ ѕσℓσ 木 σωηєя ㅤ 性
@@ -11,62 +11,44 @@ let handler = async (m, { conn, isOwner, args }) => {
   `.trim())
 
   let mention = m.mentionedJid[0]
-  let opcion = args[0]?.toLowerCase()
   
   if (!mention) return m.reply(`
 ㅤ    ꒰  ㅤ 📝 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ υѕσ 木 cσrrєctσ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *Uѕσ:* #ѕєтρяιмαяу @вσт ση/σƒƒ
-> ₊· ⫏⫏ ㅤ *Ejeмρℓσ:* #ѕєтρяιмαяу @${conn.user.jid.split('@')[0]} ση
+> ₊· ⫏⫏ ㅤ *Uѕσ:* #ѕєтρяιмαяу @вσт
+> ₊· ⫏⫏ ㅤ *Ejeмρℓσ:* #ѕєтρяιмαяу @${conn.user.jid.split('@')[0]}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
   `.trim())
   
-  if (!global.db.data.settings[mention]) {
-    global.db.data.settings[mention] = {}
+  // Asegurar que el JID tenga el formato correcto
+  let botJid = mention
+  if (!botJid.includes('@s.whatsapp.net') && !botJid.includes('@c.us')) {
+    botJid = botJid.split('@')[0] + '@s.whatsapp.net'
   }
   
-  if (opcion === 'on') {
-    global.db.data.settings[mention].primary = true
-    await m.reply(`
-ㅤ    ꒰  ㅤ 👑 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 ρяιмαяισ ㅤ 性
-
-> ₊· ⫏⫏ ㅤ *🤖 Bot mencionado:* ${mention.split('@')[0]}
-> ₊· ⫏⫏ ㅤ *✅ Estado:* PRINCIPAL activado
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
-    `.trim())
-  } 
-  else if (opcion === 'off') {
-    global.db.data.settings[mention].primary = false
-    await m.reply(`
-ㅤ    ꒰  ㅤ 🔒 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 ѕє¢υη∂αяισ ㅤ 性
-
-> ₊· ⫏⫏ ㅤ *🤖 Bot mencionado:* ${mention.split('@')[0]}
-> ₊· ⫏⫏ ㅤ *❌ Estado:* PRINCIPAL desactivado
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
-    `.trim())
+  if (!global.db.data.settings[botJid]) {
+    global.db.data.settings[botJid] = {}
   }
-  else {
-    let estado = global.db.data.settings[mention].primary ? '✅ ACTIVADO' : '❌ DESACTIVADO'
-    await m.reply(`
-ㅤ    ꒰  ㅤ 📊 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ єѕтα∂σ 木 вσт ㅤ 性
+  
+  // Alternar estado
+  let estadoActual = global.db.data.settings[botJid].primary !== false
+  let nuevoEstado = !estadoActual
+  
+  global.db.data.settings[botJid].primary = nuevoEstado
+  
+  await m.reply(`
+ㅤ    ꒰  ㅤ ${nuevoEstado ? '👑' : '🔒'} ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 ${nuevoEstado ? 'ρяιмαяισ' : 'ѕє¢υη∂αяισ'} ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *🤖 Bot:* ${mention.split('@')[0]}
-> ₊· ⫏⫏ ㅤ *📌 Estado:* ${estado}
+> ₊· ⫏⫏ ㅤ *🤖 Bot:* ${botJid.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *📌 Estado:* ${nuevoEstado ? '✅ PRINCIPAL' : '❌ SECUNDARIO'}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
-    `.trim())
-  }
+  `.trim())
 }
 
 handler.help = ['setprimary']
