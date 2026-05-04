@@ -1,126 +1,103 @@
-let handler = async (m, { conn, args, usedPrefix, command, participants, groupMetadata, isAdmin, isBotAdmin, isOwner }) => {
-
-  if (!m.isGroup) return conn.reply(m.chat, `
+let handler = async (m, { conn, isAdmin, isOwner, isROwner, text, usedPrefix, command }) => {
+  if (!m.isGroup) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 gяυρσ ㅤ 性
+ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 ɢяυρσ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ Eѕтє ¢σмαη∂σ ѕσℓσ ƒυη¢ισηα єη gяυρσѕ
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-  `.trim(), m)
-
-  if (!isAdmin && !isOwner) return conn.reply(m.chat, `
-ㅤ    ꒰  ㅤ 🔒 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ ρєяміѕσ 木 ∂єηєgα∂σ ㅤ 性
-
-> ₊· ⫏⫏ ㅤ Sσℓσ ℓσѕ *α∂міηѕ* ρυє∂єη υѕαя єѕтє ¢σмαη∂σ
+> ₊· ⫏⫏ ㅤ Sσℓσ єη gяυρσѕ
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-  `.trim(), m)
+  `.trim())
 
+  if (!isAdmin && !isOwner) return m.reply(`
+ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ α∂мιη 木 яєqυєяι∂σ ㅤ 性
 
-  if (!isBotAdmin) return conn.reply(m.chat, `
-ㅤ    ꒰  ㅤ ⚠️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 ηo α∂міη ㅤ 性
-
-> ₊· ⫏⫏ ㅤ Nє¢єѕιтσ ѕєя *α∂міη* єη єℓ gяυρσ ραяα єχρυℓѕαя
+> ₊· ⫏⫏ ㅤ Nєcєѕιтαѕ ѕєя α∂мιη
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-  `.trim(), m)
+  `.trim())
 
-  // ── Obtener usuario a kickear ──
-  // Puede ser por mención (@tag) o respondiendo un mensaje
-  let target = m.mentionedJid?.[0] || (m.quoted && m.quoted.sender) || null
+  let user = null
+  let nombre = ''
 
-  // Si no hay mención ni respuesta, verificar si se pasó número como argumento
-  if (!target && args[0]) {
-    const num = args[0].replace(/[^0-9]/g, '')
-    if (num) target = num + '@s.whatsapp.net'
+  if (m.quoted) {
+    user = m.quoted.sender
+    nombre = await conn.getName(user)
+  } else if (text) {
+    let mention = m.mentionedJid[0]
+    if (mention) {
+      user = mention
+      nombre = await conn.getName(user)
+    } else {
+      let numeros = text.match(/\d+/g)
+      if (numeros) {
+        user = numeros[0] + '@s.whatsapp.net'
+        nombre = await conn.getName(user)
+      }
+    }
   }
 
-  if (!target) return conn.reply(m.chat, `
-ㅤ    ꒰  ㅤ ❓ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ υѕσ 木 ¢σяяє¢тσ ㅤ 性
+  if (!user) return m.reply(`
+ㅤ    ꒰  ㅤ 📝 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ υѕσ 木 cσrrєctσ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *Uѕo:* ${usedPrefix}kick @usuario
-> ₊· ⫏⫏ ㅤ *O:* responde el mensaje del usuario
+> ₊· ⫏⫏ ㅤ *Uѕσ 1:* Rєѕρση∂є αℓ мєηѕαנє ∂єℓ υѕυαяισ
+> ₊· ⫏⫏ ㅤ *Uѕσ 2:* #кι¢к @υѕυαяισ
+> ₊· ⫏⫏ ㅤ *Uѕσ 3:* #кι¢к +59177474230
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-  `.trim(), m)
+  `.trim())
 
-  // ── Verificar que el target esté en el grupo ──
-  const estaEnGrupo = participants.some(p => (p.id || p.jid) === target)
-  if (!estaEnGrupo) return conn.reply(m.chat, `
+  const detectwhat = user.includes('@lid') ? '@lid' : '@s.whatsapp.net'
+  const isROwnerTarget = global.owner ? [...global.owner.map(([number]) => number)].map(v => v.replace(/\D/g, "") + detectwhat).includes(user) : false
+  const isOwnerTarget = isROwnerTarget || user === conn.user.jid
+
+  if (isOwnerTarget) return m.reply(`
+ㅤ    ꒰  ㅤ 🛡️ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ ησ 木 ρυє∂єѕ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Nσ ρυє∂єѕ єχρυℓѕαя αℓ *¢яєα∂σя* σ *σωηєя*
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+  `.trim())
+
+  if (!isBotAdmin) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ υѕυαяισ 木 ησ єη¢σηтяα∂σ ㅤ 性
+ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 ѕιη α∂мιη ㅤ 性
 
-> ₊· ⫏⫏ ㅤ Eѕє υѕυαяισ ησ єѕтá єη єℓ gяυρσ
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-  `.trim(), m)
-
-  // ── Evitar kickear al bot mismo ──
-  const botJid = conn.user?.jid || conn.user?.id
-  if (target === botJid || target.split('@')[0] === botJid?.split('@')[0]) return conn.reply(m.chat, `
-ㅤ    ꒰  ㅤ 😅 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 αυтσ-ραтα∂α ㅤ 性
-
-> ₊· ⫏⫏ ㅤ Nσ ρυє∂σ єχρυℓѕαямє α мí міѕмσ 😂
+> ₊· ⫏⫏ ㅤ Eℓ вσт ηє¢єѕιтα ѕєя α∂мιη
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-  `.trim(), m)
+  `.trim())
 
- 
-  const targetData = participants.find(p => (p.id || p.jid) === target) || {}
-  const targetIsAdmin = targetData.admin === 'admin' || targetData.admin === 'superadmin'
-
-  if (targetIsAdmin && !isOwner) return conn.reply(m.chat, `
-ㅤ    ꒰  ㅤ 👑 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ ρяσтє¢¢ιóη 木 α∂міη ㅤ 性
-
-> ₊· ⫏⫏ ㅤ Nσ ρυє∂єѕ єχρυℓѕαя α υη *α∂міηιѕтяα∂σя*
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-  `.trim(), m)
-
-  // ── Obtener nombre del target ──
-  const targetName = await conn.getName(target) || target.split('@')[0]
-
-  // ── Ejecutar el kick ──
   try {
-    await conn.sendMessage(m.chat, { react: { text: '👢', key: m.key } })
-    await conn.groupParticipantsUpdate(m.chat, [target], 'remove')
-
-    await conn.reply(m.chat, `
+    await conn.groupParticipantsUpdate(m.chat, [user], 'remove')
+    await m.reply(`
 ㅤ    ꒰  ㅤ 👢 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ єχρυℓѕα∂σ 木 єχιтσ ㅤ 性
+ㅤ    ⿻ ㅤ ✿ ㅤ єχρυℓѕα∂σ 木 🚫 ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *Uѕυαяισ:* ${targetName}
-> ₊· ⫏⫏ ㅤ *Núмєяσ:* ${target.split('@')[0]}
-> ₊· ⫏⫏ ㅤ *Gяυρσ:* ${groupMetadata.subject || 'Grupo'}
-> ₊· ⫏⫏ ㅤ *Pσя:* ${await conn.getName(m.sender) || m.sender.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *👤 Usuario:* ${nombre}
+> ₊· ⫏⫏ ㅤ *⚡ Acción:* Expulsado del grupo
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-    `.trim(), m)
-
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+    `.trim())
   } catch (e) {
-    await conn.reply(m.chat, `
+    await m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 єχρυℓѕιóη ㅤ 性
+ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 єχρυℓѕαя ㅤ 性
 
-> ₊· ⫏⫏ ㅤ Nσ ρυ∂є єχρυℓѕαя αℓ υѕυαяισ
-> ₊· ⫏⫏ ㅤ *Eяяσя:* ${e.message || 'Desconocido'}
+> ₊· ⫏⫏ ㅤ *єяяσя:* ${e.message}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-    `.trim(), m)
+> ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
+    `.trim())
   }
 }
 
-handler.help = ['kick @usuario']
+handler.help = ['kick']
 handler.tags = ['group']
-handler.command = ['kick', 'expulsar', 'echar']
-handler.group = true      // Solo funciona en grupos
-handler.admin = true      // Quien lo usa debe ser admin
-handler.botAdmin = true   // El bot debe ser admin
+handler.command = ['kick', 'expulsar']
+handler.group = true
 
 export default handler
