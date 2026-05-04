@@ -141,7 +141,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
   let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
   let id = `${who.split('@')[0]}`
-  let pathblackJadiBot = path.join(process.cwd(), 'subBot', id)
+  let pathblackJadiBot = path.join(process.cwd(), 'Alya-Bot', 'subBot', id)
 
   if (!fs.existsSync(pathblackJadiBot)) {
     fs.mkdirSync(pathblackJadiBot, { recursive: true })
@@ -332,10 +332,11 @@ export async function alyaJadiBot(options) {
     }
   }, 60000)
 
-  let handler = await import('../handler.js')
+  // 🔧 IMPORTANTE: Ruta corregida al handler.js que está en Alya-Bot/
+  let handler = await import('../Alya-Bot/handler.js')
   let creloadHandler = async function (restatConn) {
     try {
-      const Handler = await import(`../handler.js?update=${Date.now()}`).catch(console.error)
+      const Handler = await import(`../Alya-Bot/handler.js?update=${Date.now()}`).catch(console.error)
       if (Object.keys(Handler || {}).length) handler = Handler
     } catch (e) { }
     if (restatConn) {
