@@ -434,7 +434,7 @@ await global.reloadHandler()
 
 // ========== RECONECTAR SUB-BOTS GUARDADOS ==========
 async function reconectarSubBots() {
-    const subBotPath = path.join(process.cwd(), 'Alya-Bot', 'subBot')
+    const subBotPath = path.join(process.cwd(), 'subBot')
     if (!fs.existsSync(subBotPath)) {
         console.log(chalk.yellow('📁 No hay carpeta de sub-bots para reconectar'))
         return
@@ -455,7 +455,7 @@ async function reconectarSubBots() {
         try {
             console.log(chalk.yellow(`🔄 Reconectando sub-bot: ${carpeta}`))
             
-            const { alyaJadiBot } = await import('./plugins/serbot.js')
+            const { alyaJadiBot } = await import('../plugins/serbot.js')
             
             const options = {
                 pathblackJadiBot: path.join(subBotPath, carpeta),
@@ -492,7 +492,7 @@ setTimeout(() => {
         }, 5000)
     }
 }, 15000)
-// ====================================================
+// ===================================================
 
 function clearTmp() {
     const tmpDir = join(process.cwd(), 'tmp')
