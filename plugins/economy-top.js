@@ -5,9 +5,15 @@ let handler = async (m, { conn, args }) => {
   
   for (let [id, user] of Object.entries(global.db.data.users)) {
     if (user.USD > 0 && id.includes('@s.whatsapp.net')) {
+      let nombre
+      try {
+        nombre = await conn.getName(id)
+      } catch {
+        nombre = id.split('@')[0]
+      }
       usuarios.push({
         jid: id,
-        nombre: await conn.getName(id).catch(() => id.split('@')[0]),
+        nombre: nombre || id.split('@')[0],
         usd: user.USD || 0
       })
     }
