@@ -291,7 +291,6 @@ global.conn.ev.on('group-participants.update', async (update) => {
         const groupMetadata = await global.conn.groupMetadata(id).catch(() => null)
         const groupName = groupMetadata?.subject || 'ᴇʟ ɢʀᴜᴘᴏ'
         const memberCount = groupMetadata?.participants?.length || 0
-        
         let groupIcon = 'https://files.catbox.moe/z4qgf1.jpeg'
         try {
             const icon = await global.conn.profilePictureUrl(id, 'image')
@@ -312,7 +311,7 @@ global.conn.ev.on('group-participants.update', async (update) => {
 
 > ₊· ⫏⫏ ㅤ 👤 @${jid.split('@')[0]}
 > ₊· ⫏⫏ ㅤ 📊 Nɪᴠᴇʟ: ${userLevel}
-> ₊· ⫏⫏ ㅤ 🔖 Rᴏʟ: ${userRole}
+> ₊· ⫏⫏ ㅤ 🌸 Rᴏʟ: ${userRole}
 > ₊· ⫏⫏ ㅤ 👥 Mɪᴇᴍʙʀᴏs: ${memberCount}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
@@ -382,6 +381,21 @@ global.reloadHandler = async function (restatConn) {
     global.conn.ev.on('messages.upsert', async (m) => {
         if (m.messages && m.messages[0] && m.messages[0].key && m.messages[0].key.remoteJid) {
             const jid = m.messages[0].key.remoteJid
+            const msg = m.messages[0]
+            
+            // ========== VERIFICAR SI EL BOT ESTÁ DESACTIVADO EN EL GRUPO ==========
+            if (jid.endsWith('@g.us')) {
+                if (!global.db.data.chats[jid]) global.db.data.chats[jid] = {}
+                const chatGroup = global.db.data.chats[jid]
+                const sender = msg.key.participant || msg.key.remoteJid
+                const isOwner = global.owner ? global.owner.some(own => own[0] === sender?.split('@')[0]) : false
+                const isROwner = global.owner ? global.owner.some(own => own[0] === sender?.split('@')[0]) : false
+                
+                if (chatGroup && chatGroup.botEnabled === false && !isOwner && !isROwner) {
+                    return
+                }
+            }
+            
             await global.conn.sendPresenceUpdate('composing', jid)
             await global.conn.handler(m)
             await global.conn.readMessages([m.messages[0].key])
@@ -441,68 +455,6 @@ global.reload = async (_ev, filename) => {
 Object.freeze(global.reload)
 watch(pluginFolder, global.reload)
 await global.reloadHandler()
-
-// ========== RECONECTAR SUB-BOTS GUARDADOS ==========
-async function reconectarSubBots() {
-    const subBotPath = path.join(process.cwd(), 'subBot')
-    if (!fs.existsSync(subBotPath)) {
-        console.log(chalk.yellow('📁 No hay carpeta de sub-bots para reconectar'))
-        return
-    }
-    
-    const carpetas = fs.readdirSync(subBotPath)
-    if (carpetas.length === 0) {
-        console.log(chalk.yellow('📁 No hay sub-bots guardados'))
-        return
-    }
-    
-    console.log(chalk.cyan(`🔄 Intentando reconectar ${carpetas.length} sub-bot(s)...`))
-    
-    for (let carpeta of carpetas) {
-        const credsPath = path.join(subBotPath, carpeta, 'creds.json')
-        if (!fs.existsSync(credsPath)) continue
-        
-        try {
-            console.log(chalk.yellow(`🔄 Reconectando sub-bot: ${carpeta}`))
-            
-            const { alyaJadiBot } = await import('../plugins/serbot.js')
-            
-            const options = {
-                pathblackJadiBot: path.join(subBotPath, carpeta),
-                m: null,
-                conn: global.conn,
-                args: [],
-                usedPrefix: '#',
-                command: 'qr',
-                fromCommand: false
-            }
-            
-            setTimeout(() => {
-                alyaJadiBot(options).catch(err => {
-                    console.log(chalk.red(`❌ Error reconectando sub-bot ${carpeta}:`, err.message))
-                })
-            }, 2000)
-            
-        } catch (e) {
-            console.log(chalk.red(`❌ Error al reconectar ${carpeta}:`, e.message))
-        }
-    }
-}
-
-setTimeout(() => {
-    if (global.conn && global.conn.user) {
-        reconectarSubBots()
-    } else {
-        console.log(chalk.yellow('⏳ Esperando conexión principal para reconectar sub-bots...'))
-        const interval = setInterval(() => {
-            if (global.conn && global.conn.user) {
-                clearInterval(interval)
-                reconectarSubBots()
-            }
-        }, 5000)
-    }
-}, 15000)
-// ===================================================
 
 function clearTmp() {
     const tmpDir = join(process.cwd(), 'tmp')
