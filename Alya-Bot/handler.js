@@ -171,14 +171,6 @@ export async function handler(chatUpdate) {
     const isAdmin = isRAdmin || user.admin === 'admin';
     const isBotAdmin = !!bot.admin;
 
-    // ========== VERIFICAR SI EL BOT ESTÁ ACTIVO EN EL GRUPO ==========
-    if (m.isGroup) {
-      const chatGroup = global.db.data.chats[m.chat]
-      if (chatGroup && chatGroup.botEnabled === false && !isOwner && !isROwner) {
-        return
-      }
-    }
-
     // ========== SISTEMA ANTILINK CON NEWSLETTER ==========
     if (m.isGroup && m.text && !m.isBaileys) {
       const chat = global.db.data.chats[m.chat];
