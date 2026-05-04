@@ -291,7 +291,12 @@ global.conn.ev.on('group-participants.update', async (update) => {
         const groupMetadata = await global.conn.groupMetadata(id).catch(() => null)
         const groupName = groupMetadata?.subject || 'ᴇʟ ɢʀᴜᴘᴏ'
         const memberCount = groupMetadata?.participants?.length || 0
-        const groupIcon = await getGroupPicture(id)
+        
+        let groupIcon = 'https://files.catbox.moe/z4qgf1.jpeg'
+        try {
+            const icon = await global.conn.profilePictureUrl(id, 'image')
+            if (icon) groupIcon = icon
+        } catch (e) {}
 
         if (action === 'add') {
             for (const jid of participants) {
@@ -301,25 +306,24 @@ global.conn.ev.on('group-participants.update', async (update) => {
                     let userLevel = userData.level || 1
                     let userRole = userData.role || '🌱 Aᴘʀᴇɴᴅɪᴢ'
 
-                    let welcomeText = chat.welcomeMessage || `ㅤ    ꒰  ㅤ 🌸 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+                    let welcomeText = chat.welcomeMessage || `
+ㅤ    ꒰  ㅤ 🌸 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ вιєηνєηι∂@ 木 ✨ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ 👤 @user
-> ₊· ⫏⫏ ㅤ 📊 Nɪᴠᴇʟ: @level
-> ₊· ⫏⫏ ㅤ 🌸 Rᴏʟ: @role
-> ₊· ⫏⫏ ㅤ 👥 Mɪᴇᴍʙʀᴏs: @count
+> ₊· ⫏⫏ ㅤ 👤 @${jid.split('@')[0]}
+> ₊· ⫏⫏ ㅤ 📊 Nɪᴠᴇʟ: ${userLevel}
+> ₊· ⫏⫏ ㅤ 🌸 Rᴏʟ: ${userRole}
+> ₊· ⫏⫏ ㅤ 👥 Mɪᴇᴍʙʀᴏs: ${memberCount}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🌟 Dɪsғʀᴜᴛᴀ @group`
+> ₊· ⫏⫏ ㅤ 🌟 Dɪsғʀᴜᴛᴀ ${groupName}`
 
-                    welcomeText = welcomeText
-                        .replace(/@user/g, `@${jid.split('@')[0]}`)
-                        .replace(/@level/g, userLevel)
-                        .replace(/@role/g, userRole)
-                        .replace(/@count/g, memberCount)
-                        .replace(/@group/g, groupName)
-
-                    await global.conn.sendMessage(id, { image: { url: groupIcon }, caption: welcomeText, mentions: [jid] })
+                    await global.conn.sendMessage(id, { 
+                        image: { url: groupIcon }, 
+                        caption: welcomeText, 
+                        mentions: [jid] 
+                    })
+                    
                     if (chat.welcomeBonus !== false) {
                         userData.monedas = (userData.monedas || 0) + 50
                         userData.exp = (userData.exp || 0) + 100
@@ -331,14 +335,20 @@ global.conn.ev.on('group-participants.update', async (update) => {
         if (action === 'remove') {
             for (const jid of participants) {
                 try {
-                    const goodbyeText = `ㅤ    ꒰  ㅤ 👋 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+                    const goodbyeText = `
+ㅤ    ꒰  ㅤ 👋 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ нαsтα 木 ρʀᴏɴтᴏ ㅤ 性
 
 > ₊· ⫏⫏ ㅤ 👤 @${jid.split('@')[0]} нᴀ ᴀʙᴀɴᴅᴏɴᴀᴅᴏ
 > ₊· ⫏⫏ ㅤ 👥 Mɪᴇᴍʙʀᴏs ʀᴇsᴛᴀɴᴛᴇs: ${memberCount}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱`
-                    await global.conn.sendMessage(id, { image: { url: groupIcon }, caption: goodbyeText, mentions: [jid] })
+                    
+                    await global.conn.sendMessage(id, { 
+                        image: { url: groupIcon }, 
+                        caption: goodbyeText, 
+                        mentions: [jid] 
+                    })
                 } catch(e) {}
             }
         }
