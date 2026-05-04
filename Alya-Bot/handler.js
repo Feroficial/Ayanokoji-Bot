@@ -251,29 +251,37 @@ export async function handler(chatUpdate) {
       }
     }
 
-    // ========== SALUDO CON AUDIO ==========
-    if (m.text && !m.isBaileys) {
-        const saludar = ["Hola", "Hola alya", "Buenas", "Buenos dias", "Buenas tardes", "Buenas noches", "Bot", "Alya bot"];
-        const msg = m.text.toLowerCase().trim();
+   // ========== SALUDO CON AUDIO (NOTA DE VOZ) ==========
+if (m.text && !m.isBaileys) {
+    const saludar = ["hola", "hola alya", "buenas", "buenos dias", "buenas tardes", "buenas noches", "alo", "hey alya", "ola", "epa"];
+    const msg = m.text.toLowerCase().trim();
 
-        if (saludar.some(saludo => msg.includes(saludo))) {
-            const audioUrl = "https://files.catbox.moe/i427hk.mp3";
-            
-            const audioMessage = {
+    if (saludar.some(saludo => msg.includes(saludo))) {
+        const audioUrl = "https://files.catbox.moe/i427hk.mp3";
+        
+        try {
+            await this.sendMessage(m.chat, { 
                 audio: { url: audioUrl },
                 mimetype: "audio/mpeg",
-                fileName: "alya_bienvenida.mp3",
                 ptt: true
-            };
+            }, { quoted: m });
             
+            await this.sendMessage(m.chat, { react: { text: "🎧", key: m.key } });
+        } catch (e) {
+            console.error("Error enviando audio:", e);
+            // Si falla, intentar con otro mimetype
             try {
-                await this.sendMessage(m.chat, audioMessage, { quoted: m });
-                await this.sendMessage(m.chat, { react: { text: "🎧", key: m.key } });
-            } catch (e) {
-                console.error("Error enviando audio:", e);
+                await this.sendMessage(m.chat, { 
+                    audio: { url: audioUrl },
+                    mimetype: "audio/aac",
+                    ptt: true
+                }, { quoted: m });
+            } catch (e2) {
+                await this.sendMessage(m.chat, { text: "🌸 Hola! Soy Alya Bot 🌸" }, { quoted: m });
             }
         }
     }
+}
 
     // ========== PROCESAR PLUGINS ==========
     let comandoEncontrado = false;
