@@ -41,7 +41,7 @@ export async function handler(chatUpdate) {
 
       Object.assign(user, {
         exp: isNumber(user.exp) ? user.exp : 0,
-        monedas: isNumber(user.monedas) ? user.monedas : 100,
+        USD: isNumber(user.USD) ? user.USD : 100,
         bank: isNumber(user.bank) ? user.bank : 0,
         joincount: isNumber(user.joincount) ? user.joincount : 1,
         diamond: isNumber(user.diamond) ? user.diamond : 3,
@@ -124,7 +124,8 @@ export async function handler(chatUpdate) {
         jadibotmd: 'jadibotmd' in settings ? settings.jadibotmd : true,
         antiPrivate: 'antiPrivate' in settings ? settings.antiPrivate : false,
         autoread: 'autoread' in settings ? settings.autoread : false,
-        status: settings.status || 0
+        status: settings.status || 0,
+        primary: 'primary' in settings ? settings.primary : true
       });
 
     } catch (e) { console.error('Error inicializando datos:', e); }
@@ -137,6 +138,14 @@ export async function handler(chatUpdate) {
     const isOwner = isROwner || m.fromMe;
     const isPrems = isROwner || (global.db.data.users[m.sender]?.premiumTime || 0) > 0;
     const isMods = isROwner || (global.mods || []).includes(m.sender.split('@')[0]);
+
+    // ========== VERIFICAR SI ESTE BOT ES EL PRINCIPAL ==========
+    const botSettings = global.db.data.settings[this.user.jid]
+    const isPrimary = botSettings?.primary !== false
+
+    if (!isPrimary && !isOwner && !isROwner) {
+      return
+    }
 
     if (opts["queque"] && m.text && !isMods) {
       const queque = this.msgqueque;
@@ -324,12 +333,12 @@ export async function handler(chatUpdate) {
         m.isCommand = true;
         let xp = 'exp' in plugin ? parseInt(plugin.exp) : 10;
         m.exp += xp;
-        if (!isPrems && plugin.monedas && _user.monedas < plugin.monedas) {
+        if (!isPrems && plugin.monedas && _user.USD < plugin.monedas) {
           this.reply(m.chat, `
 ㅤ    ꒰  ㅤ 💰 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ мσηє∂αѕ 木 ιηѕυƒι¢ιєηтєѕ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ Necesitas ${plugin.monedas} monedas
+> ₊· ⫏⫏ ㅤ Necesitas ${plugin.monedas} USD
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
           `.trim(), m);
@@ -364,7 +373,7 @@ export async function handler(chatUpdate) {
 ㅤ    ꒰  ㅤ 💰 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ gαѕтσ 木 мσηє∂αѕ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ Usaste *${+m.monedas} monedas*
+> ₊· ⫏⫏ ㅤ Usaste *${+m.monedas} USD*
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
           `.trim(), m);
@@ -407,7 +416,7 @@ export async function handler(chatUpdate) {
       if (utente?.muto) await this.sendMessage(m.chat, { delete: { remoteJid: m.chat, fromMe: false, id: m.key.id, participant: m.key.participant }});
       if (utente) {
         utente.exp += m.exp || 0;
-        utente.monedas -= m.monedas || 0;
+        utente.USD -= m.monedas || 0;
         utente.lastMsg = Date.now();
       }
     }
