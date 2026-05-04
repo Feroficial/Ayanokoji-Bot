@@ -30,7 +30,8 @@ let handler = async (m, { conn, isAdmin, isOwner, args }) => {
 ㅤ    ꒰  ㅤ ✅ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 α¢тινα∂σ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ Eℓ вσт ѕє α¢тινó єη *${grupoNombre}*
+> ₊· ⫏⫏ ㅤ *📌 Grupo:* ${grupoNombre}
+> ₊· ⫏⫏ ㅤ *🤖 Estado:* ACTIVADO
 > ₊· ⫏⫏ ㅤ Yα ρυє∂єη υѕαя ℓσѕ ¢σмαη∂σѕ
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
@@ -43,7 +44,8 @@ let handler = async (m, { conn, isAdmin, isOwner, args }) => {
 ㅤ    ꒰  ㅤ 🚫 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 ∂єѕα¢тινα∂σ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ Eℓ вσт ѕє ∂єѕα¢тινó єη *${grupoNombre}*
+> ₊· ⫏⫏ ㅤ *📌 Grupo:* ${grupoNombre}
+> ₊· ⫏⫏ ㅤ *🤖 Estado:* DESACTIVADO
 > ₊· ⫏⫏ ㅤ Usα *#вσт ση* ραяα α¢тιναяℓσ
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
@@ -56,7 +58,8 @@ let handler = async (m, { conn, isAdmin, isOwner, args }) => {
 ㅤ    ꒰  ㅤ 📊 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ єѕтα∂σ 木 вσт ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *📌 Estado en ${grupoNombre}:* ${estado}
+> ₊· ⫏⫏ ㅤ *📌 Grupo:* ${grupoNombre}
+> ₊· ⫏⫏ ㅤ *🤖 Estado:* ${estado}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
