@@ -7,6 +7,7 @@ import { unwatchFile, watchFile } from 'fs';
 import fs from 'fs';
 import chalk from 'chalk';
 import ws from 'ws';
+import axios from 'axios';
 
 const { proto } = (await import('@whiskeysockets/baileys')).default;
 const isNumber = x => typeof x === 'number' && !isNaN(x);
@@ -15,6 +16,10 @@ const delay = ms => isNumber(ms) && new Promise(resolve => setTimeout(() => reso
 const dbPath = './src/database/aniadb.json';
 const newsletterJid = "120363407253203904@newsletter";
 const newsletterName = "αℓуα - ¢нαηηєℓ";
+
+// Audios
+const audioBienvenida = "https://files.catbox.moe/i427hk.mp3";
+const audioDespedida = "https://files.catbox.moe/i427hk.mp3"; // Cambia por tu audio de despedida
 
 export async function handler(chatUpdate) {
   this.msgqueque ||= [];
@@ -170,7 +175,7 @@ export async function handler(chatUpdate) {
     const isAdmin = isRAdmin || user.admin === 'admin';
     const isBotAdmin = !!bot.admin;
 
-    // ========== SISTEMA ANTILINK CON NEWSLETTER ==========
+    // ========== ANTILINK ==========
     if (m.isGroup && m.text && !m.isBaileys) {
       const chat = global.db.data.chats[m.chat];
 
@@ -251,37 +256,53 @@ export async function handler(chatUpdate) {
       }
     }
 
-   // ========== SALUDO CON AUDIO (NOTA DE VOZ) ==========
-if (m.text && !m.isBaileys) {
-    const saludar = ["hola", "hola alya", "buenas", "buenos dias", "buenas tardes", "buenas noches", "alo", "hey alya", "ola", "epa"];
-    const msg = m.text.toLowerCase().trim();
+    // ========== SALUDO (HOLA) ==========
+    if (m.text && !m.isBaileys) {
+        const saludos = ["hola", "hola alya", "buenas", "buenos dias", "buenas tardes", "buenas noches", "alo", "hey alya", "ola", "epa", "holi", "holis"];
+        const msg = m.text.toLowerCase().trim();
 
-    if (saludar.some(saludo => msg.includes(saludo))) {
-        const audioUrl = "https://files.catbox.moe/i427hk.mp3";
-        
-        try {
-            await this.sendMessage(m.chat, { 
-                audio: { url: audioUrl },
-                mimetype: "audio/mpeg",
-                ptt: true
-            }, { quoted: m });
-            
-            await this.sendMessage(m.chat, { react: { text: "🎧", key: m.key } });
-        } catch (e) {
-            console.error("Error enviando audio:", e);
-            // Si falla, intentar con otro mimetype
+        if (saludos.some(s => msg.includes(s))) {
             try {
+                const response = await fetch(audioBienvenida);
+                const audioBuffer = Buffer.from(await response.arrayBuffer());
+                
                 await this.sendMessage(m.chat, { 
-                    audio: { url: audioUrl },
-                    mimetype: "audio/aac",
+                    audio: audioBuffer,
+                    mimetype: "audio/mpeg",
                     ptt: true
                 }, { quoted: m });
-            } catch (e2) {
-                await this.sendMessage(m.chat, { text: "🌸 Hola! Soy Alya Bot 🌸" }, { quoted: m });
+                
+                await this.sendMessage(m.chat, { react: { text: "🎧", key: m.key } });
+            } catch (e) {
+                console.error("Error enviando audio de bienvenida:", e);
+                await this.sendMessage(m.chat, { text: "🌸 ¡Hola! Soy Alya Bot 🌸" }, { quoted: m });
             }
         }
     }
-}
+
+    // ========== DESPEDIDA (ADIÓS) ==========
+    if (m.text && !m.isBaileys) {
+        const despedidas = ["adios", "adiós", "chao", "bye", "nos vemos", "hasta luego", "hasta pronto", "me voy", "salir"];
+        const msg = m.text.toLowerCase().trim();
+
+        if (despedidas.some(d => msg.includes(d))) {
+            try {
+                const response = await fetch(audioDespedida);
+                const audioBuffer = Buffer.from(await response.arrayBuffer());
+                
+                await this.sendMessage(m.chat, { 
+                    audio: audioBuffer,
+                    mimetype: "audio/mpeg",
+                    ptt: true
+                }, { quoted: m });
+                
+                await this.sendMessage(m.chat, { react: { text: "👋", key: m.key } });
+            } catch (e) {
+                console.error("Error enviando audio de despedida:", e);
+                await this.sendMessage(m.chat, { text: "🌸 ¡Hasta luego! Cuídate 🌸" }, { quoted: m });
+            }
+        }
+    }
 
     // ========== PROCESAR PLUGINS ==========
     let comandoEncontrado = false;
@@ -405,7 +426,7 @@ if (m.text && !m.isBaileys) {
       }
     }
 
-    // ========== COMANDO NO ENCONTRADO CON NEWSLETTER ==========
+    // ========== COMANDO NO ENCONTRADO ==========
     if (m.text && !m.isBaileys && !comandoEncontrado && !m.isCommand) {
       const primerCaracter = m.text[0];
       const esPrefijo = ['#', '.', '/', '!'].includes(primerCaracter);
