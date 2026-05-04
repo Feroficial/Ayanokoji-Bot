@@ -43,14 +43,14 @@ let handler = async (m, { conn, args }) => {
 ㅤ    ꒰  ㅤ 💸 ㅤ *αℓуα - вαηк* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ яєтιяσ 木 єχιтσѕσ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ *👤 Usuario:* @${m.sender.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *👤 Usuario:* ${m.sender.split('@')[0]}
 > ₊· ⫏⫏ ㅤ *📤 Cantidad retirada:* ${cantidad} USD
 > ₊· ⫏⫏ ㅤ *💵 Efectivo actual:* ${user.USD} USD
 > ₊· ⫏⫏ ㅤ *🏦 Restante en banco:* ${user.bank} USD
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
-  `.trim(), { mentions: [m.sender] })
+  `.trim())
 }
 
 handler.help = ['retirar']
