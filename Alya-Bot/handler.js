@@ -170,6 +170,111 @@ export async function handler(chatUpdate) {
     const isAdmin = isRAdmin || user.admin === 'admin';
     const isBotAdmin = !!bot.admin;
 
+    // ========== SISTEMA ANTILINK CON NEWSLETTER ==========
+    if (m.isGroup && m.text && !m.isBaileys) {
+      const chat = global.db.data.chats[m.chat];
+
+      if (chat && chat.antiLink === true) {
+        const linksProhibidos = [
+          'chat.whatsapp.com', 'whatsapp.com/channel', 'instagram.com', 'facebook.com',
+          'twitter.com', 'tiktok.com', 'youtube.com', 'youtu.be', 'wa.me',
+          't.me', 'discord.gg', 'linktr.ee', 'https://', 'http://'
+        ]
+
+        let tieneLink = false;
+        let linkEncontrado = '';
+
+        for (let link of linksProhibidos) {
+          if (m.text.toLowerCase().includes(link)) {
+            tieneLink = true;
+            linkEncontrado = link;
+            break;
+          }
+        }
+
+        const urlRegex = /(https?:\/\/[^\s]+)/gi;
+        if (urlRegex.test(m.text) && !tieneLink) {
+          tieneLink = true;
+          linkEncontrado = 'enlace';
+        }
+
+        if (tieneLink && !isAdmin && !isRAdmin && !isOwner && !isROwner) {
+          try {
+            await this.sendMessage(m.chat, { delete: m.key });
+          } catch (e) {}
+
+          const contextInfo = {
+            mentionedJid: [m.sender],
+            forwardedNewsletterMessageInfo: {
+              newsletterJid: newsletterJid,
+              newsletterName: newsletterName,
+              serverMessageId: 1
+            }
+          };
+
+          if (isBotAdmin) {
+            try {
+              await this.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
+            } catch (e) {}
+
+            await this.sendMessage(m.chat, {
+              text: `
+ㅤ    ꒰  ㅤ 🔗 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ αηтιℓιηк 木 🛡️ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ *👤 Usuario:* @${m.sender.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *🔗 Enlace:* ${linkEncontrado}
+> ₊· ⫏⫏ ㅤ *⚡ Acción:* Eliminado y expulsado
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
+              `.trim(),
+              contextInfo: contextInfo
+            });
+          } else {
+            await this.sendMessage(m.chat, {
+              text: `
+ㅤ    ꒰  ㅤ 🔗 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ αηтιℓιηк 木 🛡️ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ *👤 Usuario:* @${m.sender.split('@')[0]}
+> ₊· ⫏⫏ ㅤ *🔗 Enlace:* ${linkEncontrado}
+> ₊· ⫏⫏ ㅤ *⚠️ Error:* El bot necesita ser admin
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ 🔖 Creador: Lʏᴏɴɴ
+              `.trim(),
+              contextInfo: contextInfo
+            });
+          }
+        }
+      }
+    }
+
+    // ========== SALUDO CON AUDIO ==========
+    if (m.text && !m.isBaileys) {
+        const saludar = ["Hola", "Hola alya", "Buenas", "Buenos dias", "Buenas tardes", "Buenas noches", "Bot", "Alya bot"];
+        const msg = m.text.toLowerCase().trim();
+
+        if (saludar.some(saludo => msg.includes(saludo))) {
+            const audioUrl = "https://files.catbox.moe/i427hk.mp3";
+            
+            const audioMessage = {
+                audio: { url: audioUrl },
+                mimetype: "audio/mpeg",
+                fileName: "alya_bienvenida.mp3",
+                ptt: true
+            };
+            
+            try {
+                await this.sendMessage(m.chat, audioMessage, { quoted: m });
+                await this.sendMessage(m.chat, { react: { text: "🎧", key: m.key } });
+            } catch (e) {
+                console.error("Error enviando audio:", e);
+            }
+        }
+    }
+
     // ========== PROCESAR PLUGINS ==========
     let comandoEncontrado = false;
     const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), '../plugins');
