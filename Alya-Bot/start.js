@@ -286,7 +286,8 @@ global.conn.ev.on('group-participants.update', async (update) => {
         if (!global.db.data) await loadDatabase()
         if (!global.db.data.chats[id]) global.db.data.chats[id] = {}
         const chat = global.db.data.chats[id]
-        if (!chat || chat.welcome !== true) return
+        const welcomeEnabled = 'welcome' in chat ? chat.welcome : true
+        if (!welcomeEnabled) return
 
         const groupMetadata = await global.conn.groupMetadata(id).catch(() => null)
         const groupName = groupMetadata?.subject || 'ᴇʟ ɢʀᴜᴘᴏ'
