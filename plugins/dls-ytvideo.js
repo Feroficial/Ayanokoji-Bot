@@ -93,7 +93,7 @@ let handler = async (m, { conn, text, usedPrefix }) => {
 > ₊· ⫏⫏ ㅤ *єrrσr:* ${error.message}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ *αρι:* https://api.alyacore.xyz
+> ₊· ⫏⫏ ㅤ *αρι:* https://dvlyonn.onrender.com
     `.trim())
     await m.react('❌')
   }
