@@ -23,11 +23,11 @@ let handler = async (m, { conn, text, usedPrefix }) => {
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
     `.trim())
 
-    const searchUrl = `https://dvlyonn.onrender.com/search/youtube?q=${encodeURIComponent(text)}`
+    const searchUrl = `https://api.alyacore.xyz/search/yt?query=${encodeURIComponent(text)}&key=Alya-WDxN0Sg4`
     const busqueda = await fetch(searchUrl)
     const searchData = await busqueda.json()
 
-    if (!searchData.result?.length) return m.reply(`
+    if (!searchData.status || !searchData.result?.length) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ єrrσr 木 вúsqυє∂α ㅤ 性
 
@@ -37,7 +37,7 @@ let handler = async (m, { conn, text, usedPrefix }) => {
     `.trim())
 
     const video = searchData.result[0]
-    
+
     await m.reply(`
 ㅤ    ꒰  ㅤ ⏳ ㅤ *αℓуα - νι∂єσ* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ ∂єscαrgαη∂σ 木 📥 ㅤ 性
@@ -61,10 +61,11 @@ let handler = async (m, { conn, text, usedPrefix }) => {
 
 > ₊· ⫏⫏ ㅤ *τíτυℓσ:* ${downloadData.result.title || video.title}
 > ₊· ⫏⫏ ㅤ *∂υrαción:* ${downloadData.result.duration || video.duration}
-> ₊· ⫏⫏ ㅤ *cяєα∂σr:* ${video.channel}
+> ₊· ⫏⫏ ㅤ *cяєα∂σr:* ${video.autor}
+> ₊· ⫏⫏ ㅤ *👁️ νιѕтαѕ:* ${video.views}
 
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-> ₊· ⫏⫏ ㅤ *αρι:* https://dvlyonn.onrender.com
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ *αρι:* https://api.alyacore.xyz
     `.trim()
 
     await conn.sendMessage(m.chat, {
@@ -91,8 +92,8 @@ let handler = async (m, { conn, text, usedPrefix }) => {
 
 > ₊· ⫏⫏ ㅤ *єrrσr:* ${error.message}
 
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-> ₊· ⫏⫏ ㅤ *αρι:* https://dvlyonn.onrender.com
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+> ₊· ⫏⫏ ㅤ *αρι:* https://api.alyacore.xyz
     `.trim())
     await m.react('❌')
   }
