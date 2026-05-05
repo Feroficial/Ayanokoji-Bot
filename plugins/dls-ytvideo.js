@@ -6,7 +6,7 @@ let handler = async (m, { conn, text, usedPrefix }) => {
 ㅤ    ⿻ ㅤ ✿ ㅤ υsσ 木 cσrrєctσ ㅤ 性
 
 > ₊· ⫏⫏ ㅤ *υsσ:* ${usedPrefix}νι∂єσ <cαnción σ νι∂єσ>
-> ₊· ⫏⫏ ㅤ *єjємρℓσ:* ${usedPrefix}νι∂єσ Bad Bunny
+> ₊· ⫏⫏ ㅤ *єjємρℓσ:* ${usedPrefix}νι∂єσ Alejo igoa 
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
   `.trim())
