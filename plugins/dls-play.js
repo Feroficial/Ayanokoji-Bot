@@ -6,7 +6,7 @@ let handler = async (m, { conn, text, usedPrefix }) => {
 ㅤ    ⿻ ㅤ ✿ ㅤ υsσ 木 cσrrєctσ ㅤ 性
 
 > ₊· ⫏⫏ ㅤ *υsσ:* ${usedPrefix}ρℓαу <cαnción>
-> ₊· ⫏⫏ ㅤ *єjємρℓσ:* ${usedPrefix}ρℓαу Una vaina loca
+> ₊· ⫏⫏ ㅤ *єjємρℓσ:* ${usedPrefix}ρℓαу Una vaina loca 
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
   `.trim())
@@ -23,7 +23,7 @@ let handler = async (m, { conn, text, usedPrefix }) => {
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
     `.trim())
 
-    const searchUrl = `https://api.alyacore.xyz/search/yt?query=${encodeURIComponent(text)}&key=Alya-WDxN0Sg4`
+    const searchUrl = `https://dvlyonn.onrender.com/search/youtube?q=${encodeURIComponent(text)}`
     const busqueda = await fetch(searchUrl)
     const searchData = await busqueda.json()
 
@@ -66,13 +66,13 @@ let handler = async (m, { conn, text, usedPrefix }) => {
 
 > ₊· ⫏⫏ ㅤ *τíτυℓσ:* ${downloadData.result.title || video.title}
 > ₊· ⫏⫏ ㅤ *∂υrαción:* ${duracionFormateada}
-> ₊· ⫏⫏ ㅤ *cяєα∂σr:* ${video.autor}
+> ₊· ⫏⫏ ㅤ *cяєα∂σr:* ${video.channel}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-> ₊· ⫏⫏ ㅤ *αρι:* https://api.alyacore.xyz
+> ₊· ⫏⫏ ㅤ *αρι:* https://dvlyonn.onrender.com
     `.trim()
 
-    const miniatura = downloadData.result.thumbnail || video.banner
+    const miniatura = downloadData.result.thumbnail || video.thumbnail
     if (miniatura) {
       await conn.sendMessage(m.chat, {
         image: { url: miniatura },
@@ -106,7 +106,7 @@ let handler = async (m, { conn, text, usedPrefix }) => {
 
 > ₊· ⫏⫏ ㅤ *єrrσr:* ${error.message}
 
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ *αρι:* https://dvlyonn.onrender.com
     `.trim())
     await m.react('❌')
