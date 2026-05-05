@@ -1,5 +1,5 @@
 // promote.js - Ascender a administrador
-let handler = async (m, { conn, isAdmin, isOwner, isROwner, text }) => {
+let handler = async (m, { conn, isAdmin, isOwner, isROwner, isBotAdmin, text }) => {
   if (!m.isGroup) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 ɢяυρσ ㅤ 性
@@ -18,7 +18,7 @@ let handler = async (m, { conn, isAdmin, isOwner, isROwner, text }) => {
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
   `.trim())
 
-  if (!conn.isBotAdmin) return m.reply(`
+  if (!isBotAdmin) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ вσт 木 ѕιη α∂мιη ㅤ 性
 
