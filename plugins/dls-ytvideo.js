@@ -6,7 +6,7 @@ let handler = async (m, { conn, text, usedPrefix }) => {
 ㅤ    ⿻ ㅤ ✿ ㅤ υsσ 木 cσrrєctσ ㅤ 性
 
 > ₊· ⫏⫏ ㅤ *υsσ:* ${usedPrefix}νι∂єσ <cαnción σ νι∂єσ>
-> ₊· ⫏⫏ ㅤ *єjємρℓσ:* ${usedPrefix}νι∂єσ Alejo igoa 
+> ₊· ⫏⫏ ㅤ *єjємρℓσ:* ${usedPrefix}νι∂єσ Bad Bunny
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
   `.trim())
@@ -23,7 +23,7 @@ let handler = async (m, { conn, text, usedPrefix }) => {
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
     `.trim())
 
-    const searchUrl = `https://api.alyacore.xyz/search/yt?query=${encodeURIComponent(text)}&key=Alya-WDxN0Sg4`
+    const searchUrl = `https://dvlyonn.onrender.com/search/youtube?q=${encodeURIComponent(text)}`
     const busqueda = await fetch(searchUrl)
     const searchData = await busqueda.json()
 
@@ -61,11 +61,11 @@ let handler = async (m, { conn, text, usedPrefix }) => {
 
 > ₊· ⫏⫏ ㅤ *τíτυℓσ:* ${downloadData.result.title || video.title}
 > ₊· ⫏⫏ ㅤ *∂υrαción:* ${downloadData.result.duration || video.duration}
-> ₊· ⫏⫏ ㅤ *cяєα∂σr:* ${video.autor}
+> ₊· ⫏⫏ ㅤ *cяєα∂σr:* ${video.channel}
 > ₊· ⫏⫏ ㅤ *👁️ νιѕтαѕ:* ${video.views}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ *αρι:* https://api.alyacore.xyz
+> ₊· ⫏⫏ ㅤ *αρι:* https://dvlyonn.onrender.com
     `.trim()
 
     await conn.sendMessage(m.chat, {
