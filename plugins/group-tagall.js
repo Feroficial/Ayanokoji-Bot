@@ -1,0 +1,55 @@
+let handler = async (m, { conn, isAdmin, isOwner, text }) => {
+  if (!m.isGroup) return m.reply(`
+ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 ɢяυρσ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Sσℓσ єη gяυρσѕ
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+  `.trim())
+
+  if (!isAdmin && !isOwner) return m.reply(`
+ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ α∂мιη 木 яєqυєяι∂σ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Nєcєѕιтαѕ ѕєя α∂мιη
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+  `.trim())
+
+  let grupo = await conn.groupMetadata(m.chat)
+  let participantes = grupo.participants
+  let mensaje = text || '📢 *Atención* 📢'
+  
+  let listaMenciones = []
+  let numeros = ''
+  
+  for (let i = 0; i < participantes.length; i++) {
+    let user = participantes[i].id
+    listaMenciones.push(user)
+    numeros += `> ${i + 1}. @${user.split('@')[0]}\n`
+  }
+  
+  let caption = `
+ㅤ    ꒰  ㅤ 📢 ㅤ *αℓуα - TΛG ΛLL* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ мєη¢ισи 木 gяυρσ ㅤ 性
+
+> ₊· ⫏⫏ ㅤ *📝 Mensaje:* ${mensaje}
+> ₊· ⫏⫏ ㅤ *👥 Miembros:* ${participantes.length}
+
+${numeros}
+
+ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
+  `.trim()
+
+  await conn.sendMessage(m.chat, { text: caption, mentions: listaMenciones }, { quoted: m })
+  await m.react('📢')
+}
+
+handler.help = ['tagall']
+handler.tags = ['group']
+handler.command = ['tagall', 'todos', 'mencionar']
+handler.group = true
+handler.admin = true
+
+export default handler
