@@ -43,7 +43,7 @@ const loadMenuMedia = jid => {
 const fetchBuffer = async url =>
   Buffer.from(await (await fetch(url)).arrayBuffer())
 
-const defaultThumb = await fetchBuffer('https://files.catbox.moe/z4qgf1.jpeg')
+const defaultThumb = await fetchBuffer('https://raw.githubusercontent.com/dvwilker/gohan-storage/main/1778040376885-IMG-20260504-WA0556.jpg')
 
 let handler = async (m, { conn, usedPrefix }) => {
   await conn.sendMessage(m.chat, { react: { text: '🕸️', key: m.key } })
