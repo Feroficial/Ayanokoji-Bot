@@ -15,17 +15,55 @@ const defaultMenu = {
 %readmore
 `.trimStart(),
   header: '\nㅤ    ꒰  ㅤ ✿ ㅤ *%¢αтєgσяу* ㅤ ⫏⫏  ꒱\nㅤ    ⿻ ㅤ 性 ㅤ ѕє¢¢ιση ㅤ ✿',
-  body: '> ₊· ⫏⫏ ㅤ %¢м∂',
+  body: '> ₊· ⫏⫏ ㅤ %¢м∂\n> 💬 %∂єѕ¢',
   footer: 'ㅤ',
   after: `
 ㅤ
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ 性 ㅤ ѕιѕтємα єנє¢υтα∂σ ㅤ ✿
-> ₊· ⫏⫏ ㅤ #ριηg ─ 📡 *єѕтα∂σ ∂єℓ вσт*
+> ₊· ⫏⫏ ㅤ #ριηg ─ 📡 єѕтα∂σ ∂єℓ вσт
 ㅤ
 ㅤ    ꒰  ㅤ 🕸️ ㅤ *¢яєα∂σ ρσя ℓуσηη* ㅤ ⫏⫏  ꒱
 > ₊· ⫏⫏ ㅤ ✿ 木 性 ㅤ αℓуα
 `
+}
+
+const descripciones = {
+  play: "Descarga música de YouTube",
+  video: "Descarga video de YouTube",
+  tiktok: "Descarga video de TikTok",
+  pinterest: "Busca imágenes en Pinterest",
+  work: "Trabaja y gana USD (cooldown 3 min)",
+  bank: "Ver tu saldo total (efectivo + banco)",
+  depositar: "Guarda USD en el banco",
+  retirar: "Saca USD del banco",
+  pay: "Envía USD a otro usuario",
+  top: "Ranking global de usuarios con más USD",
+  ruleta: "Apuesta USD a RED o GREEN",
+  caraocruz: "Apuesta USD a cara o cruz",
+  ttt: "Juego de tres en raya (vs bot o amigo)",
+  trivia: "Juego de preguntas y respuestas",
+  r: "Responde a una pregunta de trivia",
+  kick: "Expulsa a un usuario (admins)",
+  promote: "Asciende a administrador (admins)",
+  demote: "Descinde de administrador (admins)",
+  tagall: "Menciona a todos los miembros (admins)",
+  bot: "Activa/desactiva el bot en el grupo (admins)",
+  add: "Agrega un usuario al grupo (admins)",
+  delete: "Elimina un mensaje (admins)",
+  report: "Reporta contenido inapropiado",
+  ghost: "Verifica si un número tiene WhatsApp",
+  sticker: "Convierte imagen a sticker",
+  qr: "Genera QR para vincular sub-bot",
+  code: "Genera código de 8 dígitos para sub-bot",
+  bots: "Lista los sub-bots activos",
+  ping: "Verifica el estado del bot",
+  owner: "Muestra información del creador",
+  menu: "Muestra este menú",
+  welcome: "Activa/desactiva bienvenidas (admins)",
+  setwelcome: "Personaliza mensaje de bienvenida (admins)",
+  antilink: "Activa/desactiva anti-enlaces (admins)",
+  info: "Información del usuario"
 }
 
 const menuDir = './media/menu'
@@ -76,31 +114,26 @@ let handler = async (m, { conn, usedPrefix }) => {
 
   const tags = {
     main: 'ρяιη¢ιραℓ',
-    fun: 'ƒυη',
-    group: 'ɢяυρσѕ',
     downloader: '∂σωηℓσα∂єя',
-    search: 'ѕєαя¢н',
     economy: 'є¢σησму',
     game: 'gαмє',
-    nsfw: 'ηѕƒω +18',
+    group: 'ɢяυρσ',
     tools: 'тσσℓѕ',
     serbot: 'ѕєявσт',
-    owner: 'σωηєя',
-    sticker: 'ѕтι¢кєяѕ',
-    reaction: 'яєα¢тισηѕ',
-    register: 'яєgιѕтєя',
-    anime: 'αηιмє',
+    sticker: 'ѕтι¢кєя',
     info: 'ιηƒσ'
-}
+  }
 
   const text = [
     menu.before,
     ...Object.keys(tags).map(tag => {
       const cmds = help
         .filter(p => p.tags.includes(tag))
-        .flatMap(p => p.help.map(c =>
-          menu.body.replace('%¢м∂', p.prefix ? c : usedPrefix + c)
-        )).join('\n')
+        .flatMap(p => p.help.map(c => {
+          let cmdSinPrefijo = c
+          let desc = descripciones[cmdSinPrefijo] || "Comando disponible"
+          return menu.body.replace('%¢м∂', usedPrefix + c).replace('%∂єѕ¢', desc)
+        })).join('\n')
       if (!cmds) return ''
       return `${menu.header.replace('%¢αтєgσяу', tags[tag])}\n${cmds}\n${menu.footer}`
     }).filter(v => v),
@@ -111,7 +144,6 @@ let handler = async (m, { conn, usedPrefix }) => {
     ? fs.readFileSync(menuMedia.thumbnail)
     : defaultThumb
 
-  // ContextInfo con el newsletter para que aparezca el botón "Ver canal"
   const contextInfo = {
     mentionedJid: [m.sender],
     isForwarded: true,
