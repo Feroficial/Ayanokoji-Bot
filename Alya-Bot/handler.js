@@ -254,7 +254,7 @@ export async function handler(chatUpdate) {
     // ========== PROCESAR PLUGINS ==========
     let comandoEncontrado = false;
     const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), '../plugins');
-    
+
     for (let name in global.plugins) {
       let plugin = global.plugins[name];
       if (!plugin || plugin.disabled) continue;
@@ -370,29 +370,6 @@ export async function handler(chatUpdate) {
           `.trim(), m);
         }
         break;
-      }
-    }
-
-    // ========== COMANDO NO ENCONTRADO CON NEWSLETTER ==========
-    if (m.text && !m.isBaileys && !comandoEncontrado && !m.isCommand) {
-      const primerCaracter = m.text[0];
-      const esPrefijo = ['#', '.', '/', '!'].includes(primerCaracter);
-      
-      if (esPrefijo && m.text.length > 1) {
-        const contextInfo = {
-          mentionedJid: [m.sender],
-          forwardedNewsletterMessageInfo: {
-            newsletterJid: newsletterJid,
-            newsletterName: newsletterName,
-            serverMessageId: 1
-          }
-        };
-
-        await this.sendMessage(m.chat, {
-          text: `❓ *${m.text}* no es un comando válido.\n📝 Usa *#menu* para ver la lista.`,
-          contextInfo: contextInfo
-        });
-        await this.sendMessage(m.chat, { react: { text: '❓', key: m.key } });
       }
     }
 
