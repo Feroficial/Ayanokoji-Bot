@@ -31,7 +31,7 @@ let handler = async (m, { conn, isAdmin, isOwner, text }) => {
   }
   
   let caption = `
-ㅤ    ꒰  ㅤ 📢 ㅤ *αℓуα - TΛG ΛLL* ㅤ ⫏⫏  ꒱
+ㅤ    ꒰  ㅤ 📢 ㅤ *αℓуα - TΛGΛLL* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ мєη¢ισи 木 gяυρσ ㅤ 性
 
 > ₊· ⫏⫏ ㅤ *📝 Mensaje:* ${mensaje}
