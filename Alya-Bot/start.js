@@ -286,12 +286,13 @@ global.conn.ev.on('group-participants.update', async (update) => {
         if (!global.db.data) await loadDatabase()
         if (!global.db.data.chats[id]) global.db.data.chats[id] = {}
         const chat = global.db.data.chats[id]
-        const welcomeEnabled = 'welcome' in chat ? chat.welcome : true
+        const welcomeEnabled = chat.welcome !== false
         if (!welcomeEnabled) return
 
         const groupMetadata = await global.conn.groupMetadata(id).catch(() => null)
-        const groupName = groupMetadata?.subject || 'ᴇʟ ɢʀᴜᴘᴏ'
-        const memberCount = groupMetadata?.participants?.length || 0
+        if (!groupMetadata) return
+        const groupName = groupMetadata.subject || 'ᴇʟ ɢʀᴜᴘᴏ'
+        const memberCount = groupMetadata.participants.length
         let groupIcon = 'https://files.catbox.moe/z4qgf1.jpeg'
         try {
             const icon = await global.conn.profilePictureUrl(id, 'image')
@@ -302,9 +303,9 @@ global.conn.ev.on('group-participants.update', async (update) => {
             for (const jid of participants) {
                 try {
                     if (!global.db.data.users[jid]) global.db.data.users[jid] = {}
-                    let userData = global.db.data.users[jid]
-                    let userLevel = userData.level || 1
-                    let userRole = userData.role || '🌱 Aᴘʀᴇɴᴅɪᴢ'
+                    const userData = global.db.data.users[jid]
+                    const userLevel = userData.level || 1
+                    const userRole = userData.role || '🌱 Aᴘʀᴇɴᴅɪᴢ'
 
                     let welcomeText = chat.welcomeMessage || `
 ㅤ    ꒰  ㅤ 🌸 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
@@ -318,17 +319,17 @@ global.conn.ev.on('group-participants.update', async (update) => {
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
 > ₊· ⫏⫏ ㅤ 🌟 Dɪsғʀᴜᴛᴀ ${groupName}`
 
-                    await global.conn.sendMessage(id, { 
-                        image: { url: groupIcon }, 
-                        caption: welcomeText, 
-                        mentions: [jid] 
+                    await global.conn.sendMessage(id, {
+                        image: { url: groupIcon },
+                        caption: welcomeText,
+                        mentions: [jid]
                     })
-                    
+
                     if (chat.welcomeBonus !== false) {
                         userData.monedas = (userData.monedas || 0) + 50
                         userData.exp = (userData.exp || 0) + 100
                     }
-                } catch(e) { console.log('Error en welcome:', e) }
+                } catch(e) { console.error('Error en welcome add:', e) }
             }
         }
 
@@ -343,16 +344,15 @@ global.conn.ev.on('group-participants.update', async (update) => {
 > ₊· ⫏⫏ ㅤ 👥 Mɪᴇᴍʙʀᴏs ʀᴇsᴛᴀɴᴛᴇs: ${memberCount}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱`
-                    
-                    await global.conn.sendMessage(id, { 
-                        image: { url: groupIcon }, 
-                        caption: goodbyeText, 
-                        mentions: [jid] 
+                    await global.conn.sendMessage(id, {
+                        image: { url: groupIcon },
+                        caption: goodbyeText,
+                        mentions: [jid]
                     })
-                } catch(e) {}
+                } catch(e) { console.error('Error en welcome remove:', e) }
             }
         }
-    } catch (e) { console.log('Error en group-participants:', e) }
+    } catch (e) { console.error('Error en group-participants:', e) }
 })
 
 let isInit = true
