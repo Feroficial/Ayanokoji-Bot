@@ -1,4 +1,5 @@
-let handler = async (m, { conn, isAdmin, args }) => {
+// welcome.js - Activar/desactivar bienvenidas
+let handler = async (m, { conn, isAdmin, isOwner }) => {
   if (!m.isGroup) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ єяяσя 木 ɢяυρσ ㅤ 性
@@ -8,7 +9,7 @@ let handler = async (m, { conn, isAdmin, args }) => {
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
   `.trim())
 
-  if (!isAdmin) return m.reply(`
+  if (!isAdmin && !isOwner) return m.reply(`
 ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ α∂мιη 木 яєqυєяι∂σ ㅤ 性
 
@@ -19,39 +20,19 @@ let handler = async (m, { conn, isAdmin, args }) => {
 
   const chat = global.db.data.chats[m.chat]
   if (!chat) global.db.data.chats[m.chat] = {}
+
+  global.db.data.chats[m.chat].welcome = !global.db.data.chats[m.chat].welcome
   
-  const opcion = args[0]?.toLowerCase()
-  
-  if (opcion === 'on') {
-    chat.welcome = true
-    m.reply(`
-ㅤ    ꒰  ㅤ ✅ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ ωєℓcσмє 木 αcтινα∂σ ㅤ 性
+  const estado = global.db.data.chats[m.chat].welcome ? '✅ α¢тινα∂αѕ' : '❌ ∂єѕα¢тινα∂αѕ'
 
-> ₊· ⫏⫏ ㅤ Lαѕ вιєηνєηι∂αѕ fυєяση αcтινα∂αѕ
+  await m.reply(`
+ㅤ    ꒰  ㅤ ${global.db.data.chats[m.chat].welcome ? '✅' : '❌'} ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
+ㅤ    ⿻ ㅤ ✿ ㅤ вιєηνєηι∂αѕ 木 ${global.db.data.chats[m.chat].welcome ? 'α¢тινα∂αѕ' : '∂єѕα¢тινα∂αѕ'} ㅤ 性
+
+> ₊· ⫏⫏ ㅤ Lαѕ вιєηνєηι∂αѕ єѕтáη ${estado}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-    `.trim())
-  } else if (opcion === 'off') {
-    chat.welcome = false
-    m.reply(`
-ㅤ    ꒰  ㅤ ❌ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ ωєℓcσмє 木 ∂єѕαcтινα∂σ ㅤ 性
-
-> ₊· ⫏⫏ ㅤ Lαѕ вιєηνєηι∂αѕ fυєяση ∂єѕαcтινα∂αѕ
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-    `.trim())
-  } else {
-    return m.reply(`
-ㅤ    ꒰  ㅤ 📝 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ υѕσ 木 cσrrєctσ ㅤ 性
-
-> ₊· ⫏⫏ ㅤ *Uѕσ:* #welcome on/off
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-    `.trim())
-  }
+  `.trim())
 }
 
 handler.help = ['welcome']
