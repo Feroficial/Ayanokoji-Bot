@@ -1,3 +1,4 @@
+// start.js (completo y corregido)
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1'
 import './config.js'
 import { watchFile, unwatchFile } from 'fs'
