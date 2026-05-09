@@ -22,7 +22,7 @@ const defaultMenu = {
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ 性 ㅤ ѕιѕтємα єנє¢υтα∂σ ㅤ ✿
 ㅤ
-ㅤ    ꒰  ㅤ 🕸️ ㅤ *¢яєα∂σ ρσя ℓуσηη* ㅤ ⫏⫏  ꒱
+ㅤ    ꒰  ㅤ 🕸️ ㅤ *¢яєα∂σ ρяσ ℓуσηη* ㅤ ⫏⫏  ꒱
 > ₊· ⫏⫏ ㅤ ✿ 木 性 ㅤ αℓуα
 `
 }
@@ -114,7 +114,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 
   const buttons = [
     { 
-      buttonId: `${usedPrefix}ping`, 
+      buttonId: '.ping', 
       buttonText: { displayText: '📡 PING' }, 
       type: 1 
     }
