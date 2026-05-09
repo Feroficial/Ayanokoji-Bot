@@ -120,25 +120,34 @@ let handler = async (m, { conn, usedPrefix }) => {
     }
   ]
 
-  const contextInfo = {
-    mentionedJid: [m.sender],
-    isForwarded: true,
-    forwardingScore: 999,
-    forwardedNewsletterMessageInfo: {
-      newsletterJid: "120363407253203904@newsletter",
-      newsletterName: "αℓуα - ¢нαηηєℓ",
-      serverMessageId: 1
+  const imageContent = {
+    image: uniqueThumb,
+    caption: text.trim(),
+    footer: '🌸 αℓуα - вσт - Creador: Lʏᴏɴɴ',
+    buttons: buttons,
+    headerType: 4,
+    mentionedJid: conn.parseMention(text),
+    contextInfo: {
+      forwardingScore: 999,
+      isForwarded: true,
+      forwardedNewsletterMessageInfo: {
+        newsletterJid: "120363407253203904@newsletter",
+        newsletterName: "αℓуα - ¢нαηηєℓ",
+        serverMessageId: 1
+      },
+      externalAdReply: {
+        title: '🌸 αℓуα - вσт',
+        body: '¡Menú de comandos!',
+        mediaType: 1,
+        thumbnailUrl: thumb,
+        sourceUrl: 'https://whatsapp.com/channel/0029VbCOTaJ9RZAQPdiZ4J1K'
+      }
     }
   }
 
-  await conn.sendMessage(m.chat, {
-    image: uniqueThumb,
-    caption: text,
-    contextInfo: contextInfo,
-    buttons: buttons,
-    footer: 'αℓуα - вσт',
-    headerType: 1
-  }, { quoted: m })
+  await conn.sendMessage(m.chat, imageContent, { quoted: m })
+
+  await m.react('🕸️')
 }
 
 handler.help = ['menu', 'menú']
