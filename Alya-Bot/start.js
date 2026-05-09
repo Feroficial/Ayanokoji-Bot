@@ -1,6 +1,7 @@
-// start.js (completo y corregido)
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1'
 import './config.js'
+import cluster from 'cluster'
+const { setupMaster, fork } = cluster
 import { watchFile, unwatchFile } from 'fs'
 import cfonts from 'cfonts'
 import { createRequire } from 'module'
@@ -11,27 +12,29 @@ import fs, { readdirSync, statSync, unlinkSync, existsSync, mkdirSync, readFileS
 import yargs from 'yargs'
 import { spawn } from 'child_process'
 import lodash from 'lodash'
+import { alyaJadiBot } from '../plugins/serbot.js'
 import chalk from 'chalk'
 import syntaxerror from 'syntax-error'
 import { tmpdir } from 'os'
 import { format } from 'util'
+import boxen from 'boxen'
 import pino from 'pino'
 import path, { join, dirname } from 'path'
 import { Boom } from '@hapi/boom'
 import { makeWASocket, protoType, serialize } from '../lib/simple.js'
 import { Low, JSONFile } from 'lowdb'
+import { mongoDB, mongoDBV2 } from '../lib/mongoDB.js'
 import store from '../lib/store.js'
 const { proto } = (await import('@whiskeysockets/baileys')).default
 import pkg from 'google-libphonenumber'
 const { PhoneNumberUtil } = pkg
 const phoneUtil = PhoneNumberUtil.getInstance()
-const { DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, jidNormalizedUser } = await import('@whiskeysockets/baileys')
+const { DisconnectReason, useMultiFileAuthState, MessageRetryMap, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, jidNormalizedUser } = await import('@whiskeysockets/baileys')
 import readline, { createInterface } from 'readline'
 import NodeCache from 'node-cache'
-import fetch from 'node-fetch'
-
 const { CONNECTING } = ws
 const { chain } = lodash
+const PORT = process.env.PORT || process.env.SERVER_PORT || 3000
 protoType()
 serialize()
 
@@ -84,65 +87,62 @@ global.loadDatabase = async function loadDatabase() {
 loadDatabase()
 
 const { state, saveState, saveCreds } = await useMultiFileAuthState(global.sessions)
+const msgRetryCounterMap = (MessageRetryMap) => {}
 const msgRetryCounterCache = new NodeCache()
 const { version } = await fetchLatestBaileysVersion()
+let phoneNumber = global.botNumber
+
+const methodCodeQR = process.argv.includes("qr")
+const methodCode = !!phoneNumber || process.argv.includes("code")
+const MethodMobile = process.argv.includes("mobile")
+
+const theme = {
+    banner: chalk.bgMagenta.black,
+    accent: chalk.bold.magenta,
+    highlight: chalk.bold.cyan,
+    text: chalk.bold.white,
+    prompt: chalk.bold.magenta
+}
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = (texto) => new Promise((resolver) => rl.question(texto, resolver))
 
-const configFile = './bot-config.json'
-let config = { modo: '1', numero: '' }
+let opcion
+if (methodCodeQR) opcion = '1'
 
-if (fs.existsSync(configFile)) {
-    try {
-        config = JSON.parse(fs.readFileSync(configFile, 'utf-8'))
-        console.log(chalk.bold.green(`✅ ᴄᴏɴғɪɢᴜʀᴀᴄɪóɴ ᴄᴀʀɢᴀᴅᴀ: ᴍᴏᴅᴏ ${config.modo === '1' ? 'QR' : 'Cóᴅɪɢᴏ ᴅᴇ 8 ᴅíɢɪᴛᴏs'}${config.numero ? ` - Núᴍᴇʀᴏ: ${config.numero}` : ''}`))
-    } catch (e) {
-        console.log(chalk.bold.red('❌ ᴇʀʀᴏʀ ʟᴇʏᴇɴᴅᴏ ᴄᴏɴғɪɢᴜʀᴀᴄɪóɴ'))
-        await solicitarConfiguracion()
-    }
-} else {
-    await solicitarConfiguracion()
-}
+const credsExist = fs.existsSync(`./${global.sessions}/creds.json`)
 
-async function solicitarConfiguracion() {
-    let opcion
+if (!methodCodeQR && !methodCode && !credsExist) {
+    console.log(theme.banner(`
+╭━━━━━━━━━━━━━━━━━━━━╮
+┃ 🌸 *αℓуα - вσт* 🌸
+┃ *ᴇʟ ᴀsɪsᴛᴇɴᴛᴇ ᴍás ᴄᴏᴍᴘʟᴇᴛᴏ*
+╰━━━━━━━━━━━━━━━━━━━━╯
+    `))
     do {
         opcion = await question(
-            chalk.bgMagenta.black('🌸 αℓуα - вσт - sᴇʟᴇᴄᴄɪᴏɴᴀ ᴍᴏᴅᴏ:\n') +
-            chalk.bold.magenta('1. Cóᴅɪɢᴏ QR\n') +
-            chalk.bold.cyan('2. Cóᴅɪɢᴏ ᴅᴇ 8 ᴅíɢɪᴛᴏs\n🌸➤ ')
+            theme.accent('⌬ SELECCIONA MODO DE CONEXIÓN:\n') +
+            theme.highlight('1. 📱 CÓDIGO QR\n') +
+            theme.text('2. 🔐 CÓDIGO DE 8 DÍGITOS\n') +
+            theme.prompt('🌸➤ ')
         )
         if (!/^[1-2]$/.test(opcion)) {
-            console.log(chalk.bold.redBright(`✨ ᴏᴘᴄɪóɴ ɪɴᴠáʟɪᴅᴀ. ᴇʟɪɢᴇ 1 ᴏ 2.`))
+            console.log(chalk.bold.redBright(`✨ Opción inválida. Elige 1 o 2.`))
         }
     } while (opcion !== '1' && opcion !== '2')
-
-    config.modo = opcion
-
-    if (opcion === '2') {
-        let numero = await question(chalk.bgMagenta(chalk.bold.white(`🌸 ɪɴɢʀᴇsᴀ ᴛᴜ Núᴍᴇʀᴏ ᴄᴏɴ Cóᴅɪɢᴏ ᴅᴇ ᴘᴀís sɪɴ +:\n🌸➤ `)))
-        numero = numero.replace(/\D/g, '')
-        config.numero = numero
-        console.log(chalk.bold.green(`✅ Núᴍᴇʀᴏ ɢᴜᴀʀᴅᴀᴅᴏ: ${numero}`))
-    }
-
-    fs.writeFileSync(configFile, JSON.stringify(config, null, 2))
-    console.log(chalk.bold.green(`✅ ᴄᴏɴғɪɢᴜʀᴀᴄɪóɴ ɢᴜᴀʀᴅᴀᴅᴀ`))
 }
 
-console.log(chalk.bold.green(`✅ ᴍᴏᴅᴏ sᴇʟᴇᴄᴄɪᴏɴᴀᴅᴏ: ${config.modo === '1' ? 'QR' : 'Cóᴅɪɢᴏ ᴅᴇ 8 ᴅíɢɪᴛᴏs'}\n`))
-
-console.info = () => { }
-console.debug = () => { }
+console.info = () => {}
+console.debug = () => {}
 
 const connectionOptions = {
     logger: pino({ level: 'silent' }),
-    printQRInTerminal: config.modo === '1',
-    browser: config.modo === '1' ? [`${global.nameqr}`, 'Edge', '20.0.04'] : ['Windows', 'Chrome', 'Chrome 114.0.5735.198'],
+    printQRInTerminal: opcion == '1' ? true : methodCodeQR ? true : false,
+    mobile: MethodMobile,
+    browser: opcion == '1' ? [`${global.nameqr}`, 'Edge', '20.0.04'] : methodCodeQR ? [`${global.nameqr}`, 'Edge', '20.0.04'] : ['Chrome', 'Edge', '110.0.1587.56'],
     auth: {
         creds: state.creds,
-        keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' })),
+        keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
     },
     markOnlineOnConnect: true,
     generateHighQualityLinkPreview: true,
@@ -152,65 +152,50 @@ const connectionOptions = {
         return msg?.message || ""
     },
     msgRetryCounterCache,
+    msgRetryCounterMap,
     defaultQueryTimeoutMs: undefined,
     version,
-    keepAliveIntervalMs: 30000,
 }
 
 global.conn = makeWASocket(connectionOptions)
 
-let pairingRequested = false
-let reconnectAttempts = 0
-let reconnectTimer = null
-let keepAlivePing = null
-
-function startKeepAlive() {
-    if (keepAlivePing) clearInterval(keepAlivePing)
-    keepAlivePing = setInterval(() => {
-        if (global.conn && global.conn.user && global.stopped === 'open') {
-            global.conn.sendPresenceUpdate('available').catch(() => {})
-            if (global.conn.ws && global.conn.ws.send) {
-                try { global.conn.ws.send('2') } catch(e) {}
+if (!fs.existsSync(`./${global.sessions}/creds.json`)) {
+    if (opcion === '2' || methodCode) {
+        opcion = '2'
+        if (!conn.authState.creds.registered) {
+            let addNumber
+            if (!!phoneNumber) {
+                addNumber = phoneNumber.replace(/[^0-9]/g, '')
+            } else {
+                do {
+                    phoneNumber = await question(chalk.bgMagenta.black(chalk.bold.white(`🌸 INGRESA TU NÚMERO CON CÓDIGO DE PAÍS SIN +:\n🌸➤ `)))
+                    phoneNumber = phoneNumber.replace(/\D/g, '')
+                    if (!phoneNumber.startsWith('+')) {
+                        phoneNumber = `+${phoneNumber}`
+                    }
+                } while (!await isValidPhoneNumber(phoneNumber))
+                rl.close()
+                addNumber = phoneNumber.replace(/\D/g, '')
+                setTimeout(async () => {
+                    let codeBot = await conn.requestPairingCode(addNumber)
+                    codeBot = codeBot?.match(/.{1,4}/g)?.join("-") || codeBot
+                    console.log(chalk.bold.white(chalk.bgMagenta(`🌸 CÓDIGO: ${codeBot} 🌸`)))
+                    console.log(chalk.cyan(`📌 Ingresa este código en WhatsApp > Dispositivos vinculados`))
+                }, 3000)
             }
         }
-    }, 25000)
+    }
 }
 
-async function reconnectBot() {
-    if (reconnectTimer) clearTimeout(reconnectTimer)
-    if (reconnectAttempts > 15) {
-        console.log(chalk.red('❌ ᴅᴇᴍᴀsɪᴀᴅᴏs ʀᴇɪɴᴛᴇɴᴛᴏs. ʀᴇɪɴɪᴄɪᴀɴᴅᴏ ᴇɴ 30 sᴇɢᴜɴᴅᴏs...'))
-        setTimeout(() => process.exit(1), 30000)
-        return
-    }
-    const delay = Math.min(5000 * Math.pow(1.3, reconnectAttempts), 45000)
-    console.log(chalk.yellow(`🔄 ʀᴇɪɴᴛᴇɴᴛᴀɴᴅᴏ ᴇɴ ${delay / 1000}s (ɪɴᴛᴇɴᴛᴏ ${reconnectAttempts + 1}/15)...`))
-    reconnectTimer = setTimeout(async () => {
-        reconnectAttempts++
-        try {
-            if (global.conn && global.conn.ws) try { global.conn.ws.close() } catch(e) {}
-            global.conn.ev.removeAllListeners()
-            global.conn = makeWASocket(connectionOptions)
-            await global.reloadHandler(true)
-            console.log(chalk.green('✅ ʀᴇᴄᴏɴᴇxɪóɴ ᴇxɪᴛᴏsᴀ'))
-        } catch (err) {
-            console.error(chalk.red('❌ ᴇʀʀᴏʀ:', err.message))
-            reconnectBot()
-        }
-    }, delay)
-}
+conn.isInit = false
+conn.well = false
+conn.logger.info(` 🌸 αℓуα - вσт ɪɴɪᴄɪᴀᴅᴀ ᴄᴏʀʀᴇᴄᴛᴀᴍᴇɴᴛᴇ 🌸\n`)
 
-async function updateBotProfilePicture(imageUrl) {
-    try {
-        const imgRes = await fetch(imageUrl)
-        if (imgRes.ok) {
-            const imgBuffer = Buffer.from(await imgRes.arrayBuffer())
-            await global.conn.updateProfilePicture(global.conn.user.jid, imgBuffer)
-            console.log(chalk.bold.green('✅ ғᴏᴛᴏ ᴀᴄᴛᴜᴀʟɪᴢᴀᴅᴀ 🌸'))
-        }
-    } catch (e) {
-        console.log(chalk.bold.red(`❌ ᴇʀʀᴏʀ: ${e.message}`))
-    }
+if (!opts['test']) {
+    if (global.db) setInterval(async () => {
+        if (global.db.data) await global.db.write()
+        if (opts['autocleartmp'] && (global.support || {}).find) (tmp = [os.tmpdir(), 'tmp', `${jadi}`], tmp.forEach((filename) => cp.spawn('find', [filename, '-amin', '3', '-type', 'f', '-delete'])))
+    }, 30 * 1000)
 }
 
 async function getGroupPicture(groupJid) {
@@ -221,65 +206,59 @@ async function getGroupPicture(groupJid) {
     }
 }
 
-async function requestPairingCode() {
-    if (pairingRequested) return
-    pairingRequested = true
-    if (!config.numero) {
-        console.log(chalk.red('❌ Nᴏ ʜᴀʏ Núᴍᴇʀᴏ ɢᴜᴀʀᴅᴀᴅᴏ'))
-        return
-    }
-    try {
-        console.log(chalk.yellow(`📱 Sᴏʟɪᴄɪᴛᴀɴᴅᴏ Cóᴅɪɢᴏ ᴘᴀʀᴀ: ${config.numero}...`))
-        let codeBot = await global.conn.requestPairingCode(config.numero)
-        let formattedCode = codeBot.match(/.{1,4}/g)?.join("-") || codeBot
-        console.log(chalk.bold.white(chalk.bgMagenta(`🌸 Cóᴅɪɢᴏ: ${formattedCode} 🌸`)))
-        console.log(chalk.cyan(`📌 Iɴɢʀᴇsᴀ ᴇsᴛᴇ Cóᴅɪɢᴏ ᴇɴ WʜᴀᴛsAᴘᴘ > Dɪsᴘᴏsɪᴛɪᴠᴏs Vɪɴᴄᴜʟᴀᴅᴏs`))
-    } catch (e) {
-        console.log(chalk.red('❌ Eʀʀᴏʀ:', e.message))
-        pairingRequested = false
-    }
-}
-
 async function connectionUpdate(update) {
     const { connection, lastDisconnect, isNewLogin, qr } = update
     const reason = new Boom(lastDisconnect?.error)?.output?.statusCode
     global.stopped = connection
 
-    if (config.modo === '2' && !pairingRequested && !global.conn.authState.creds.registered) {
-        setTimeout(() => {
-            if (!pairingRequested && !global.conn.authState.creds.registered) requestPairingCode()
-        }, 1000)
-    }
-
-    if (isNewLogin) {
-        global.conn.isInit = true
-        reconnectAttempts = 0
-        console.log(chalk.green('✅ Nᴜᴇᴠᴀ sᴇsɪóɴ ɪɴɪᴄɪᴀᴅᴀ'))
-    }
+    if (isNewLogin) conn.isInit = true
     if (!global.db.data) loadDatabase()
 
-    if ((qr && qr !== '0') && config.modo === '1') {
-        console.log(chalk.bold.magenta(`\n❐ ESCANEA EL CÓDIGO QR 🌸`))
+    if ((qr && qr !== '0') || methodCodeQR) {
+        if (opcion === '1' || methodCodeQR) {
+            console.log(chalk.bold.magenta(`\n❐ ESCANEA EL CÓDIGO QR - EXPIRA EN 45 SEGUNDOS`))
+        }
     }
 
     if (connection === 'open') {
         console.log(chalk.bold.magenta('\n🌸 αℓуα - вσт ᴄᴏɴᴇᴄᴛᴀᴅᴀ 🌸'))
-        await updateBotProfilePicture('https://files.catbox.moe/z4qgf1.jpeg')
-        startKeepAlive()
+        
+        const bio = `🌸 αℓуα - вσт | @Lyonn`
+        await global.conn.updateProfileStatus(bio).catch(() => {})
     }
 
     if (connection === 'close') {
-        if (keepAlivePing) clearInterval(keepAlivePing)
-        if (reason === DisconnectReason.loggedOut) {
-            console.log(chalk.bold.redBright(`\n⚠︎ SESIÓN INVÁLIDA, BORRA LA CARPETA ${global.sessions} Y REINICIA ⚠︎`))
-        } else {
-            console.log(chalk.bold.magentaBright(`\n⚠︎ CONEXIÓN PERDIDA, RECONECTANDO...`))
-            reconnectBot()
+        switch (reason) {
+            case DisconnectReason.badSession:
+            case DisconnectReason.loggedOut:
+                console.log(chalk.bold.redBright(`\n⚠︎ SESIÓN INVÁLIDA, BORRA LA CARPETA ${global.sessions} Y REINICIA ⚠︎`))
+                break
+            case DisconnectReason.connectionClosed:
+                console.log(chalk.bold.magentaBright(`\n⚠︎ CONEXIÓN CERRADA, RECONECTANDO...`))
+                break
+            case DisconnectReason.connectionLost:
+                console.log(chalk.bold.magentaBright(`\n⚠︎ CONEXIÓN PERDIDA, RECONECTANDO...`))
+                break
+            case DisconnectReason.connectionReplaced:
+                console.log(chalk.bold.yellowBright(`\n⚠︎ CONEXIÓN REEMPLAZADA, OTRA SESIÓN INICIADA`))
+                return
+            case DisconnectReason.restartRequired:
+                console.log(chalk.bold.cyanBright(`\n☑ REINICIANDO SESIÓN...`))
+                break
+            case DisconnectReason.timedOut:
+                console.log(chalk.bold.yellowBright(`\n⚠︎ TIEMPO AGOTADO, REINTENTANDO...`))
+                break
+            default:
+                console.log(chalk.bold.redBright(`\n⚠︎ DESCONEXIÓN DESCONOCIDA (${reason || 'Desconocido'})`))
+                break
+        }
+
+        if (conn?.ws?.socket === null) {
+            await global.reloadHandler(true).catch(console.error)
+            global.timestamp.connect = new Date()
         }
     }
 }
-
-global.conn.ev.on('connection.update', connectionUpdate)
 
 global.conn.ev.on('group-participants.update', async (update) => {
     try {
@@ -294,11 +273,7 @@ global.conn.ev.on('group-participants.update', async (update) => {
         if (!groupMetadata) return
         const groupName = groupMetadata.subject || 'ᴇʟ ɢʀᴜᴘᴏ'
         const memberCount = groupMetadata.participants.length
-        let groupIcon = 'https://files.catbox.moe/z4qgf1.jpeg'
-        try {
-            const icon = await global.conn.profilePictureUrl(id, 'image')
-            if (icon) groupIcon = icon
-        } catch (e) {}
+        let groupIcon = await getGroupPicture(id)
 
         if (action === 'add') {
             for (const jid of participants) {
@@ -318,7 +293,7 @@ global.conn.ev.on('group-participants.update', async (update) => {
 > ₊· ⫏⫏ ㅤ 👥 Mɪᴇᴍʙʀᴏs: ${memberCount}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🌟 Dɪsғʀᴜᴛᴀ ${groupName}`
+> ₊· ⫏⫏ ㅤ 🌟 Disfruta @${groupName}`
 
                     await global.conn.sendMessage(id, {
                         image: { url: groupIcon },
@@ -330,7 +305,7 @@ global.conn.ev.on('group-participants.update', async (update) => {
                         userData.monedas = (userData.monedas || 0) + 50
                         userData.exp = (userData.exp || 0) + 100
                     }
-                } catch(e) { console.error('Error en welcome add:', e) }
+                } catch (e) { console.error('Error en welcome add:', e) }
             }
         }
 
@@ -345,15 +320,28 @@ global.conn.ev.on('group-participants.update', async (update) => {
 > ₊· ⫏⫏ ㅤ 👥 Mɪᴇᴍʙʀᴏs ʀᴇsᴛᴀɴᴛᴇs: ${memberCount}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱`
+
                     await global.conn.sendMessage(id, {
                         image: { url: groupIcon },
                         caption: goodbyeText,
                         mentions: [jid]
                     })
-                } catch(e) { console.error('Error en welcome remove:', e) }
+                } catch (e) { console.error('Error en welcome remove:', e) }
             }
         }
     } catch (e) { console.error('Error en group-participants:', e) }
+})
+
+process.on('uncaughtException', (err) => {
+    if (err.code === 'ENAMETOOLONG') {
+        console.error(chalk.red.bold(`✘ ERROR (ENAMETOOLONG): ${err.message}`))
+    } else {
+        console.error(chalk.red.bold('✘ ERROR CRÍTICO:'), err)
+    }
+})
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error(chalk.red.bold('✘ RECHAZO NO MANEJADO:'), reason)
 })
 
 let isInit = true
@@ -362,49 +350,68 @@ let handler = await import('./handler.js')
 global.reloadHandler = async function (restatConn) {
     try {
         const Handler = await import(`./handler.js?update=${Date.now()}`).catch(console.error)
-        if (Handler && (Handler.handler || Handler.default)) handler = Handler.default || Handler
-    } catch (e) { console.error(e) }
+        if (Handler && (Handler.handler || Handler.default)) {
+            handler = Handler.default || Handler
+        }
+    } catch (e) {
+        console.error(e)
+    }
     if (restatConn) {
         const oldChats = global.conn.chats
-        try { global.conn.ws.close() } catch { }
-        global.conn.ev.removeAllListeners()
+        try {
+            global.conn.ws.close()
+        } catch { }
+        conn.ev.removeAllListeners()
         global.conn = makeWASocket(connectionOptions, { chats: oldChats })
         isInit = true
     }
     if (!isInit) {
-        global.conn.ev.off('messages.upsert', global.conn.handler)
-        global.conn.ev.off('connection.update', global.conn.connectionUpdate)
-        global.conn.ev.off('creds.update', global.conn.credsUpdate)
+        conn.ev.off('messages.upsert', conn.handler)
+        conn.ev.off('connection.update', conn.connectionUpdate)
+        conn.ev.off('creds.update', conn.credsUpdate)
     }
-    global.conn.handler = (handler.handler || handler).bind(global.conn)
-    global.conn.connectionUpdate = connectionUpdate
-    global.conn.credsUpdate = saveCreds.bind(global.conn, true)
 
-    global.conn.ev.on('messages.upsert', async (m) => {
+    conn.handler = (handler.handler || handler).bind(global.conn)
+    conn.connectionUpdate = connectionUpdate.bind(global.conn)
+    conn.credsUpdate = saveCreds.bind(global.conn, true)
+
+    conn.ev.on('messages.upsert', async (m) => {
         if (m.messages && m.messages[0] && m.messages[0].key && m.messages[0].key.remoteJid) {
             const jid = m.messages[0].key.remoteJid
-            await global.conn.sendPresenceUpdate('composing', jid)
-            await global.conn.handler(m)
-            await global.conn.readMessages([m.messages[0].key])
-            await global.conn.sendPresenceUpdate('paused', jid)
+            await conn.sendPresenceUpdate('composing', jid)
+            await conn.handler(m)
+            await conn.readMessages([m.messages[0].key])
+            await conn.sendPresenceUpdate('paused', jid)
         }
     })
-    global.conn.ev.on('connection.update', global.conn.connectionUpdate)
-    global.conn.ev.on('creds.update', global.conn.credsUpdate)
+
+    conn.ev.on('connection.update', conn.connectionUpdate)
+    conn.ev.on('creds.update', conn.credsUpdate)
 
     isInit = false
     return true
 }
 
-global.conn.isInit = false
-global.conn.logger.info(` 🌸 αℓуα - вσт ɪɴɪᴄɪᴀᴅᴀ ᴄᴏʀʀᴇᴄᴛᴀᴍᴇɴᴛᴇ 🌸\n`)
+global.rutaJadiBot = join(__dirname, '../subBot')
 
-if (!opts['test']) {
-    if (global.db) setInterval(async () => { if (global.db.data) await global.db.write() }, 30 * 1000)
+if (global.blackJadibts) {
+    if (!existsSync(global.rutaJadiBot)) {
+        mkdirSync(global.rutaJadiBot, { recursive: true })
+        console.log(chalk.bold.cyan(`📁 Carpeta subBot creada.`))
+    }
+
+    const readRutaJadiBot = readdirSync(global.rutaJadiBot)
+    if (readRutaJadiBot.length > 0) {
+        const creds = 'creds.json'
+        for (const gjbts of readRutaJadiBot) {
+            const botPath = join(global.rutaJadiBot, gjbts)
+            const readBotPath = readdirSync(botPath)
+            if (readBotPath.includes(creds)) {
+                alyaJadiBot({ pathblackJadiBot: botPath, m: null, conn, args: '', usedPrefix: '/', command: 'serbot' })
+            }
+        }
+    }
 }
-
-process.on('uncaughtException', (err) => { console.error(chalk.red.bold('✘ ERROR:', err)); reconnectBot() })
-process.on('unhandledRejection', (reason) => { console.error(chalk.red.bold('✘ RECHAZO:', reason)); reconnectBot() })
 
 const pluginFolder = global.__dirname(join(__dirname, '../plugins/index'))
 const pluginFilter = (filename) => /\.js$/.test(filename)
@@ -416,26 +423,38 @@ async function filesInit() {
             const file = global.__filename(join(pluginFolder, filename))
             const module = await import(file)
             global.plugins[filename] = module.default || module
-        } catch (e) { console.error(e); delete global.plugins[filename] }
+        } catch (e) {
+            conn.logger.error(e)
+            delete global.plugins[filename]
+        }
     }
 }
-filesInit().catch(console.error)
+filesInit().then((_) => Object.keys(global.plugins)).catch(console.error)
 
 global.reload = async (_ev, filename) => {
     if (pluginFilter(filename)) {
         const dir = global.__filename(join(pluginFolder, filename), true)
         if (filename in global.plugins) {
-            if (existsSync(dir)) global.conn.logger.info(` updated plugin - '${filename}'`)
-            else { global.conn.logger.warn(`deleted plugin - '${filename}'`); return delete global.plugins[filename] }
-        } else global.conn.logger.info(`new plugin - '${filename}'`)
-        const err = syntaxerror(readFileSync(dir), filename, { sourceType: 'module', allowAwaitOutsideFunction: true })
-        if (err) global.conn.logger.error(`syntax error while loading '${filename}'\n${format(err)}`)
+            if (existsSync(dir)) conn.logger.info(` updated plugin - '${filename}'`)
+            else {
+                conn.logger.warn(`deleted plugin - '${filename}'`)
+                return delete global.plugins[filename]
+            }
+        } else conn.logger.info(`new plugin - '${filename}'`)
+        const err = syntaxerror(readFileSync(dir), filename, {
+            sourceType: 'module',
+            allowAwaitOutsideFunction: true,
+        })
+        if (err) conn.logger.error(`syntax error while loading '${filename}'\n${format(err)}`)
         else {
             try {
                 const module = (await import(`${global.__filename(dir)}?update=${Date.now()}`))
                 global.plugins[filename] = module.default || module
-            } catch (e) { global.conn.logger.error(`error require plugin '${filename}\n${format(e)}`) }
-            finally { global.plugins = Object.fromEntries(Object.entries(global.plugins).sort(([a], [b]) => a.localeCompare(b))) }
+            } catch (e) {
+                conn.logger.error(`error require plugin '${filename}\n${format(e)}`)
+            } finally {
+                global.plugins = Object.fromEntries(Object.entries(global.plugins).sort(([a], [b]) => a.localeCompare(b)))
+            }
         }
     }
 }
@@ -443,22 +462,160 @@ Object.freeze(global.reload)
 watch(pluginFolder, global.reload)
 await global.reloadHandler()
 
+async function _quickTest() {
+    const test = await Promise.all([
+        spawn('ffmpeg'),
+        spawn('ffprobe'),
+        spawn('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-filter_complex', 'color', '-frames:v', '1', '-f', 'webp', '-']),
+        spawn('convert'),
+        spawn('magick'),
+        spawn('gm'),
+        spawn('find', ['--version']),
+    ].map((p) => {
+        return Promise.race([
+            new Promise((resolve) => {
+                p.on('close', (code) => {
+                    resolve(code !== 127)
+                })
+            }),
+            new Promise((resolve) => {
+                p.on('error', (_) => resolve(false))
+            })
+        ])
+    }))
+    const [ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, find] = test
+    const s = global.support = { ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, find }
+    Object.freeze(global.support)
+}
+
 function clearTmp() {
     const tmpDir = join(process.cwd(), 'tmp')
     if (!existsSync(tmpDir)) mkdirSync(tmpDir, { recursive: true })
-    readdirSync(tmpDir).forEach(file => { try { unlinkSync(join(tmpDir, file)) } catch (e) {} })
+    const filenames = readdirSync(tmpDir)
+    filenames.forEach(file => {
+        const filePath = join(tmpDir, file)
+        try {
+            unlinkSync(filePath)
+        } catch (e) { }
+    })
 }
 
-setInterval(async () => { if (global.stopped !== 'close' && global.conn && global.conn.user) await clearTmp() }, 1000 * 60 * 4)
-
-async function _quickTest() {
-    const test = await Promise.all([
-        spawn('ffmpeg'), spawn('ffprobe'),
-        spawn('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-filter_complex', 'color', '-frames:v', '1', '-f', 'webp', '-']),
-        spawn('convert'), spawn('magick'), spawn('gm'), spawn('find', ['--version'])
-    ].map(p => Promise.race([new Promise(resolve => p.on('close', code => resolve(code !== 127))), new Promise(resolve => p.on('error', () => resolve(false)))])))
-    const [ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, find] = test
-    global.support = { ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, find }
-    Object.freeze(global.support)
+function purgeSession() {
+    let prekey = []
+    let directorio = readdirSync(`./${global.sessions}`)
+    let filesFolderPreKeys = directorio.filter(file => file.startsWith('pre-key-'))
+    prekey = [...prekey, ...filesFolderPreKeys]
+    filesFolderPreKeys.forEach(files => {
+        try {
+            unlinkSync(`./${global.sessions}/${files}`)
+        } catch (e) { }
+    })
 }
-_quickTest().catch(console.error)
+
+function purgeSessionSB() {
+    try {
+        const listaDirectorios = readdirSync(global.rutaJadiBot)
+        listaDirectorios.forEach(directorio => {
+            if (statSync(join(global.rutaJadiBot, directorio)).isDirectory()) {
+                const DSBPreKeys = readdirSync(join(global.rutaJadiBot, directorio)).filter(fileInDir => fileInDir.startsWith('pre-key-'))
+                DSBPreKeys.forEach(fileInDir => {
+                    if (fileInDir !== 'creds.json') {
+                        try {
+                            unlinkSync(join(global.rutaJadiBot, directorio, fileInDir))
+                        } catch (e) { }
+                    }
+                })
+            }
+        })
+    } catch (err) {
+        console.log(chalk.bold.red(`Error eliminando pre-keys de SB:\n${err}`))
+    }
+}
+
+function purgeOldFiles() {
+    const directories = [`./${global.sessions}/`, global.rutaJadiBot]
+    directories.forEach(dir => {
+        try {
+            readdirSync(dir).forEach(file => {
+                if (file !== 'creds.json') {
+                    try {
+                        unlinkSync(join(dir, file))
+                        console.log(chalk.bold.cyanBright(`\n╭» ❍ ARCHIVOS ❍\n│→ ${file} ELIMINADO\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))
+                    } catch (e) { }
+                }
+            })
+        } catch (err) {
+            console.log(chalk.bold.red(`\n╭» ❍ ERROR ❍\n│→ No se pudo eliminar archivos en ${dir}\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ✘\n` + err))
+        }
+    })
+}
+
+if (!opts['test']) {
+    if (global.db) {
+        setInterval(async () => {
+            try {
+                if (global.db.data) await global.db.write()
+                if (opts['autocleartmp'] && (global.support || {}).find) {
+                    const tmpDirs = [os.tmpdir(), join(process.cwd(), 'tmp'), `${jadi}`]
+                    tmpDirs.forEach(dir => cp.spawn('find', [dir, '-amin', '3', '-type', 'f', '-delete']))
+                }
+            } catch (e) {
+                console.error(e)
+            }
+        }, 30000)
+    }
+}
+
+setInterval(async () => {
+    if (stopped === 'close' || !conn || !conn.user) return
+    await clearTmp()
+    console.log(chalk.bold.cyanBright(`\n╭» ❍ MULTIMEDIA ❍\n│→ ARCHIVOS DE LA CARPETA TMP ELIMINADOS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))
+}, 1000 * 60 * 4)
+
+setInterval(async () => {
+    if (stopped === 'close' || !conn || !conn.user) return
+    await purgeSession()
+    console.log(chalk.bold.cyanBright(`\n╭» ❍ ${global.sessions} ❍\n│→ SESIONES NO ESENCIALES ELIMINADAS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))
+}, 1000 * 60 * 10)
+
+setInterval(async () => {
+    if (stopped === 'close' || !conn || !conn.user) return
+    await purgeSessionSB()
+}, 1000 * 60 * 10)
+
+setInterval(async () => {
+    if (stopped === 'close' || !conn || !conn.user) return
+    await purgeOldFiles()
+}, 1000 * 60 * 10)
+
+_quickTest().then(() => conn.logger.info(chalk.bold.magenta(`🌸 αℓуα - вσт ʟɪsᴛᴀ ᴘᴀʀᴀ ᴜsᴀʀsᴇ 🌸\n`))).catch(console.error)
+
+let stopped
+
+setInterval(async () => {
+    if (stopped === 'close' || !conn || !conn?.user) return
+    const _uptime = process.uptime() * 1000
+    const uptime = clockString(_uptime)
+    const bio = `🌸 αℓуα - вσт | Activo: ${uptime}`
+    await conn?.updateProfileStatus(bio).catch(_ => _)
+}, 60000)
+
+function clockString(ms) {
+    const d = isNaN(ms) ? '--' : Math.floor(ms / 86400000)
+    const h = isNaN(ms) ? '--' : Math.floor(ms / 3600000) % 24
+    const m = isNaN(ms) ? '--' : Math.floor(ms / 60000) % 60
+    const s = isNaN(ms) ? '--' : Math.floor(ms / 1000) % 60
+    return [d, 'd ', h, 'h ', m, 'm ', s, 's '].map((v) => v.toString().padStart(2, 0)).join('')
+}
+
+async function isValidPhoneNumber(number) {
+    try {
+        number = number.replace(/\s+/g, '')
+        if (number.startsWith('+521')) number = number.replace('+521', '+52')
+        else if (number.startsWith('+52') && number[4] === '1') number = number.replace('+52 1', '+52')
+        const parsedNumber = phoneUtil.parseAndKeepRawInput(number)
+        return phoneUtil.isValidNumber(parsedNumber)
+    } catch {
+        return false
+    }
+}
