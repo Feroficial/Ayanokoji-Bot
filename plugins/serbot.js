@@ -51,7 +51,6 @@ let rtx2 = `
 > ₊· ⫏⫏ ㅤ 🔖 Cяєα∂σя: Lʏᴏɴɴ
 `
 
-const tokensValidos = ['DVLYONN', 'NAYDELI', 'RIZAR', 'DANY']
 const maxSubBots = 500
 
 let blackJBOptions = {}
@@ -169,52 +168,6 @@ export default handler
 
 export async function alyaJadiBot(options) {
   let { pathblackJadiBot, m, conn, args, usedPrefix, command } = options
-  
-  let esToken = args[0] && tokensValidos.includes(args[0].toUpperCase())
-  
-  if (command === 'code' && esToken) {
-    let token = args[0].toUpperCase()
-    let tempDir = path.join(process.cwd(), 'temp_pairing', Date.now().toString())
-    
-    if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true })
-    
-    const { state, saveCreds } = await useMultiFileAuthState(tempDir)
-    const { version } = await fetchLatestBaileysVersion()
-    
-    let pairingSock = makeWASocket({
-      logger: pino({ level: 'silent' }),
-      printQRInTerminal: false,
-      browser: Browsers.macOS("Chrome"),
-      auth: state,
-      version: version
-    })
-    
-    let secret = await pairingSock.requestPairingCode(m.sender.split('@')[0])
-    secret = secret.match(/.{1,4}/g)?.join("-")
-    
-    await conn.sendMessage(m.chat, {
-      text: `
-ㅤ    ꒰  ㅤ 🔐 ㅤ *αℓуα - ѕυв вσт* ㅤ ⫏⫏  ꒱
-ㅤ    ⿻ ㅤ ✿ ㅤ ¢ó∂ιgσ 木 ѕє¢яєтσ ㅤ 性
-
-> ₊· ⫏⫏ ㅤ *🎫 Token usado:* ${token}
-> ₊· ⫏⫏ ㅤ *🔑 Código:* ${secret}
-
-ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ Ingresa este código en WhatsApp:
-> ₊· ⫏⫏ ㅤ Ajustes > Dispositivos vinculados
-      `.trim(),
-      mentions: [m.sender]
-    })
-    
-    pairingSock.ev.removeAllListeners()
-    pairingSock.ws.close()
-    setTimeout(() => {
-      fs.rmSync(tempDir, { recursive: true, force: true }).catch(() => {})
-    }, 5000)
-    return
-  }
-  
   if (command === 'code') {
     command = 'qr'
     args.unshift('code')
@@ -379,6 +332,7 @@ export async function alyaJadiBot(options) {
     }
   }, 60000)
 
+  // 🔧 IMPORTANTE: Ruta corregida al handler.js que está en Alya-Bot/
   let handler = await import('../Alya-Bot/handler.js')
   let creloadHandler = async function (restatConn) {
     try {
