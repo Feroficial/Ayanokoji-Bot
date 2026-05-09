@@ -174,15 +174,22 @@ export async function alyaJadiBot(options) {
   
   if (command === 'code' && esToken) {
     let token = args[0].toUpperCase()
+    let tempDir = path.join(process.cwd(), 'temp_pairing', Date.now().toString())
     
-    let sock = makeWASocket({
+    if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true })
+    
+    const { state, saveCreds } = await useMultiFileAuthState(tempDir)
+    const { version } = await fetchLatestBaileysVersion()
+    
+    let pairingSock = makeWASocket({
       logger: pino({ level: 'silent' }),
       printQRInTerminal: false,
       browser: Browsers.macOS("Chrome"),
-      auth: { creds: { account: undefined } }
+      auth: state,
+      version: version
     })
     
-    let secret = await sock.requestPairingCode(m.sender.split('@')[0])
+    let secret = await pairingSock.requestPairingCode(m.sender.split('@')[0])
     secret = secret.match(/.{1,4}/g)?.join("-")
     
     await conn.sendMessage(m.chat, {
@@ -199,6 +206,12 @@ export async function alyaJadiBot(options) {
       `.trim(),
       mentions: [m.sender]
     })
+    
+    pairingSock.ev.removeAllListeners()
+    pairingSock.ws.close()
+    setTimeout(() => {
+      fs.rmSync(tempDir, { recursive: true, force: true }).catch(() => {})
+    }, 5000)
     return
   }
   
@@ -206,7 +219,6 @@ export async function alyaJadiBot(options) {
     command = 'qr'
     args.unshift('code')
   }
-  
   const mcode = args[0] && (/--code|code/.test(args[0].trim()))
     ? true
     : args[1] && (/--code|code/.test(args[1].trim()))
