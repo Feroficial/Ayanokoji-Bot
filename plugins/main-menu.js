@@ -1,7 +1,25 @@
-import { xpRange } from '../lib/levelling.js'
 import fs from 'fs'
-import path from 'path'
-import fetch from 'node-fetch'
+import { join } from 'path'
+import { xpRange } from '../lib/levelling.js'
+
+const tags = {
+  main: 'ρяιη¢ιραℓ',
+  fun: 'ƒυη',
+  group: 'ɢяυρσѕ',
+  downloader: '∂σωηℓσα∂єя',
+  search: 'ѕєαя¢н',
+  economy: 'є¢σησму',
+  game: 'gαмє',
+  nsfw: 'ηѕƒω +18',
+  tools: 'тσσℓѕ',
+  serbot: 'ѕєявσт',
+  owner: 'σωηєя',
+  sticker: 'ѕтι¢кєяѕ',
+  reaction: 'яєα¢тισηѕ',
+  register: 'яєgιѕтєя',
+  anime: 'αηιмє',
+  info: 'ιηƒσ'
+}
 
 const defaultMenu = {
   before: `
@@ -11,153 +29,113 @@ const defaultMenu = {
 > ₊· нσℓα *.* вιєηνєηι∂σ αℓ мєηυ ∂є *αℓуα - вσт*
 > ⫏⫏   ✿ ¢αηαℓ  ›
 > » https://whatsapp.com/channel/0029VbCOTaJ9RZAQPdiZ4J1K
-‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎
 %readmore
 `.trimStart(),
-  header: '\nㅤ    ꒰  ㅤ ✿ ㅤ *%¢αтєgσяу* ㅤ ⫏⫏  ꒱\nㅤ    ⿻ ㅤ 性 ㅤ ѕє¢¢ιση ㅤ ✿',
-  body: '> ₊· ⫏⫏ ㅤ %¢м∂',
+  header: '\nㅤ    ꒰  ㅤ ✿ ㅤ *%category* ㅤ ⫏⫏  ꒱\nㅤ    ⿻ ㅤ 性 ㅤ ѕє¢¢ιση ㅤ ✿',
+  body: '> ₊· ⫏⫏ ㅤ %cmd',
   footer: 'ㅤ',
   after: `
 ㅤ
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ 性 ㅤ ѕιѕтємα єנє¢υтα∂σ ㅤ ✿
 ㅤ
-ㅤ    ꒰  ㅤ 🕸️ ㅤ *¢яєα∂σ ρяσ ℓуσηη* ㅤ ⫏⫏  ꒱
+ㅤ    ꒰  ㅤ 🕸️ ㅤ *ᴄʀᴇᴀᴅᴏ ᴘᴏʀ ʟʏᴏɴɴ* ㅤ ⫏⫏  ꒱
 > ₊· ⫏⫏ ㅤ ✿ 木 性 ㅤ αℓуα
 `
 }
 
-const menuDir = './media/menu'
-fs.mkdirSync(menuDir, { recursive: true })
+const handler = async (m, { conn, usedPrefix: _p }) => {
+  try {
+    const { exp, level } = global.db.data.users[m.sender]
+    const { min, xp } = xpRange(level, global.multiplier)
+    const name = await conn.getName(m.sender)
 
-const getMenuMediaFile = jid =>
-  path.join(menuDir, `menuMedia_${jid.replace(/[:@.]/g, '_')}.json`)
+    const help = Object.values(global.plugins)
+      .filter(p => !p.disabled)
+      .map(p => ({
+        help: Array.isArray(p.help) ? p.help : [p.help],
+        tags: Array.isArray(p.tags) ? p.tags : [p.tags],
+        prefix: 'customPrefix' in p,
+      }))
 
-const loadMenuMedia = jid => {
-  const file = getMenuMediaFile(jid)
-  if (!fs.existsSync(file)) return {}
-  try { return JSON.parse(fs.readFileSync(file)) } catch { return {} }
-}
+    let bannerFinal = 'https://files.catbox.moe/z4qgf1.jpeg'
 
-const fetchBuffer = async url =>
-  Buffer.from(await (await fetch(url)).arrayBuffer())
+    const tipo = conn.user.jid === global.conn.user.jid ? 'ρяιη¢ιραℓ' : 'ѕυв вσт'
 
-const defaultThumb = await fetchBuffer('https://raw.githubusercontent.com/dvwilker/gohan-storage/main/1778040376885-IMG-20260504-WA0556.jpg')
+    const _text = [
+      defaultMenu.before,
+      ...Object.keys(tags).map(tag => {
+        const cmds = help
+          .filter(menu => menu.tags?.includes(tag))
+          .map(menu => menu.help.map(h => 
+            defaultMenu.body
+              .replace(/%cmd/g, menu.prefix ? h : `${_p}${h}`)
+          ).join('\n')).join('\n')
+        return cmds ? [defaultMenu.header.replace(/%category/g, tags[tag]), cmds, defaultMenu.footer].join('\n') : ''
+      }).filter(Boolean),
+      defaultMenu.after
+    ].join('\n')
 
-let handler = async (m, { conn, usedPrefix }) => {
-  await conn.sendMessage(m.chat, { react: { text: '🕸️', key: m.key } })
-
-  const botJid = conn.user.jid
-  const menuMedia = loadMenuMedia(botJid)
-  const menu = global.subBotMenus?.[botJid] || defaultMenu
-
-  const user = global.db.data.users[m.sender] || { level: 0, exp: 0 }
-  const { min, xp } = xpRange(user.level, global.multiplier)
-
-  const replace = {
-    name: await conn.getName(m.sender),
-    level: user.level,
-    exp: user.exp - min,
-    maxexp: xp,
-    totalreg: Object.keys(global.db.data.users).length,
-    mode: global.opts.self ? 'Privado' : 'Público',
-    muptime: clockString(process.uptime() * 1000),
-    readmore: String.fromCharCode(8206).repeat(4001)
-  }
-
-  const help = Object.values(global.plugins || {})
-    .filter(p => !p.disabled)
-    .map(p => ({
-      help: [].concat(p.help || []),
-      tags: [].concat(p.tags || []),
-      prefix: 'customPrefix' in p
-    }))
-
-  const tags = {
-    main: 'ρяιη¢ιραℓ',
-    fun: 'ƒυη',
-    group: 'ɢяυρσѕ',
-    downloader: '∂σωηℓσα∂єя',
-    search: 'ѕєαя¢н',
-    economy: 'є¢σησму',
-    game: 'gαмє',
-    nsfw: 'ηѕƒω +18',
-    tools: 'тσσℓѕ',
-    serbot: 'ѕєявσт',
-    owner: 'σωηєя',
-    sticker: 'ѕтι¢кєяѕ',
-    reaction: 'яєα¢тισηѕ',
-    register: 'яєgιѕтєя',
-    anime: 'αηιмє',
-    info: 'ιηƒσ'
-  }
-
-  const text = [
-    menu.before,
-    ...Object.keys(tags).map(tag => {
-      const cmds = help
-        .filter(p => p.tags.includes(tag))
-        .flatMap(p => p.help.map(c =>
-          menu.body.replace('%¢м∂', p.prefix ? c : usedPrefix + c)
-        )).join('\n')
-      if (!cmds) return ''
-      return `${menu.header.replace('%¢αтєgσяу', tags[tag])}\n${cmds}\n${menu.footer}`
-    }).filter(v => v),
-    menu.after
-  ].join('\n').replace(/%(\w+)/g, (_, k) => replace[k] ?? '')
-
-  const thumb = menuMedia.thumbnail && fs.existsSync(menuMedia.thumbnail)
-    ? fs.readFileSync(menuMedia.thumbnail)
-    : defaultThumb
-
-  const uniqueThumb = Buffer.concat([thumb, Buffer.from(botJid)])
-
-  const buttons = [
-    { 
-      buttonId: '.ping', 
-      buttonText: { displayText: '📡 PING' }, 
-      type: 1 
+    const replace = {
+      name: name,
+      level: level,
+      exp: exp - min,
+      maxexp: xp,
+      totalreg: Object.keys(global.db.data.users).length,
+      muptime: clockString(process.uptime() * 1000),
+      readmore: readMore,
+      tipo: tipo,
     }
-  ]
 
-  const imageContent = {
-    image: uniqueThumb,
-    caption: text.trim(),
-    footer: '🌸 αℓуα - вσт - Creador: Lʏᴏɴɴ',
-    buttons: buttons,
-    headerType: 4,
-    mentionedJid: conn.parseMention(text),
-    contextInfo: {
-      forwardingScore: 999,
-      isForwarded: true,
-      forwardedNewsletterMessageInfo: {
-        newsletterJid: "120363407253203904@newsletter",
-        newsletterName: "αℓуα - ¢нαηηєℓ",
-        serverMessageId: 1
-      },
-      externalAdReply: {
-        title: '🌸 αℓуα - вσт',
-        body: '¡Menú de comandos!',
-        mediaType: 1,
-        thumbnailUrl: thumb,
-        sourceUrl: 'https://whatsapp.com/channel/0029VbCOTaJ9RZAQPdiZ4J1K'
+    const text = _text.replace(new RegExp(`%(${Object.keys(replace).join('|')})`, 'g'), (_, name) => String(replace[name]))
+
+    const buttons = [
+      { 
+        buttonId: '.ping', 
+        buttonText: { displayText: '📡 PING' }, 
+        type: 1 
       }
-    }
+    ]
+
+    await conn.sendMessage(m.chat, {
+      image: { url: bannerFinal },
+      caption: text.trim(),
+      footer: '🌸 αℓуα - вσт',
+      buttons: buttons,
+      headerType: 4,
+      mentions: [m.sender],
+      contextInfo: {
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: "120363407253203904@newsletter",
+          newsletterName: "αℓуα - ¢нαηηєℓ",
+          serverMessageId: 1
+        }
+      }
+    }, { quoted: m })
+
+    await m.react('🕸️')
+
+  } catch (e) {
+    console.error('Error en el menú:', e)
+    await m.reply(`❌ Error: ${e.message}`)
   }
-
-  await conn.sendMessage(m.chat, imageContent, { quoted: m })
-
-  await m.react('🕸️')
 }
 
-handler.help = ['menu', 'menú']
+handler.help = ['menu', 'menú', 'help', 'ayuda']
 handler.tags = ['main']
 handler.command = ['menu', 'menú', 'help', 'ayuda']
 handler.register = false
 
 export default handler
 
-const clockString = ms =>
-  [3600000, 60000, 1000].map((v, i) =>
-    String(Math.floor(ms / v) % (i ? 60 : 99)).padStart(2, '0')
-  ).join(':')
+const more = String.fromCharCode(8206)
+const readMore = more.repeat(4001)
+
+function clockString(ms) {
+  let h = Math.floor(ms / 3600000)
+  let m = Math.floor(ms / 60000) % 60
+  let s = Math.floor(ms / 1000) % 60
+  return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':')
+}
