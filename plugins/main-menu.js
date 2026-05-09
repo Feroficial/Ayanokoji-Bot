@@ -89,20 +89,9 @@ const handler = async (m, { conn, usedPrefix: _p }) => {
 
     const text = _text.replace(new RegExp(`%(${Object.keys(replace).join('|')})`, 'g'), (_, name) => String(replace[name]))
 
-    const buttons = [
-      { 
-        buttonId: '.ping', 
-        buttonText: { displayText: '📡 PING' }, 
-        type: 1 
-      }
-    ]
-
     await conn.sendMessage(m.chat, {
       image: { url: bannerFinal },
       caption: text.trim(),
-      footer: '🌸 αℓуα - вσт',
-      buttons: buttons,
-      headerType: 4,
       mentions: [m.sender],
       contextInfo: {
         forwardingScore: 999,
