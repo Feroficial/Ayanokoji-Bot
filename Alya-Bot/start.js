@@ -222,7 +222,7 @@ async function connectionUpdate(update) {
 
     if (connection === 'open') {
         console.log(chalk.bold.magenta('\n🌸 αℓуα - вσт ᴄᴏɴᴇᴄᴛᴀᴅᴀ 🌸'))
-        
+
         const bio = `🌸 αℓуα - вσт | @Lyonn`
         await global.conn.updateProfileStatus(bio).catch(() => {})
     }
@@ -260,13 +260,27 @@ async function connectionUpdate(update) {
     }
 }
 
+// Variable para evitar duplicados
+let lastWelcomeEvent = {}
+
 global.conn.ev.on('group-participants.update', async (update) => {
     try {
         const { id, participants, action } = update
+        
+        // Crear una clave única para evitar duplicados (grupo + acción + lista de participantes)
+        const eventKey = `${id}_${action}_${participants.sort().join(',')}`
+        const now = Date.now()
+        
+        if (lastWelcomeEvent[eventKey] && (now - lastWelcomeEvent[eventKey] < 2000)) {
+            console.log('Evento duplicado ignorado')
+            return
+        }
+        lastWelcomeEvent[eventKey] = now
+        
         if (!global.db.data) await loadDatabase()
         if (!global.db.data.chats[id]) global.db.data.chats[id] = {}
         const chat = global.db.data.chats[id]
-        const welcomeEnabled = chat.welcome
+        const welcomeEnabled = chat.welcome !== false
         if (!welcomeEnabled) return
 
         const groupMetadata = await global.conn.groupMetadata(id).catch(() => null)
@@ -276,59 +290,71 @@ global.conn.ev.on('group-participants.update', async (update) => {
         let groupIcon = await getGroupPicture(id)
 
         if (action === 'add') {
-            for (const jid of participants) {
-                try {
-                    if (!global.db.data.users[jid]) global.db.data.users[jid] = {}
-                    const userData = global.db.data.users[jid]
-                    const userLevel = userData.level || 1
-                    const userRole = userData.role || '🌱 Aᴘʀᴇɴᴅɪᴢ'
-
-                    let welcomeText = chat.welcomeMessage || `
+            // Solo enviar un mensaje para todos los que se unieron
+            const jids = participants
+            const nombres = []
+            
+            for (const jid of jids) {
+                if (!global.db.data.users[jid]) global.db.data.users[jid] = {}
+                nombres.push(`@${jid.split('@')[0]}`)
+            }
+            
+            let welcomeText = chat.welcomeMessage || `
 ㅤ    ꒰  ㅤ 🌸 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ вιєηνєηι∂@ 木 ✨ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ 👤 @${jid.split('@')[0]}
-> ₊· ⫏⫏ ㅤ 📊 Nɪᴠᴇʟ: ${userLevel}
-> ₊· ⫏⫏ ㅤ 🌸 Rᴏʟ: ${userRole}
+> ₊· ⫏⫏ ㅤ 👤 ${nombres.join(', ')}
 > ₊· ⫏⫏ ㅤ 👥 Mɪᴇᴍʙʀᴏs: ${memberCount}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱
-> ₊· ⫏⫏ ㅤ 🌟 Disfruta @${groupName}`
+> ₊· ⫏⫏ ㅤ 🌟 Disfruta ${groupName}`
 
-                    await global.conn.sendMessage(id, {
-                        image: { url: groupIcon },
-                        caption: welcomeText,
-                        mentions: [jid]
-                    })
+            await global.conn.sendMessage(id, {
+                image: { url: groupIcon },
+                caption: welcomeText,
+                mentions: jids
+            })
 
-                    if (chat.welcomeBonus !== false) {
-                        userData.monedas = (userData.monedas || 0) + 50
-                        userData.exp = (userData.exp || 0) + 100
-                    }
-                } catch (e) { console.error('Error en welcome add:', e) }
+            for (const jid of jids) {
+                const userData = global.db.data.users[jid]
+                if (chat.welcomeBonus !== false) {
+                    userData.monedas = (userData.monedas || 0) + 50
+                    userData.exp = (userData.exp || 0) + 100
+                }
             }
         }
 
         if (action === 'remove') {
-            for (const jid of participants) {
-                try {
-                    const goodbyeText = `
+            const jids = participants
+            const nombres = []
+            
+            for (const jid of jids) {
+                nombres.push(`@${jid.split('@')[0]}`)
+            }
+            
+            const goodbyeText = `
 ㅤ    ꒰  ㅤ 👋 ㅤ *αℓуα - вσт* ㅤ ⫏⫏  ꒱
 ㅤ    ⿻ ㅤ ✿ ㅤ нαsтα 木 ρʀᴏɴтᴏ ㅤ 性
 
-> ₊· ⫏⫏ ㅤ 👤 @${jid.split('@')[0]} нᴀ ᴀʙᴀɴᴅᴏɴᴀᴅᴏ
+> ₊· ⫏⫏ ㅤ 👤 ${nombres.join(', ')} нᴀɴ ᴀʙᴀɴᴅᴏɴᴀᴅᴏ
 > ₊· ⫏⫏ ㅤ 👥 Mɪᴇᴍʙʀᴏs ʀᴇsᴛᴀɴᴛᴇs: ${memberCount}
 
 ㅤ    ꒰  ㅤ ✿ ㅤ *αℓуα - вσт* ㅤ ⫏⫏ ꒱`
 
-                    await global.conn.sendMessage(id, {
-                        image: { url: groupIcon },
-                        caption: goodbyeText,
-                        mentions: [jid]
-                    })
-                } catch (e) { console.error('Error en welcome remove:', e) }
+            await global.conn.sendMessage(id, {
+                image: { url: groupIcon },
+                caption: goodbyeText,
+                mentions: jids
+            })
+        }
+        
+        // Limpiar eventos antiguos (más de 5 segundos)
+        for (const key in lastWelcomeEvent) {
+            if (Date.now() - lastWelcomeEvent[key] > 5000) {
+                delete lastWelcomeEvent[key]
             }
         }
+        
     } catch (e) { console.error('Error en group-participants:', e) }
 })
 
