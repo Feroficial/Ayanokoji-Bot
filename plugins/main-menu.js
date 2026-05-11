@@ -1,6 +1,12 @@
 import fs from 'fs'
 import { join } from 'path'
 import { xpRange } from '../lib/levelling.js'
+import fetch from 'node-fetch'
+import path from 'path'
+import { exec } from 'child_process'
+import util from 'util'
+
+const execPromise = util.promisify(exec)
 
 const tags = {
   main: 'ρяιη¢ιραℓ',
@@ -44,6 +50,26 @@ const defaultMenu = {
 `
 }
 
+async function descargarYConvertirAudio(url, outputPath) {
+  const tmpDir = path.join(process.cwd(), 'tmp')
+
+  if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true })
+
+  const tempPath = path.join(tmpDir, `temp_${Date.now()}.mp3`)
+
+  const res = await fetch(url)
+  const buffer = await res.buffer()
+  fs.writeFileSync(tempPath, buffer)
+
+  await execPromise(
+    `ffmpeg -y -i "${tempPath}" -c:a libopus -b:a 24k -vbr on -compression_level 10 -f ogg "${outputPath}"`
+  )
+
+  fs.unlinkSync(tempPath)
+
+  return outputPath
+}
+
 const handler = async (m, { conn, usedPrefix: _p }) => {
   try {
     const { exp, level } = global.db.data.users[m.sender]
@@ -59,6 +85,7 @@ const handler = async (m, { conn, usedPrefix: _p }) => {
       }))
 
     let bannerFinal = 'https://files.catbox.moe/z4qgf1.jpeg'
+    let audioURL = 'https://files.catbox.moe/i427hk.mp3'
 
     const tipo = conn.user.jid === global.conn.user.jid ? 'ρяιη¢ιραℓ' : 'ѕυв вσт'
 
@@ -67,7 +94,7 @@ const handler = async (m, { conn, usedPrefix: _p }) => {
       ...Object.keys(tags).map(tag => {
         const cmds = help
           .filter(menu => menu.tags?.includes(tag))
-          .map(menu => menu.help.map(h => 
+          .map(menu => menu.help.map(h =>
             defaultMenu.body
               .replace(/%cmd/g, menu.prefix ? h : `${_p}${h}`)
           ).join('\n')).join('\n')
@@ -103,6 +130,22 @@ const handler = async (m, { conn, usedPrefix: _p }) => {
         }
       }
     }, { quoted: m })
+
+    try {
+      const audioPath = path.join(process.cwd(), 'tmp', `menu_audio_${Date.now()}.ogg`)
+      await descargarYConvertirAudio(audioURL, audioPath)
+      const audioBuffer = fs.readFileSync(audioPath)
+
+      await conn.sendMessage(m.chat, {
+        audio: audioBuffer,
+        mimetype: 'audio/ogg; codecs=opus',
+        ptt: true
+      }, { quoted: m })
+
+      fs.unlinkSync(audioPath)
+    } catch (audioErr) {
+      console.error('Error con el audio:', audioErr)
+    }
 
     await m.react('🕸️')
 
