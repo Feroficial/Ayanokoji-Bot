@@ -6,14 +6,14 @@ import {
   proto
 } from '@whiskeysockets/baileys'
 
-let descargas = {}
+let pendientes = {}
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) {
     const buttons = {
       name: 'single_select',
       buttonParamsJson: JSON.stringify({
-        title: '🎵 YT2MP3',
+        title: '🎵 YTMP3',
         sections: [
           {
             title: '🔗 ENLACE DE YOUTUBE',
@@ -57,20 +57,18 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   await m.react('🎵')
 
   let url = text.trim()
-  
   if (!url.includes('youtu.be') && !url.includes('youtube.com')) {
     return m.reply(`❌ Link inválido\n\n${usedPrefix + command} https://youtu.be/M0qv9fTlfdc`)
   }
 
   try {
-    const apiUrl = `https://dvlyonnxz.onrender.com/download/ytaudio?url=${encodeURIComponent(url)}`
+    const apiUrl = `https://dvlyonn.onrender.com/download/ytaudio?url=${encodeURIComponent(url)}`
     const response = await fetch(apiUrl)
     const data = await response.json()
 
-    if (!data.status || !data.result) throw new Error('Error')
+    if (!data.status || !data.result) throw new Error('Error API')
 
     const { title, duration, thumbnail, download_url } = data.result
-    
     const minutos = Math.floor(duration / 60)
     const segundos = duration % 60
     const duracion = `${minutos}:${segundos.toString().padStart(2, '0')}`
@@ -85,29 +83,29 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
     const media = await conn.prepareWAMessageMedia({ image: fs.readFileSync(thumbPath) }, { upload: conn.waUploadToServer })
 
-    const gameId = m.chat
-    descargas[gameId] = {
+    const chatId = m.chat
+    pendientes[chatId] = {
       url: download_url,
       title: title
     }
 
     setTimeout(() => {
-      if (descargas[gameId]) delete descargas[gameId]
+      if (pendientes[chatId]) delete pendientes[chatId]
     }, 60000)
 
     const buttons = {
       name: 'single_select',
       buttonParamsJson: JSON.stringify({
-        title: '🎵 DESCARGA',
+        title: '🎵 DESCARGAR',
         sections: [
           {
-            title: '✅ CANCIÓN ENCONTRADA',
+            title: '✅ CANCIÓN LISTA',
             rows: [
               {
                 header: '📥 TOCA PARA DESCARGAR',
                 title: title.substring(0, 35),
                 description: `Duración: ${duracion}`,
-                id: `audio_${gameId}`
+                id: `desc_${chatId}`
               }
             ]
           }
@@ -140,51 +138,51 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     fs.unlinkSync(thumbPath)
 
   } catch (error) {
-    m.reply(`❌ Error al procesar el enlace`)
+    console.error(error)
+    m.reply(`❌ Error al procesar el enlace. Verifica que el video exista.`)
   }
 }
 
 handler.before = async (m, { conn }) => {
-  const nativeFlow = m.message?.interactiveResponseMessage?.nativeFlowResponseMessage
-  if (!nativeFlow) return false
+  const flow = m.message?.interactiveResponseMessage?.nativeFlowResponseMessage
+  if (!flow) return false
 
   try {
-    const data = JSON.parse(nativeFlow.paramsJson || '{}')
+    const data = JSON.parse(flow.paramsJson || '{}')
     const id = data.id || data.selectedId || data.selectedRowId || null
-    if (!id || !id.startsWith('audio_')) return false
+    if (!id || !id.startsWith('desc_')) return false
 
-    const gameId = id.replace('audio_', '')
-    const descarga = descargas[gameId]
-    
-    if (!descarga) {
-      await conn.sendMessage(m.chat, { text: `❌ El enlace expiró. Usa *ytmp3* nuevamente.` }, { quoted: m })
+    const chatId = id.replace('desc_', '')
+    const pending = pendientes[chatId]
+    if (!pending) {
+      await conn.sendMessage(m.chat, { text: `❌ Enlace expirado. Usa *ytmp3* otra vez.` }, { quoted: m })
       return true
     }
 
-    await conn.sendMessage(m.chat, { text: `⏳ *Descargando ${descarga.title}...*` }, { quoted: m })
+    await conn.sendMessage(m.chat, { text: `⏳ *Descargando ${pending.title}...*` }, { quoted: m })
 
     const tmpDir = path.join(process.cwd(), 'tmp')
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true })
 
     const audioPath = path.join(tmpDir, `${Date.now()}.mp3`)
-    const audioRes = await fetch(descarga.url)
+    const audioRes = await fetch(pending.url)
     const audioBuffer = await audioRes.buffer()
     fs.writeFileSync(audioPath, audioBuffer)
 
     await conn.sendMessage(m.chat, {
       audio: fs.readFileSync(audioPath),
       mimetype: 'audio/mpeg',
-      fileName: `${descarga.title}.mp3`
+      fileName: `${pending.title}.mp3`
     }, { quoted: m })
 
     fs.unlinkSync(audioPath)
-    delete descargas[gameId]
+    delete pendientes[chatId]
     await m.react('✅')
-
     return true
 
   } catch (e) {
     console.error(e)
+    await conn.sendMessage(m.chat, { text: `❌ Error al descargar.` }, { quoted: m })
     return true
   }
 }
