@@ -63,19 +63,14 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   await m.react('📥')
 
   try {
-    let videoId = ''
-    if (url.includes('youtu.be')) {
-      videoId = url.split('youtu.be/')[1].split('?')[0]
-    } else if (url.includes('watch?v=')) {
-      videoId = url.split('watch?v=')[1].split('&')[0]
-    }
-    
-    const apiUrl = `https://dvlyonnxz.onrender.com/download/ytaudio?url=https://youtu.be/${videoId}`
+    const apiUrl = `https://dvlyonnxz.onrender.com/download/ytaudio?url=${url}`
     
     const response = await fetch(apiUrl)
     const data = await response.json()
 
-    if (!data.status || !data.result || !data.result.download_url) throw new Error('Error')
+    if (!data.status || !data.result) {
+      throw new Error('API error')
+    }
 
     const { title, duration, thumbnail, download_url } = data.result
     
@@ -114,7 +109,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             rows: [
               {
                 header: '📥 TOCA PARA DESCARGAR',
-                title: title.substring(0, 30),
+                title: title.substring(0, 35),
                 description: `Duración: ${duracion}`,
                 id: `download_${gameId}`
               }
@@ -149,7 +144,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     fs.unlinkSync(thumbPath)
 
   } catch (error) {
-    m.reply(`❌ Error al procesar el enlace\n\nAsegurate que el link sea válido`)
+    console.log(error)
+    m.reply(`❌ Error al procesar el enlace\n\nVerifica que el enlace sea válido`)
   }
 }
 
