@@ -14,11 +14,12 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         title: '🎵 YT2MP3',
         sections: [
           {
-            title: '🔗 DESCARGA DIRECTA',
+            title: '🔗 ENLACE DE YOUTUBE',
             rows: [
               {
-                title: '📎 ENVIAR LINK',
-                description: 'Pega el enlace de YouTube',
+                header: '📥 DESCARGA DIRECTA',
+                title: '🎵 PEGAR LINK',
+                description: 'https://youtu.be/...',
                 id: `${usedPrefix}play `
               }
             ]
@@ -32,8 +33,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
       body: { text: `ㅤ    ꒰ 🎵 *αℓуα - ∂σωηℓσα∂єя* ⫏⫏ ꒱
 ㅤ    ⿻ ✿ ιηƒσ 木 αтт 性
 
-> ₊· Uѕσ: *${usedPrefix + command} + link*
-> ₊· Eᴊᴇᴍᴘʟᴏ: *${usedPrefix + command} https://youtu.be/M0qv9fTlfdc*` },
+> ₊· Cσℓσ¢α єℓ єηℓα¢є ∂є Youtube
+> ₊· Eᴊᴇᴍᴘʟᴏ: https://youtu.be/M0qv9fTlfdc` },
       footer: { text: '⫏⫏ αℓуα - вσт ✿' },
       nativeFlowMessage: { buttons: [buttons] }
     })
@@ -66,16 +67,70 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
     if (!data.status || !data.result) throw new Error('Error')
 
-    const { title, download_url } = data.result
+    const { title, duration, thumbnail, download_url } = data.result
+    
+    const minutos = Math.floor(duration / 60)
+    const segundos = duration % 60
+    const duracion = `${minutos}:${segundos.toString().padStart(2, '0')}`
 
     const tmpDir = path.join(process.cwd(), 'tmp')
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true })
 
     const audioPath = path.join(tmpDir, `${Date.now()}.mp3`)
+    const thumbPath = path.join(tmpDir, `thumb_${Date.now()}.jpg`)
+
+    const thumbRes = await fetch(thumbnail)
+    const thumbBuffer = await thumbRes.buffer()
+    fs.writeFileSync(thumbPath, thumbBuffer)
 
     const audioRes = await fetch(download_url)
     const audioBuffer = await audioRes.buffer()
     fs.writeFileSync(audioPath, audioBuffer)
+
+    const buttons = {
+      name: 'single_select',
+      buttonParamsJson: JSON.stringify({
+        title: '🎵 DESCARGA COMPLETADA',
+        sections: [
+          {
+            title: '✅ CANCIÓN LISTA',
+            rows: [
+              {
+                header: '📥 AUDIO MP3',
+                title: title,
+                description: `Duración: ${duracion}`,
+                id: `${usedPrefix}menu`
+              }
+            ]
+          }
+        ]
+      })
+    }
+
+    const interactiveMessage = proto.Message.InteractiveMessage.create({
+      header: { title: 'αℓуα - ∂σωηℓσα∂єя', subtitle: 'Youtube a Mp3', hasMediaAttachment: true, imageMessage: (await prepareWAMessageMedia({ image: fs.readFileSync(thumbPath) }, { upload: conn.waUploadToServer })).imageMessage },
+      body: { text: `ㅤ    ꒰ 🎵 *αℓуα - ∂σωηℓσα∂єя* ⫏⫏ ꒱
+ㅤ    ⿻ ✿ ιηƒσ 木 αтт 性
+
+> ₊· *Título:* ${title}
+> ₊· *Duración:* ${duracion}
+> ₊· *Tamaño:* ~${(duration * 16).toFixed(1)}KB
+
+✅ *Descarga completada*` },
+      footer: { text: '⫏⫏ αℓуα - вσт ✿' },
+      nativeFlowMessage: { buttons: [buttons] }
+    })
+
+    const msg = generateWAMessageFromContent(m.chat, {
+      viewOnceMessage: {
+        message: {
+          messageContextInfo: {},
+          interactiveMessage
+        }
+      }
+    }, { quoted: m })
+
+    await conn.relayMessage(m.chat, msg.message, { messageId: msg.key.id })
 
     await conn.sendMessage(m.chat, {
       audio: fs.readFileSync(audioPath),
@@ -84,6 +139,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }, { quoted: m })
 
     fs.unlinkSync(audioPath)
+    fs.unlinkSync(thumbPath)
     await m.react('✅')
 
   } catch (error) {
@@ -91,7 +147,12 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   }
 }
 
-handler.help = ['ytmp3']
+const prepareWAMessageMedia = async (media, { upload }) => {
+  const { generateWAMessageContent } = await import('@whiskeysockets/baileys')
+  return await generateWAMessageContent(media, { upload })
+}
+
+handler.help = ['ytmp3 <lin>']
 handler.tags = ['downloader']
 handler.command = ['play2', 'ytmp3']
 
