@@ -13,7 +13,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     const buttons = {
       name: 'single_select',
       buttonParamsJson: JSON.stringify({
-        title: '🎵 YT2MP3',
+        title: '🎵 YTMP3',
         sections: [
           {
             title: '🔗 ENLACE DE YOUTUBE',
@@ -22,7 +22,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 header: '📥 DESCARGA DIRECTA',
                 title: '🎵 PEGAR LINK',
                 description: 'https://youtu.be/...',
-                id: `${usedPrefix}play `
+                id: `${usedPrefix}ytmp3 `
               }
             ]
           }
@@ -31,8 +31,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }
 
     const interactiveMessage = proto.Message.InteractiveMessage.create({
-      header: { title: 'αℓуα - ρℓαу', subtitle: 'Youtube a Mp3', hasMediaAttachment: false },
-      body: { text: `ㅤ    ꒰ 🎵 *αℓуα - ρℓαу* ⫏⫏ ꒱
+      header: { title: 'αℓуα - утмρ3', subtitle: 'Youtube a Mp3', hasMediaAttachment: false },
+      body: { text: `ㅤ    ꒰ 🎵 *αℓуα - утмρ3* ⫏⫏ ꒱
 ㅤ    ⿻ ✿ ιηƒσ 木 αтт 性
 
 > ₊· Uѕσ: *${usedPrefix + command} + link*
@@ -57,7 +57,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   await m.react('🎵')
 
   let url = text.trim()
-  
+
   if (!url.includes('youtu.be') && !url.includes('youtube.com')) {
     return m.reply(`❌ Link inválido\n\n${usedPrefix + command} https://youtu.be/M0qv9fTlfdc`)
   }
@@ -70,10 +70,25 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!data.status || !data.result) throw new Error('Error')
 
     const { title, duration, thumbnail, download_url } = data.result
-    
+
     const minutos = Math.floor(duration / 60)
     const segundos = duration % 60
     const duracion = `${minutos}:${segundos.toString().padStart(2, '0')}`
+
+    const tmpDir = path.join(process.cwd(), 'tmp')
+    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true })
+
+    let media = null
+    if (thumbnail) {
+      const thumbPath = path.join(tmpDir, `thumb_${Date.now()}.jpg`)
+      const thumbRes = await fetch(thumbnail)
+      if (thumbRes.ok) {
+        const thumbBuffer = await thumbRes.buffer()
+        fs.writeFileSync(thumbPath, thumbBuffer)
+        media = await conn.prepareWAMessageMedia({ image: fs.readFileSync(thumbPath) }, { upload: conn.waUploadToServer })
+        fs.unlinkSync(thumbPath)
+      }
+    }
 
     const gameId = m.chat
     descargas[gameId] = {
@@ -106,8 +121,13 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }
 
     const interactiveMessage = proto.Message.InteractiveMessage.create({
-      header: { title: 'αℓуα - ρℓαу', subtitle: 'Youtube a Mp3', hasMediaAttachment: false },
-      body: { text: `ㅤ    ꒰ 🎵 *αℓуα - ρℓαу* ⫏⫏ ꒱
+      header: { 
+        title: 'αℓуα - утмρ3', 
+        subtitle: 'Youtube a Mp3', 
+        hasMediaAttachment: !!media,
+        imageMessage: media ? media.imageMessage : undefined
+      },
+      body: { text: `ㅤ    ꒰ 🎵 *αℓуα - утмρ3* ⫏⫏ ꒱
 ㅤ    ⿻ ✿ ιηƒσ 木 αтт 性
 
 > ₊· *Título:* ${title}
@@ -144,9 +164,9 @@ handler.before = async (m, { conn }) => {
 
     const gameId = id.replace('audio_', '')
     const descarga = descargas[gameId]
-    
+
     if (!descarga) {
-      await conn.sendMessage(m.chat, { text: `❌ El enlace expiró. Usa *play* nuevamente.` }, { quoted: m })
+      await conn.sendMessage(m.chat, { text: `❌ El enlace expiró. Usa *ytmp3* nuevamente.` }, { quoted: m })
       return true
     }
 
@@ -180,6 +200,6 @@ handler.before = async (m, { conn }) => {
 
 handler.help = ['ytmp3']
 handler.tags = ['downloader']
-handler.command = ['play2', 'ytmp3']
+handler.command = ['ytmp3']
 
 export default handler
