@@ -6,14 +6,14 @@ import {
   proto
 } from '@whiskeysockets/baileys'
 
-let pendientes = {}
+let descargas = {}
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) {
     const buttons = {
       name: 'single_select',
       buttonParamsJson: JSON.stringify({
-        title: '🎵 YTMP3',
+        title: '🎵 YT2MP3',
         sections: [
           {
             title: '🔗 ENLACE DE YOUTUBE',
@@ -22,7 +22,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 header: '📥 DESCARGA DIRECTA',
                 title: '🎵 PEGAR LINK',
                 description: 'https://youtu.be/...',
-                id: `${usedPrefix}ytmp3 `
+                id: `${usedPrefix}play `
               }
             ]
           }
@@ -31,8 +31,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }
 
     const interactiveMessage = proto.Message.InteractiveMessage.create({
-      header: { title: 'αℓуα - утмρ3', subtitle: 'Youtube a Mp3', hasMediaAttachment: false },
-      body: { text: `ㅤ    ꒰ 🎵 *αℓуα - утмρ3* ⫏⫏ ꒱
+      header: { title: 'αℓуα - ρℓαу', subtitle: 'Youtube a Mp3', hasMediaAttachment: false },
+      body: { text: `ㅤ    ꒰ 🎵 *αℓуα - ρℓαу* ⫏⫏ ꒱
 ㅤ    ⿻ ✿ ιηƒσ 木 αтт 性
 
 > ₊· Uѕσ: *${usedPrefix + command} + link*
@@ -57,42 +57,29 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   await m.react('🎵')
 
   let url = text.trim()
+  
   if (!url.includes('youtu.be') && !url.includes('youtube.com')) {
     return m.reply(`❌ Link inválido\n\n${usedPrefix + command} https://youtu.be/M0qv9fTlfdc`)
   }
 
   try {
-    // Usar la API que funciona según el ejemplo (sin 'x' en dvlyonn)
-    const apiUrl = `https://dvlyonn.onrender.com/download/ytaudio?url=${encodeURIComponent(url)}`
+    const apiUrl = `https://dvlyonnxz.onrender.com/download/ytaudio?url=${encodeURIComponent(url)}`
     const response = await fetch(apiUrl)
     const data = await response.json()
 
-    if (!data.status || !data.result || !data.result.download_url) {
-      throw new Error('Error al obtener datos de la API')
-    }
+    if (!data.status || !data.result) throw new Error('Error')
 
     const { title, duration, thumbnail, download_url } = data.result
+    
     const minutos = Math.floor(duration / 60)
     const segundos = duration % 60
     const duracion = `${minutos}:${segundos.toString().padStart(2, '0')}`
 
-    // Guardar pendiente para la descarga posterior
-    const chatId = m.chat
-    pendientes[chatId] = {
-      url: download_url,
-      title: title,
-      thumbnail: thumbnail
-    }
+    const tmpDir = path.join(process.cwd(), 'tmp')
+    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true })
 
-    setTimeout(() => {
-      if (pendientes[chatId]) delete pendientes[chatId]
-    }, 60000)
-
-    // Preparar miniatura para el mensaje interactivo
     let media = null
     if (thumbnail) {
-      const tmpDir = path.join(process.cwd(), 'tmp')
-      if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true })
       const thumbPath = path.join(tmpDir, `thumb_${Date.now()}.jpg`)
       const thumbRes = await fetch(thumbnail)
       if (thumbRes.ok) {
@@ -103,19 +90,29 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
       }
     }
 
+    const gameId = m.chat
+    descargas[gameId] = {
+      url: download_url,
+      title: title
+    }
+
+    setTimeout(() => {
+      if (descargas[gameId]) delete descargas[gameId]
+    }, 60000)
+
     const buttons = {
       name: 'single_select',
       buttonParamsJson: JSON.stringify({
-        title: '🎵 DESCARGAR',
+        title: '🎵 DESCARGA',
         sections: [
           {
-            title: '✅ CANCIÓN LISTA',
+            title: '✅ CANCIÓN ENCONTRADA',
             rows: [
               {
                 header: '📥 TOCA PARA DESCARGAR',
                 title: title.substring(0, 35),
                 description: `Duración: ${duracion}`,
-                id: `desc_${chatId}`
+                id: `audio_${gameId}`
               }
             ]
           }
@@ -124,20 +121,18 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }
 
     const interactiveMessage = proto.Message.InteractiveMessage.create({
-      header: {
-        title: 'αℓуα - утмρ3',
-        subtitle: 'Youtube a Mp3',
+      header: { 
+        title: 'αℓуα - ρℓαу', 
+        subtitle: 'Youtube a Mp3', 
         hasMediaAttachment: !!media,
         imageMessage: media ? media.imageMessage : undefined
       },
-      body: {
-        text: `ㅤ    ꒰ 🎵 *αℓуα - утмρ3* ⫏⫏ ꒱
+      body: { text: `ㅤ    ꒰ 🎵 *αℓуα - ρℓαу* ⫏⫏ ꒱
 ㅤ    ⿻ ✿ ιηƒσ 木 αтт 性
 
 > ₊· *Título:* ${title}
 > ₊· *Duración:* ${duracion}
-> ₊· *Toca el botón para descargar*`
-      },
+> ₊· *Toca el botón para descargar*` },
       footer: { text: '⫏⫏ αℓуα - вσт ✿' },
       nativeFlowMessage: { buttons: [buttons] }
     })
@@ -154,56 +149,57 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     await conn.relayMessage(m.chat, msg.message, { messageId: msg.key.id })
 
   } catch (error) {
-    console.error(error)
-    m.reply(`❌ Error al procesar el enlace. Verifica que el video exista y sea válido.`)
+    m.reply(`❌ Error al procesar el enlace`)
   }
 }
 
 handler.before = async (m, { conn }) => {
-  const flow = m.message?.interactiveResponseMessage?.nativeFlowResponseMessage
-  if (!flow) return false
+  const nativeFlow = m.message?.interactiveResponseMessage?.nativeFlowResponseMessage
+  if (!nativeFlow) return false
 
   try {
-    const data = JSON.parse(flow.paramsJson || '{}')
+    const data = JSON.parse(nativeFlow.paramsJson || '{}')
     const id = data.id || data.selectedId || data.selectedRowId || null
-    if (!id || !id.startsWith('desc_')) return false
+    if (!id || !id.startsWith('audio_')) return false
 
-    const chatId = id.replace('desc_', '')
-    const pending = pendientes[chatId]
-    if (!pending) {
-      await conn.sendMessage(m.chat, { text: `❌ El enlace expiró. Usa *ytmp3* nuevamente.` }, { quoted: m })
+    const gameId = id.replace('audio_', '')
+    const descarga = descargas[gameId]
+    
+    if (!descarga) {
+      await conn.sendMessage(m.chat, { text: `❌ El enlace expiró. Usa *play* nuevamente.` }, { quoted: m })
       return true
     }
 
-    await m.react('⏳')
-    await conn.sendMessage(m.chat, { text: `⏳ *Descargando ${pending.title}...*` }, { quoted: m })
+    await conn.sendMessage(m.chat, { text: `⏳ *Descargando ${descarga.title}...*` }, { quoted: m })
 
-    // Descargar el audio
-    const audioRes = await fetch(pending.url)
-    if (!audioRes.ok) throw new Error('No se pudo descargar el audio')
+    const tmpDir = path.join(process.cwd(), 'tmp')
+    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true })
+
+    const audioPath = path.join(tmpDir, `${Date.now()}.mp3`)
+    const audioRes = await fetch(descarga.url)
     const audioBuffer = await audioRes.buffer()
+    fs.writeFileSync(audioPath, audioBuffer)
 
-    // Enviar el audio
     await conn.sendMessage(m.chat, {
-      audio: audioBuffer,
+      audio: fs.readFileSync(audioPath),
       mimetype: 'audio/mpeg',
-      fileName: `${pending.title}.mp3`
+      fileName: `${descarga.title}.mp3`
     }, { quoted: m })
 
-    delete pendientes[chatId]
+    fs.unlinkSync(audioPath)
+    delete descargas[gameId]
     await m.react('✅')
+
     return true
 
   } catch (e) {
     console.error(e)
-    await conn.sendMessage(m.chat, { text: `❌ Error al descargar: ${e.message}` }, { quoted: m })
-    await m.react('❌')
     return true
   }
 }
 
 handler.help = ['ytmp3']
 handler.tags = ['downloader']
-handler.command = ['ytmp3']
+handler.command = ['play2', 'ytmp3']
 
 export default handler
