@@ -13,7 +13,8 @@ const tags = {
   economy: 'є¢σησму',
   game: 'gαмє',
   serbot: 'ѕєявσт',
-  owner: 'σωηєя'
+  owner: 'σωηєя',
+  downloader: '∂σωηℓσα∂єя' 
 }
 
 const defaultMenu = {
